@@ -1,0 +1,53 @@
+@font-face {
+    font-family: 'IBMPlexSansKR-Regular';
+    src: url('../../public/fonts/IBMPlexSansKR-Regular.ttf') format('truetype');
+}
+  
+@font-face {
+    font-family: 'IBMPlexSansKR-Medium';
+    src: url('../../public/fonts/IBMPlexSansKR-Medium.ttf') format('truetype');
+}
+  
+@font-face {
+    font-family: 'IBMPlexSansKR-Bold';
+    src: url('../../public/fonts/IBMPlexSansKR-Bold.ttf') format('truetype');
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    z-index: 1;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo a {
+    text-decoration: none;
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 24px;
+    color: #000000;
+}
+
+.header-nav {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.header-nav a {
+    text-decoration: none;
+    color: #000000;
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+}
+
+.header-nav a.active {
+    color: #0056b3;
+}

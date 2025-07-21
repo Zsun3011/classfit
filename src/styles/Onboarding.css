@@ -1,0 +1,456 @@
+@font-face {
+    font-family: 'IBMPlexSansKR-Regular';
+    src: url('../../public/fonts/IBMPlexSansKR-Regular.ttf') format('truetype');
+}
+  
+@font-face {
+    font-family: 'IBMPlexSansKR-Medium';
+    src: url('../../public/fonts/IBMPlexSansKR-Medium.ttf') format('truetype');
+}
+  
+@font-face {
+    font-family: 'IBMPlexSansKR-Bold';
+    src: url('../../public/fonts/IBMPlexSansKR-Bold.ttf') format('truetype');
+}
+  
+
+/*LoginMethodSelector*/
+.Login-container{
+    width: 500px;
+    margin: 100px auto;
+    padding: 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.Login-container h1 {
+    text-align: center;
+    font-family: 'IBMPlexSansKR-Bold';
+    font-size: 40px;
+    margin-bottom: 24px;
+}
+
+.Login-section{
+    margin-bottom: 20px;
+}
+
+.Login-title{
+    font-family: 'IBMPlexSansKR-Medium';
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #000000;
+    border-radius: 6px;
+}
+
+.Login-button,
+.kakao-button {
+    width: 105%;
+    padding: 5px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'IBMSansKR-Medium';
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.Login-button {
+    background-color: #0056b3;
+    color: white;
+    margin-top: 10px;
+}
+
+.kakao-button {
+    background-color: #fff;
+    color: #000000;
+    border: 1px solid #000000;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.gap {
+    font-family: 'IBMPlexSansKR-Medium';
+    font-size: 14px;
+    text-align: center;
+    color: #000000;
+    margin-top: 10px;
+}
+
+hr{
+    width: 105%;
+}
+
+.Login-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBMPlexSansKR-Regular';
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.Signup-button {
+    width: 40%;
+    padding: 5px;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    background: none;
+    color: #000000;
+    font-family: 'IBMSansKR-Medium';
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.input-error::placeholder {
+    color: #FA812F;
+    font-family: 'IBMPlexSansKR-Regular';
+    font-size: 16px;
+}
+
+.error-text {
+    color: #FA812F;
+    font-family: 'IBMPlexSansKR-Medium';
+    font-size: 24px;
+}
+
+/*Onboarding*/
+.Signup-container{
+    width: 500px;
+    margin: 100px auto;
+    padding: 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.Signup-container h1 {
+    text-align: center;
+    font-family: 'IBMPlexSansKR-Bold';
+    font-size: 40px;
+    margin-bottom: 24px;
+}
+
+.Signup-section{
+    margin-bottom: 5px;
+}
+
+.Signup-title{
+    font-family: 'IBMPlexSansKR-Medium';
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #000000;
+    border-radius: 6px;
+}
+
+.CreateAccount-button,
+.Login-button2 {
+    width: 104%;
+    padding: 5px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'IBMSansKR-Medium';
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.CreateAccount-button {
+    width: 103%;
+    background-color: #0056b3;
+    color: white;
+    margin-top: 10px;
+}
+
+.Signup-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBMPlexSansKR-Regular';
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.GotoLogin-button {
+    width: 40%;
+    padding: 5px;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    background: none;
+    color: #000000;
+    font-family: 'IBMSansKR-Medium';
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/*SchoolSelector*/
+/*AdmissionYearInput*/
+/*GraduationTypeSelector*/
+/*CourseHistoryUploader*/
+.SchoolSelector-container,
+.AdmissionYearInput-container,
+.GraduationTypeSelector-container,
+.CourseHistoryUploader-container {
+    display: flex;
+    justify-content: center;
+    gap: 80px;
+    width: 940px;
+    height: 300px;
+    margin: 150px auto;
+    padding: 30px;
+}
+
+/*왼쪽 화면*/
+.SchoolSelector-left,
+.AdmissionYearInput-left,
+.GraduationTypeSelector-left {
+    width: 50%;
+}
+
+.CourseHistoryUploader-left {
+    width: 51%;
+}
+.SchoolSelector-left h1,
+.AdmissionYearInput-left h1,
+.GraduationTypeSelector-left h1,
+.CourseHistoryUploader-left h1 {
+    font-family: "IBMPlexSansKR-Bold";
+    font-size: 40px;
+}
+
+.SchoolSelector-left p,
+.AdmissionYearInput-left p,
+.GraduationTypeSelector-left p,
+.CourseHistoryUploader-left p {
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+}
+
+/*progress-bar 관련 코드*/
+.progress-bar {
+    display: flex;
+    gap: 10px;
+}
+
+.progress-step {
+    border-radius: 6px;
+    width: 130px;
+    height: 4px;
+    margin-top: 30px;
+    background-color: #ddd;
+}
+  
+.progress-step.active {
+    background-color: #0056b3;
+}
+
+/*오른쪽 화면*/
+.SchoolSelector-right,
+.AdmissionYearInput-right,
+.GraduationTypeSelector-right,
+.CourseHistoryUploader-right {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.SchoolSelector-title,
+.AdmissionYearInput-title,
+.GraduationTypeSelector-title,
+.CourseHistoryUploader-title {
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 24px;
+}
+
+/*input 설정*/
+input {
+    padding: 5px;
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #000000;
+    border-radius: 8px;
+}
+
+/*SchoolSelector의 dropdown 관련 코드*/
+.selected-input {
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+    border: 1px solid #000000;
+}
+
+.dropdown-list {
+    list-style: none;
+    border: 1px solid #ccc;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 74px;
+    position: absolute;
+    width: 25.3%;
+    padding: 7px;
+    background-color: white;
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 16px;
+}
+  
+.dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+}
+  
+.dropdown-list:hover {
+    background-color: #0056b3;
+    color: white;
+}
+  
+/* SchoolSelector의 다음 버튼 */
+.next-button {
+    width: 50%;
+    padding: 10px 80px;
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 16px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+}
+
+/*AdmissionYearInput, GraduationTypeSelector, CourseHistoryUploader의 이전 버튼 */
+.previous-button {
+    width: 50%;
+    padding: 10px 30px;
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 16px;
+    background-color: white;
+    color: #000000;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 40px;
+}
+
+/*AdmissionYearInput, GraduationTypeSelector의 다음 버튼*/
+.next-button1 {
+    width: 50%;
+    padding: 10px 30px;
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 16px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 40px;
+}
+
+/*CourseHistoryUploader의 다음 버튼*/
+.next-button1 {
+    width: 50%;
+    padding: 10px 30px;
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 16px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 40px;
+}
+
+/*AdmissionYearInput의 왼쪽 설명글*/
+/*margin-top 때문에 나누어 놓음*/
+.ExampleYear {
+    font-family: "IBMPlexSansKR-Bold";
+    font-size: 16px;
+    margin-top: -10px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/*GraduationTypeSelector의 왼쪽 설명글*/
+/*margin-top 때문에 나누어 놓음*/
+.sub-description {
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+    margin-top: 3px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/*CourseHistoryUploader의 왼쪽 설명글*/
+/*margin-top 때문에 나누어 놓음*/
+.sub-description1 {
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+    margin-top: -15px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/*졸업 유형 선택 버튼*/
+.type-button-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 5px;
+    margin-top: 40px;
+}
+
+.type-button {
+    padding: 8px 8px;
+    border: 0.2px solid #D9D9D9;
+    background-color:rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: "IBMPlexSansKR-Bold";
+    font-size: 16px;
+    box-shadow: 
+        /* 뽀용하게~ */
+        inset 0 2px 4px rgba(255, 255, 255, 0.6), /* inset - 안쪽으로 들어간 느낌*/
+        inset 0 -2px 4px rgba(0, 0, 0 , 0.05),
+        inset 0 2px 6px rgba(0, 0, 0, 0.15); 
+
+}
+
+.type-button:hover {
+    background-color: #91C8E4;
+    color: white;
+}
+
+.type-button.active{
+    background-color: #4682A9;
+    color: white;
+}
+
+/*제출 버튼*/
+.submit-container {
+    margin-top: 170px;
+    align-self: flex-end;
+}
+
+.submit-button {
+    width:170%;
+    padding: 12px 40px;
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 16px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 40px;
+}

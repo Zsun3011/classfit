@@ -1,0 +1,255 @@
+@font-face {
+    font-family: 'IBMPlexSansKR-Regular';
+    src: url('../../public/fonts/IBMPlexSansKR-Regular.ttf') format('truetype');
+}
+  
+@font-face {
+    font-family: 'IBMPlexSansKR-Medium';
+    src: url('../../public/fonts/IBMPlexSansKR-Medium.ttf') format('truetype');
+}
+  
+@font-face {
+    font-family: 'IBMPlexSansKR-Bold';
+    src: url('../../public/fonts/IBMPlexSansKR-Bold.ttf') format('truetype');
+}
+
+/*CourseList*/
+.CourseList-container {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    padding: 30px;
+    margin-top: 30px;
+    margin-left: 120px;
+    background-color: white;
+    box-shadow: 
+    -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
+    2px 2px 4px 0px rgba(0,0,0,0.25) inset;
+    border-radius: 16px;
+}
+
+.CourseList-title {
+    font-family: "IBMPlexSansKR-Bold";
+    font-size: 32px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    color: #000000;
+}
+
+/*CourseTable*/
+.Course-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+}
+
+.Course-table th,
+.Course-table td {
+    padding: 12px 15px;
+    text-align: center;
+}
+
+.Course-table th {
+    background-color: white;
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 24px;
+}
+
+.Course-table tr:hover {
+    background-color: #f7f7f7;
+}
+
+.Course-table td {
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+    margin-left: 20px;
+    border-top: 0.5px solid #D9D9D9;
+    border-bottom: 0.5px solid #D9D9D9;
+}
+
+/*CourseRow*/
+.Course-icon {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+}
+
+/*FavoriteCourseList*/
+.FavoriteCourseList-container {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    padding: 30px;
+    margin-top: 100px;
+    margin-left: 120px;
+    background-color: white;
+    box-shadow: 
+    -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
+    2px 2px 4px 0px rgba(0,0,0,0.25) inset;
+    border-radius: 16px;
+}
+
+.FavoriteCourseList-title {
+    font-family: "IBMPlexSansKR-Bold";
+    font-size: 32px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    color: #000000;
+}
+
+/*CourseFilter*/
+.CourseFilter-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 80%;
+    padding: 30px;
+    margin-top: 50px;
+    margin-left: 120px;
+    background-color: #FFFBDE;
+    box-shadow: 
+    -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
+    2px 2px 4px 0px rgba(0,0,0,0.25) inset;
+    border-radius: 16px;
+    gap: 5px;
+}
+
+.CourseFilter-title {
+    font-family: "IBMPlexSansKR-Bold";
+    font-size: 32px;
+    color: #000000;
+    margin-left: 20px;
+}
+
+.filter-group1,
+.filter-group2,
+.filter-group3,
+.filter-group4 {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group1 {
+    margin-left: 100px;
+}
+
+.filter-group2 {
+    margin-left: -70px;
+}
+
+.filter-group3 {
+    margin-left: -70px;
+}
+
+.filter-group4 {
+    margin-left: 275px;
+    margin-top: -30px;
+}
+
+.filter-group1 h1,
+.filter-group2 h1,
+.filter-group3 h1,
+.filter-group4 h1 {
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 24px;
+    color: #000000;
+    margin-bottom: -3px;
+}
+
+.professor-input,
+.coursename-input {
+    border: 0.5px solid #D9D9D9;
+    width: 50%;
+    padding-left: 10px;
+} 
+
+.weekday-button-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.weekday-button {
+    padding: 6px 10px;
+    border: 0.5px solid #D9D9D9;
+    background-color: white;
+    color: #000000;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+}
+
+.weekday-button.selected {
+    background-color: #007BFF;
+    border-color: white;
+    color: white;
+}
+
+.category-options {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+}
+
+.category-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 3px;
+    margin-bottom: 8px;
+}
+
+.category-text {
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+    color: #000000;
+    margin-bottom: 15px;
+}
+
+.checkbox {
+    appearance: none;
+    width: 35px;
+    height: 35px;
+    border: 0.5px solid #D9D9D9;
+    border-radius: 6px;
+    background-color: white;
+    position: relative;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.checkbox:checked {
+    background-color: #007BFF;
+    border: 0.5px solid white;
+}
+
+.checkbox:checked::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 10px;
+    width: 10px;
+    height: 20px;
+    border: solid white;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+}
+  
+.CourseFilter-apply-button {
+    margin-left: 700px;
+    margin-top: -70px;
+    width: 250px;
+    padding: 5px 5px;
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 24px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.CourseFilter-apply-button:hover {
+    background-color: #0056B3;
+}
