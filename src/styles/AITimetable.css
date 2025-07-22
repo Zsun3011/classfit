@@ -1,0 +1,192 @@
+@font-face{
+    font-family: 'IBMPlexSansKR-Regular';
+    src: url("../../public/font/IBMPlexSansKR-Regular.ttf") format("truetype");
+}
+
+.banner{
+    font-family: 'IBMPlexSansKR-Regular';
+    background-color: #FFFBDE;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding: 200px 0px 50px;
+}
+
+.banner-title,
+.inputCondition-title,
+.Savedtable-contianer-title,
+.AiTimetable-title{
+    font-size: 32px;
+    font-weight: bold ;
+}
+
+.banner-text{
+    font-size: 24px;
+}
+
+.button{
+    font-family: 'IBMPlexSansKR-Regular';
+    width: 240px;
+    height: 48px;
+    font-size: 24px;
+    background-color: #007BFF;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.inputCondition-container,
+.Savedtable-cotainer
+{
+    font-family: 'IBMPlexSansKR-Regular';
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    gap: 30px;
+    padding: 60px 0px;
+    font-size: 24px;;
+}
+
+.inputCondition-form {
+  display: flex;
+  gap: 100px;
+  margin-bottom: 30px;
+  padding: 30px 0px 0px 0px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.form-group input[type="number"],
+.form-group select {
+  color: #888;
+  padding: 6px 10px;
+  width: 156px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+
+.form-group label:not(:first-child) {
+  color: #888;
+  display: flex;
+  align-items: center;
+}
+
+.form-group input[type="checkbox"] {
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  margin-right: 6px;
+  accent-color: #007BFF;
+  
+}
+
+/*table card*/
+.table-card{
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 587px;
+    position: relative; /* 기준점 잡기 */
+}
+
+
+.table-name{
+    font-size: 32px;
+    font-weight: bold;
+    margin-top: 40px;
+    margin-left: 70px;
+    color: #3a3a3a;
+}
+
+.table-point,
+.table-morning{
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 8px;
+    color: #3a3a3a;
+    margin-left: 70px;
+}
+
+
+.table-gbc{
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 8px;
+    color: #3a3a3a;
+    margin-left: 70px;
+    margin-bottom: 40px;
+}
+
+
+
+/* TablePage Base */
+.table-container{
+    width: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.table-grid{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+.paging{
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 80px;
+}
+
+.paging-button{
+    font-weight: bold;
+    border-radius: 5px;
+    border: none;
+    padding: 15px 20px;
+    font-size: 16px;
+    background-color: white;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.paging-button.active{
+    background-color:#b8bac68a;
+    border: 1px solid #ccc;
+ 
+}   
+
+.AiTimetable-section{
+    display: flex;
+    gap: 60px;
+    justify-content: center;
+    align-items:center;
+}
+
+.AiTimetable-container{
+    font-family: 'IBMPlexSansKR-Regular';
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    padding: 60px 0px;
+}
+
