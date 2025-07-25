@@ -1,16 +1,15 @@
 @font-face{
     font-family: 'IBMPlexSansKR-Regular';
-    src: url("../../public/font/IBMPlexSansKR-Regular.ttf") format("truetype");
+    src: url("../../public/fonts/IBMPlexSansKR-Regular.ttf") format("truetype");
 }
 
 .dashboard-container {
   font-family: 'IBMPlexSansKR-Regular';
   background-color: #fdf6e3;
-  padding: 10px 20px 34px 20px;
+  padding: 20px;
   border-radius: 12px;
   width: 400px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  font-family: 'Pretendard', sans-serif;
 }
 
 .dashboard-title {
@@ -22,11 +21,13 @@
 
 .dashboard-section {
   margin-bottom: 20px;
+  flex: 1;
+  padding: 16px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.dashboard-summary div {
-  margin-bottom: 8px;
-}
 
 .dashboard-label {
   font-weight: 500;
@@ -50,13 +51,16 @@
 }
 
 .dashboard-list {
+  display: flex;
+  flex-direction: column;
   list-style: none;
   padding-left: 12px;
   font-size: 16px;
   color: #444;
+  gap:2px;
 }
 
 .dashboardsection-container{
   display: flex;
-  gap: 50px;
+  gap: 15px;
 }

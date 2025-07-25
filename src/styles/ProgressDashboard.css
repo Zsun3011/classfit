@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'IBMPlexSansKR-Regular';
-    src: url('../../public/font/IBMPlexSansKR-Regular.ttf') format('truetype');
+    src: url('../../public/fonts/IBMPlexSansKR-Regular.ttf') format('truetype');
 }
   
 
@@ -11,7 +11,8 @@
     height: 90%;
     background-color: white;
     padding: 16px;
-    border-radius: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .ProgressItem-wrapper {

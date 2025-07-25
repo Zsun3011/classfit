@@ -1,8 +1,9 @@
 import React from "react";
 import "../../styles/Dashboard.css";
 import ProgressDashboard from "../../components/ProgressDashboard";
+import { exampleData as timetableData } from "./Timetable";
 
-const Dashboard = ({ info }) => {
+const Dashboard = () => {
   // info는 props로 전달받는 수강 정보 객체
   // 구조 예시:
   // {
@@ -12,13 +13,16 @@ const Dashboard = ({ info }) => {
   //   major: ["자료구조(필수)", "확률과 통계(필수)", "디지털 논리(선택)"],
   //   general: ["항공우주학개론(필수)"]
   // }
+  const majorSubjects = timetableData.filter(c => c.type === "major").map(c => c.subject);
 
-   info = info || {
-    totalCredits: 18,
-    hasMorning: false,
-    freeDay: "금요일",
-    major: ["자료구조(필수)", "확률과 통계(필수)", "디지털 논리(선택)"],
-    general: ["항공우주학개론(필수)"]
+  const generalSubjects = timetableData.filter(c => c.type === "general").map(c => c.subject);
+  
+  const info = {
+      totalCredits: 18,
+      hasMorning: false,
+      freeDay: "금요일",
+      major: majorSubjects,
+      general: generalSubjects
   };
 
   const progressDataAfter = [
@@ -30,21 +34,22 @@ const Dashboard = ({ info }) => {
   ];
 
   return (
-    <div className="dashboard-container">
-      <h3 className="dashboard-title">수강 정보</h3>
-      
-      <div className="dashboard-section dashboard-summary">
-        <div>
-          <span className="dashboard-label">학점:</span>{" "}
-          <span className="dashboard-value highlight">{info.totalCredits}학점</span>
-        </div>
-        <div>
-          <span className="dashboard-label">오전 수업 포함 여부:</span>{" "}
+    <div className="dashboard-container">      
+      <div className="dashboard-section">
+        <div className="dashboard-subtitle">수강 정보</div>
+        <div className="dashboard-list">
+          <div>
+            <span className="dashboard-label">• 학점:</span>{" "}
+            <span className="dashboard-value highlight">{info.totalCredits}학점</span>
+          </div>
+          <div>
+          <span className="dashboard-label">• 오전 수업 포함 여부:</span>{" "}
           <span className="dashboard-value">{info.hasMorning ? "O" : "0"}</span>
-        </div>
-        <div>
-          <span className="dashboard-label">공강:</span>{" "}
+          </div>
+          <div>
+          <span className="dashboard-label">• 공강:</span>{" "}
           <span className="dashboard-value highlight">{info.freeDay}</span>
+          </div>
         </div>
       </div>
       <div className="dashboardsection-container">
