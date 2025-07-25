@@ -1,0 +1,97 @@
+/* 모달 전체 오버레이 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* 모달 본체 */
+.modal-container {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    height: auto;
+    max-width: 1000px;
+    gap: 20px;
+    padding: 40px 100px 30px 100px;
+}
+
+/* 모달 상단 헤더 */
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 닫기 버튼 */
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+}
+
+/* 모달 내부 콘텐츠 */
+.modal-content {
+    padding: 20px;
+}
+
+/* 즐겨찾기 과목 테이블 스타일 */
+.Course-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.Course-table th,
+.Course-table td {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.Course-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* 체크박스 */
+.course-checkbox {
+    width: 25px;
+    height: 25px;
+    accent-color: #007BFF;
+}
+
+/* 모달 하단 버튼 */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 0;
+}
+
+.modal-button-confirm {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+}
+
+.modal-button-confirm:hover {
+    background-color: #0056b3;
+}

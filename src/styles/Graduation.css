@@ -70,9 +70,10 @@
     padding: 20px 50px 40px 10px;
     width: 18   0px;
     height: 120px;
-    border-radius: 5px;
+    border-radius: 8px;
     border: none;
     box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .Box-title {
@@ -217,12 +218,16 @@
 .ProgressBar-content {
     display: flex;
     align-items: flex-start;
+    gap: 20px;
 }
 
-/* ProgressItem 선택 상태 스타일 */
-.ProgressItem-wrapper.selected {
-    background-color: #f0f9ff;
-    border: 1px solid #0ea5e9;
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+.graduation-progress .ProgressItem-wrapper {
+    background-color: #d2d2d2;
+    box-shadow:1px 1px 4px 0px #8b8b8b;
+    transition: all 0.2s ease;
 }
 
+.graduation-progress .ProgressItem-wrapper.selected {
+    background-color: white;
+    box-shadow: none;
+}
