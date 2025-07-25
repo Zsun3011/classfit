@@ -18,11 +18,19 @@ const Home = () => {
     return (
         <div>
             <Header />
-            <UserInfoCard />
-            <ScheduleList />
-            <QuickLinkButton />
-            <TimetableSummary />
-            <ProgressBar progressItems={progressDataBefore} />
+            <div className="Home-container">
+                <div className="Home-left">
+                    <UserInfoCard />
+                    <ProgressBar progressItems={progressDataBefore} />
+                    <ScheduleList />
+                </div>
+                <div className="Home-right">
+                    <TimetableSummary />
+                </div>
+                <div className="Home-bottom-right">
+                    <QuickLinkButton />
+                </div>
+            </div>
         </div>
     );
 };

@@ -40,7 +40,7 @@ const GraduationTypeSelector = () => {
         
             {/*오른쪽 부분*/}
             <div className="GraduationTypeSelector-right">
-                {/*졸업 유형 선택택*/}
+                {/*졸업 유형 선택*/}
                 <div className="type-button-group">
                     {graduationType.map((type) => (
                         <button
