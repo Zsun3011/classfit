@@ -304,33 +304,7 @@
     color: #000000;
 }
 
-.TimetableSummary-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 16px;
-    background-color: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    pointer-events: none;
-    z-index: 1;
-}
 
-.TimetableSummary-section-bottom {
-    margin-top: 200px;
-}
-
-.TimetableSummary-wrapper {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    margin-top: -300px;
-    z-index: 2;
-}
 
 .wrapper-label {
     font-family: "IBMPlexSansKR-Bold";

@@ -2,7 +2,7 @@ import React from "react";
 import ProgressItem from "./ProgressItem";
 import "../styles/ProgressDashboard.css";
 
-const ProgressDashboard = ( { progressItems = []}) => {
+const ProgressDashboard = ( { progressItems = [], onItemClick = null, selectedCourse = null}) => {
     return (
 
         <div className="ProgressDashboard-container">
@@ -13,6 +13,11 @@ const ProgressDashboard = ( { progressItems = []}) => {
                   title={item.title}
                   percent={item.percent}
                   score={item.score}
+                  onClick={onItemClick ? () => onItemClick(item.title) : undefined}
+                  isSelected={
+                    (!selectedCourse && item.title === "전체") || selectedCourse === item.title
+                    }
+                  clickable={!!onItemClick}
                 />
             ))}
         </div> 

@@ -1,33 +1,49 @@
 import React, { useState } from "react";
+import Modal from "./Modal"; // Modal 컴포넌트 import
+import FavoriteCourseModal from "./FavoriteCourseModal"; // FavoriteCourseModal 컴포넌트 import
 
 const InputConditionForm = ({ onGenerate }) => {
-    const [selectedSubject, setSelectedSubject] = useState("");
+    const [selectedSubjects, setSelectedSubjects] = useState([]);
     const [credit, setCredit] = useState("");
     const [preferredTimes, setPreferredTimes] = useState([]);
     const [avoidDays, setAvoidDays] = useState([]);
     const [keywords, setKeywords] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [tempSelectedCourses, setTempSelectedCourses] = useState([]);
+
+    // 샘플 즐겨찾기 과목 데이터
+    const favoriteCourses = [
+        { id: 1, name: "자료구조", area: "전필", credit: 3, professor: "김교수", capacity: "0/70", schedule: "월/수 (10:30 - 12:00)" },
+        { id: 2, name: "알고리즘", area: "전필", credit: 3, professor: "이교수", capacity: "0/70", schedule: "화/목 (14:00 - 15:30)" },
+        { id: 3, name: "데이터베이스", area: "전선", credit: 3, professor: "박교수", capacity: "0/70", schedule: "월/수 (14:00 - 15:30)" },
+        { id: 4, name: "운영체제", area: "전필", credit: 3, professor: "최교수", capacity: "0/70", schedule: "화/목 (10:30 - 12:00)" },
+        { id: 5, name: "컴퓨터네트워크", area: "전선", credit: 3, professor: "정교수", capacity: "0/70", schedule: "금 (13:00 - 16:00)" }
+    ];
 
     const handleSubmit = () => {
+        const selectedSubjectNames = selectedSubjects.map(id => 
+            favoriteCourses.find(course => course.id === id)?.name
+        ).filter(Boolean);
+
         const message = `
             [선택한 조건 요약]
-            ▪ 필수 과목: ${selectedSubject || "없음"}
+            ▪ 필수 과목: ${selectedSubjectNames.length > 0 ? selectedSubjectNames.join(", ") : "없음"}
             ▪ 희망 학점: ${credit || "없음"}
             ▪ 선호 시간대: ${preferredTimes.length > 0 ? preferredTimes.join(", ") : "없음"}
             ▪ 피하고 싶은 요일: ${avoidDays.length > 0 ? avoidDays.join(", ") : "없음"}
             ▪ 관심 키워드: ${keywords.length > 0 ? keywords.join(", ") : "없음"}
-                `.trim();
+        `.trim();
 
-                alert(message);
+        alert(message);
 
-                onGenerate({
-                    selectedSubject,
-                    credit,
-                    preferredTimes,
-                    avoidDays,
-                    keywords
-                });
+        onGenerate({
+            selectedSubjects,
+            credit,
+            preferredTimes,
+            avoidDays,
+            keywords
+        });
     };
-
 
     const handleCheckbox = (value, setter, state) => {
         setter(
@@ -35,6 +51,35 @@ const InputConditionForm = ({ onGenerate }) => {
                 ? state.filter((v) => v !== value)
                 : [...state, value]
         );
+    };
+
+    const handleSelectCourse = (courseId) => {
+        setTempSelectedCourses(prev =>
+            prev.includes(courseId)
+                ? prev.filter(id => id !== courseId)
+                : [...prev, courseId]
+        );
+    };
+
+    const handleConfirmSelection = () => {
+        setSelectedSubjects(tempSelectedCourses);
+        setIsModalOpen(false);
+    };
+
+    const handleCancelSelection = () => {
+        setTempSelectedCourses(selectedSubjects);
+        setIsModalOpen(false);
+    };
+
+    const openModal = () => {
+        setTempSelectedCourses(selectedSubjects);
+        setIsModalOpen(true);
+    };
+
+    const getSelectedSubjectNames = () => {
+        return selectedSubjects.map(id => 
+            favoriteCourses.find(course => course.id === id)?.name
+        ).filter(Boolean).join(", ");
     };
 
     return (
@@ -45,11 +90,26 @@ const InputConditionForm = ({ onGenerate }) => {
                 {/* 필수 포함 과목 */}
                 <div className="form-group">
                     <label>필수 포함 과목</label>
-                    <select onChange={(e) => setSelectedSubject(e.target.value)}>
-                        <option>즐겨찾기에서 선택</option>
-                        <option value="자료구조">자료구조</option>
-                        <option value="알고리즘">알고리즘</option>
-                    </select>
+                    <button
+                        onClick={openModal}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#007bff',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            width: '100%',
+                            textAlign: 'left'
+                        }}
+                    >
+                        즐겨찾기에서 선택 {selectedSubjects.length > 0 && `(${selectedSubjects.length}개 선택됨)`}
+                    </button>
+                    {selectedSubjects.length > 0 && (
+                        <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
+                            선택된 과목: {getSelectedSubjectNames()}
+                        </div>
+                    )}
                 </div>
 
                 {/* 희망 이수 학점 */}
@@ -120,6 +180,21 @@ const InputConditionForm = ({ onGenerate }) => {
             <button className="button" onClick={handleSubmit}>
                 AI 시간표 생성
             </button>
+
+            {/* 모달 */}
+            <Modal 
+                isOpen={isModalOpen} 
+                onClose={handleCancelSelection}
+                title="즐겨찾기에서 선택"
+            >
+                <FavoriteCourseModal
+                    courses={favoriteCourses}
+                    selectedCourses={tempSelectedCourses}
+                    onSelectCourse={handleSelectCourse}
+                    onConfirm={handleConfirmSelection}
+                    onCancel={handleCancelSelection}
+                />
+            </Modal>
         </div>
     );
 };

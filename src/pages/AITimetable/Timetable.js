@@ -11,10 +11,10 @@ const labelWidth = 50;     // 시간 라벨용 왼쪽 여백
 const labelHeight = 30;    // 요일 라벨용 상단 여백
 
 // 예시 시간표 데이터
-const exampleData = [
-  { subject: "자료구조", day: "월", start: "09:00", end: "10:30", color: "#8ecae6" },
-  { subject: "웹프로그래밍", day: "수", start: "13:00", end: "15:00", color: "#ffb703" },
-  { subject: "확률과통계", day: "금", start: "10:30", end: "12:00", color: "#90be6d" }
+export const exampleData = [
+  { subject: "자료구조(필수)", day: "월", start: "09:00", end: "10:30", color: "#8ecae6", type: "major" },
+  { subject: "웹프로그래밍(선택)", day: "수", start: "13:00", end: "15:00", color: "#ffb703", type: "general" },
+  { subject: "확률과 통계(필수)", day: "금", start: "10:30", end: "12:00", color: "#90be6d", type: "major" }
 ];
 
 // 시간 문자열 ("09:30")을 y 좌표(px)로 변환
@@ -86,6 +86,10 @@ const Timetable = ({ data = exampleData }) => {
         const y = labelHeight + timeToY(course.start);
         const height = timeToY(course.end) - timeToY(course.start);
 
+        const match = course.subject.match(/^(.+?)\((.+)\)$/);
+        const mainTitle = match ? match[1] : course.subject;
+        const detail = match ? `(${match[2]})` : "";
+
         return (
           <g key={`class-${index}`}>
             <rect
@@ -102,7 +106,10 @@ const Timetable = ({ data = exampleData }) => {
               textAnchor="middle"
               className="timetable-class-text"
             >
-              {course.subject}
+              <tspan x={x + colWidth / 2} dy="-5">{mainTitle}</tspan>
+              {detail && (
+                <tspan x={x + colWidth / 2} dy="25">{detail}</tspan>
+              )}
             </text>
           </g>
         );
