@@ -18,6 +18,12 @@ const Onboarding = () => {
             alert("모든 입력사항에 기입해주세요.")
             return; // 조건에 맞지 않으면 계정 생성 불가능
         }
+
+        if( password !== passwordcheck) {
+            alert("비밀번호를 다시 확인해주세요.")
+            return;
+        }
+
         //계정 생성 과정(백엔드 연결)
         navigate("/");
     };

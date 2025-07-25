@@ -1,5 +1,6 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, {useState} from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {CookiesProvider} from "react-cookie";
 
 
 //페이지 import
@@ -17,8 +18,13 @@ import MyPage from './pages/MyPage/Mypage';
 import HomeAfterInput from './pages/Home/HomeAfterInput';
 
 function App() {
+
+  const [favoriteCourseIds, setFavoriteCourseIds] = useState([]);
+  const [alarmCourseIds, setAlarmCourseIds] = useState([]);
+
   return (
-    <Router>
+    <CookiesProvider>
+    <BrowserRouter>
       <Routes>
         {/*local:3000에 들어왔을 때 로그인 화면으로 들어옴*/}
         <Route path="/" element={<LoginMethodSelector />} /> 
@@ -30,11 +36,31 @@ function App() {
         <Route path="/courseHistoryUploader" element={<CourseHistoryUploader />} />
         <Route path="/aITimetable" element={<AITimetable />} />
         <Route path="/graduationDetail" element={<GraduationDetail />} />
-        <Route path="/courseList" element={<CourseList />} />
-        <Route path="/myPage" element={<MyPage />} />
         <Route path="/homeAfterInput" element={<HomeAfterInput />} />
-      </Routes>
-    </Router>
+
+        <Route path="/courseList" 
+              element={
+              <CourseList 
+              favoriteCourseIds={favoriteCourseIds}
+              setFavoriteCourseIds={setFavoriteCourseIds}
+              alarmCourseIds={alarmCourseIds}
+              setAlarmCourseIds={setAlarmCourseIds}
+              />
+              } 
+        />
+        <Route path="/myPage" 
+              element={
+              <MyPage 
+              favoriteCourseIds={favoriteCourseIds}
+              setFavoriteCourseIds={setFavoriteCourseIds}
+              alarmCourseIds={alarmCourseIds}
+              setAlarmCourseIds={setAlarmCourseIds}
+              />
+            }
+        />
+        </Routes>
+      </BrowserRouter>
+      </CookiesProvider>
   );
 };
 

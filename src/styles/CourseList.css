@@ -1,16 +1,16 @@
 @font-face {
     font-family: 'IBMPlexSansKR-Regular';
-    src: url('../../public/fonts/IBMPlexSansKR-Regular.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Regular.ttf') format('truetype');
 }
   
 @font-face {
     font-family: 'IBMPlexSansKR-Medium';
-    src: url('../../public/fonts/IBMPlexSansKR-Medium.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Medium.ttf') format('truetype');
 }
   
 @font-face {
     font-family: 'IBMPlexSansKR-Bold';
-    src: url('../../public/fonts/IBMPlexSansKR-Bold.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Bold.ttf') format('truetype');
 }
 
 /*CourseList*/
@@ -20,7 +20,7 @@
     width: 80%;
     padding: 30px;
     margin-top: 30px;
-    margin-left: 120px;
+    margin-left: 130px;
     background-color: white;
     box-shadow: 
     -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
@@ -82,7 +82,7 @@
     width: 80%;
     padding: 30px;
     margin-top: 100px;
-    margin-left: 120px;
+    margin-left: 130px;
     background-color: white;
     box-shadow: 
     -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
@@ -106,7 +106,7 @@
     width: 80%;
     padding: 30px;
     margin-top: 50px;
-    margin-left: 120px;
+    margin-left: 130px;
     background-color: #FFFBDE;
     box-shadow: 
     -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
@@ -186,6 +186,10 @@
     color: white;
 }
 
+.weekday-button.selected:hover {
+    background-color: #0056B3;
+}
+
 .category-options {
     display: flex;
     flex-wrap: nowrap;
@@ -234,6 +238,10 @@
     border: solid white;
     border-width: 0 2.5px 2.5px 0;
     transform: rotate(45deg);
+}
+
+.checkbox:checked:hover {
+    background-color: #0056B3;
 }
   
 .CourseFilter-apply-button {
