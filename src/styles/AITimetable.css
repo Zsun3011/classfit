@@ -82,7 +82,7 @@
 .form-group label:not(:first-child) {
   color: #888;
   display: flex;
-  align-items: center;
+  gap: 5px;
 }
 
 .form-group input[type="checkbox"] {

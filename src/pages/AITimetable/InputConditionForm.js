@@ -1,6 +1,8 @@
-import React, { useState } from "react";
-import Modal from "./Modal"; // Modal 컴포넌트 import
+import React, { useState, useEffect } from "react";
 import FavoriteCourseModal from "./FavoriteCourseModal"; // FavoriteCourseModal 컴포넌트 import
+import "../../styles/MyPage.css";
+import "../../styles/CourseList.css";
+import dummyCourses from "../CourseList/dummyCourses";
 
 const InputConditionForm = ({ onGenerate }) => {
     const [selectedSubjects, setSelectedSubjects] = useState([]);
@@ -11,19 +13,18 @@ const InputConditionForm = ({ onGenerate }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tempSelectedCourses, setTempSelectedCourses] = useState([]);
 
-    // 샘플 즐겨찾기 과목 데이터
-    const favoriteCourses = [
-        { id: 1, name: "자료구조", area: "전필", credit: 3, professor: "김교수", capacity: "0/70", schedule: "월/수 (10:30 - 12:00)" },
-        { id: 2, name: "알고리즘", area: "전필", credit: 3, professor: "이교수", capacity: "0/70", schedule: "화/목 (14:00 - 15:30)" },
-        { id: 3, name: "데이터베이스", area: "전선", credit: 3, professor: "박교수", capacity: "0/70", schedule: "월/수 (14:00 - 15:30)" },
-        { id: 4, name: "운영체제", area: "전필", credit: 3, professor: "최교수", capacity: "0/70", schedule: "화/목 (10:30 - 12:00)" },
-        { id: 5, name: "컴퓨터네트워크", area: "전선", credit: 3, professor: "정교수", capacity: "0/70", schedule: "금 (13:00 - 16:00)" }
-    ];
+    const [favoriteIds, setFavoriteIds] = useState([]);
+
+    useEffect(() => {
+    const storedFavorites = JSON.parse(localStorage.getItem("favoriteIds") || "[]");
+    setFavoriteIds(storedFavorites);
+    }, []);
+
 
     const handleSubmit = () => {
-        const selectedSubjectNames = selectedSubjects.map(id => 
-            favoriteCourses.find(course => course.id === id)?.name
-        ).filter(Boolean);
+        const selectedSubjectNames = selectedSubjects
+            .map(id => dummyCourses.find(course => course.id === id)?.name)
+            .filter(Boolean);
 
         const message = `
             [선택한 조건 요약]
@@ -76,10 +77,11 @@ const InputConditionForm = ({ onGenerate }) => {
         setIsModalOpen(true);
     };
 
-    const getSelectedSubjectNames = () => {
-        return selectedSubjects.map(id => 
-            favoriteCourses.find(course => course.id === id)?.name
-        ).filter(Boolean).join(", ");
+   const getSelectedSubjectNames = () => {
+    return selectedSubjects
+        .map(id => dummyCourses.find(course => course.id === id)?.name)
+        .filter(Boolean)
+        .join(", ");
     };
 
     return (
@@ -181,20 +183,27 @@ const InputConditionForm = ({ onGenerate }) => {
                 AI 시간표 생성
             </button>
 
-            {/* 모달 */}
-            <Modal 
-                isOpen={isModalOpen} 
-                onClose={handleCancelSelection}
-                title="즐겨찾기에서 선택"
-            >
-                <FavoriteCourseModal
-                    courses={favoriteCourses}
-                    selectedCourses={tempSelectedCourses}
-                    onSelectCourse={handleSelectCourse}
-                    onConfirm={handleConfirmSelection}
-                    onCancel={handleCancelSelection}
-                />
-            </Modal>
+            {isModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-container">
+                        <div className="modal-header">
+                            <h2>즐겨찾기에서 선택</h2>
+                            <button className="modal-close" onClick={handleCancelSelection}>×</button>
+                        </div>
+                        <div className="modal-content">
+                            <FavoriteCourseModal
+                                courses={dummyCourses}
+                                favoriteCourseIds={favoriteIds}
+                                selectedCourses={tempSelectedCourses}
+                                onSelectCourse={handleSelectCourse}
+                                onConfirm={handleConfirmSelection}
+                                onCancel={handleCancelSelection}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

@@ -7,7 +7,7 @@ import CoursePanel from "./CoursePanel";
 
 
 const GraduationProgress = ({ progressItems = [] }) =>{
-    const [selectedCourse, setSelectedCourse] = useState(null);
+    const [selectedCourse, setSelectedCourse] = useState("전체");
 
     // 과목별 데이터 (임의의 과목들)
     const courseData = {
@@ -66,7 +66,7 @@ const GraduationProgress = ({ progressItems = [] }) =>{
     };
 
     return(
-        <div className="ProgressBar-container1">
+        <div className="ProgressBar-container1 graduation-progress">
             <div className="ProgressBar-top">
                 <h1>졸업 진척률</h1>
                 <div className="ProgressBar-section">

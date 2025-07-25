@@ -14,9 +14,7 @@ const ProgressDashboard = ( { progressItems = [], onItemClick = null, selectedCo
                   percent={item.percent}
                   score={item.score}
                   onClick={onItemClick ? () => onItemClick(item.title) : undefined}
-                  isSelected={
-                    (!selectedCourse && item.title === "전체") || selectedCourse === item.title
-                    }
+                  isSelected={selectedCourse === item.title}
                   clickable={!!onItemClick}
                 />
             ))}

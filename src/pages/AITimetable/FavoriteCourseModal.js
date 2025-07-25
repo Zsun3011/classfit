@@ -1,9 +1,16 @@
 import React from "react";
+import "../../styles/MyPage.css";
+import "../../styles/CourseList.css";
+import "../../styles/Modal.css"
 
-const FavoriteCourseModal = ({ courses, selectedCourses, onSelectCourse, onConfirm, onCancel }) => {
+const FavoriteCourseModal = ({ courses, favoriteCourseIds, selectedCourses, onSelectCourse, onConfirm, onCancel }) => {
+    
+    // 즐겨찾기된 과목만 필터링
+    const favoriteCourses = courses.filter(course => favoriteCourseIds.includes(course.id));
+
     return (
-        <div>
-            <table className="favorite-modal-table">
+        <div className="FavoriteCourseModal-container">
+            <table className="Course-table">
                 <thead>
                     <tr>
                         <th>선택</th>
@@ -18,7 +25,7 @@ const FavoriteCourseModal = ({ courses, selectedCourses, onSelectCourse, onConfi
                     </tr>
                 </thead>
                 <tbody>
-                    {courses.map((course) => (
+                    {favoriteCourses.map((course) => (
                         <tr key={course.id}>
                             <td>
                                 <input
@@ -33,7 +40,6 @@ const FavoriteCourseModal = ({ courses, selectedCourses, onSelectCourse, onConfi
                                     src="/icons/star-yellow.png"
                                     alt="즐겨찾기"
                                     className="Course-icon"
-                                    style={{ width: '20px', height: '20px' }}
                                 />
                             </td>
                             <td>{course.name}</td>
@@ -47,24 +53,15 @@ const FavoriteCourseModal = ({ courses, selectedCourses, onSelectCourse, onConfi
                                     src="/icons/reminder-gray.png"
                                     alt="알람"
                                     className="Course-icon"
-                                    style={{ width: '20px', height: '20px' }}
                                 />
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
+
             <div className="modal-buttons">
-                <button
-                    onClick={onCancel}
-                    className="modal-button-cancel"
-                >
-                    취소
-                </button>
-                <button
-                    onClick={onConfirm}
-                    className="modal-button-confirm"
-                >
+                <button className="modal-button-confirm" onClick={onConfirm}>
                     추가하기
                 </button>
             </div>
