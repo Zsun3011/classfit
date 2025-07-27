@@ -1,18 +1,17 @@
 @font-face {
     font-family: 'IBMPlexSansKR-Regular';
-    src: url('../../public/fonts/IBMPlexSansKR-Regular.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Regular.ttf') format('truetype');
 }
   
 @font-face {
     font-family: 'IBMPlexSansKR-Medium';
-    src: url('../../public/fonts/IBMPlexSansKR-Medium.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Medium.ttf') format('truetype');
 }
   
 @font-face {
     font-family: 'IBMPlexSansKR-Bold';
-    src: url('../../public/fonts/IBMPlexSansKR-Bold.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Bold.ttf') format('truetype');
 }
-  
 
 /*LoginMethodSelector*/
 .Login-container{
@@ -51,7 +50,7 @@ input {
 
 .Login-button,
 .kakao-button {
-    width: 105%;
+    width: 102%;
     padding: 5px;
     border: none;
     border-radius: 8px;
@@ -98,6 +97,7 @@ hr{
 .Signup-button {
     width: 40%;
     padding: 5px;
+    margin-right: -10px;
     border: 1px solid #000000;
     border-radius: 8px;
     background: none;
@@ -184,6 +184,7 @@ input {
 .GotoLogin-button {
     width: 40%;
     padding: 5px;
+    margin-right: -15px;
     border: 1px solid #000000;
     border-radius: 8px;
     background: none;
@@ -213,13 +214,11 @@ input {
 /*왼쪽 화면*/
 .SchoolSelector-left,
 .AdmissionYearInput-left,
-.GraduationTypeSelector-left {
+.GraduationTypeSelector-left,
+.CourseHistoryUploader-left {
     width: 50%;
 }
 
-.CourseHistoryUploader-left {
-    width: 51%;
-}
 .SchoolSelector-left h1,
 .AdmissionYearInput-left h1,
 .GraduationTypeSelector-left h1,
@@ -444,7 +443,7 @@ input {
 
 .submit-button {
     width:170%;
-    padding: 12px 40px;
+    padding: 10px 40px;
     font-family: "IBMPlexSansKR-Medium";
     font-size: 16px;
     background-color: #0056b3;
@@ -453,4 +452,8 @@ input {
     border-radius: 8px;
     cursor: pointer;
     margin-top: 40px;
+}
+
+.sub-description1 {
+    margin-bottom: 7px;
 }

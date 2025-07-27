@@ -7,7 +7,7 @@
 .ProgressDashboard-container {
     display: flex;
     flex-direction: column;
-    width: 90%;
+    width: 95%;
     height: 90%;
     background-color: white;
     padding: 16px;

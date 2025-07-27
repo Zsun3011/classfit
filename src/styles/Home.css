@@ -1,16 +1,43 @@
 @font-face {
     font-family: 'IBMPlexSansKR-Regular';
-    src: url('../../public/fonts/IBMPlexSansKR-Regular.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Regular.ttf') format('truetype');
 }
   
 @font-face {
     font-family: 'IBMPlexSansKR-Medium';
-    src: url('../../public/fonts/IBMPlexSansKR-Medium.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Medium.ttf') format('truetype');
 }
   
 @font-face {
     font-family: 'IBMPlexSansKR-Bold';
-    src: url('../../public/fonts/IBMPlexSansKR-Bold.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Bold.ttf') format('truetype');
+}
+/*Home*/
+/*HomeAfterInput*/
+.Home-container {
+    margin-bottom: 80px;
+}
+
+.Home-left {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-top: 120px;
+    margin-left: 130px;
+}
+
+.Home-right {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin-top: -1362px;
+    margin-left: 680px;
+}
+
+.Home-bottom-right {
+    display: flex;
+    margin-top: 30px;
+    margin-left: 990px;
 }
 
 /*UserInfoCard*/
@@ -20,8 +47,6 @@
     width: 464px;
     padding: 30px;
     flex-direction: column;
-    margin-top: 100px;
-    margin-left: 120px;
     border-radius: 16px;
     background-color: #FFFBDE;
     box-shadow: 
@@ -90,15 +115,13 @@
 
 /*ScheduleList*/
 .ScheduleList-container {
-    position: absolute;
+    position: relative;
     display: flex;
     width: 803px;
     padding: 20px;
     border-radius: 16px;
     background-color: white;
     height: 230px;
-    margin-top: 870px;
-    margin-left: 120px;
     flex-direction: column;
     box-shadow: 
         -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
@@ -144,15 +167,13 @@
 
 /*QuickLinkButton*/
 .QuickLinkButton-container {
-    position: absolute;
+    position: relative;
     display: flex;
     width: 356px;
     padding: 20px;
     border-radius: 16px;
     background-color: white;
-    margin-top: 870px;
     height: 230px;
-    margin-left: 1000px;
     flex-direction: column;
     box-shadow: 
         -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
@@ -186,14 +207,12 @@
 
 /*ProgressBar*/
 .ProgressBar-container {
-    position: absolute;
+    position: relative;
     display: flex;
     width: 490px;
     height: 746px;
     padding: 30px 17px;
     flex-direction: column;
-    margin-top: -805px;
-    margin-left: 120px;
     gap: 15px;
     border-radius: 16px;
     background-color: #FFFBDE;
@@ -268,18 +287,15 @@
 .TimetableSummary-container {
     position: relative;
     display: flex;
-    width: 635px;
+    width: 630px;
     height: 985px;
     padding: 38px;
     flex-direction: column;
-    align-items: center;
-    margin-top: -225px;
-    margin-left: 685px;
     border-radius: 16px;
     background-color: #FFFBDE;
     box-shadow: 
         -2px -2px 4px 0px rgba(0, 0, 0, 0.25)inset,
-        2px 2px 4px 0px rgba(0, 0, 0, 0.25)inset; 
+        2px 2px 4px 0px rgba(0, 0, 0, 0.25)inset;
 }
 
 .TimetableSummary-container h1 {
@@ -303,9 +319,9 @@
 }
 
 .wrapper-button {
+    position: relative;
     width:50%;
     padding: 5px 10px;
-    margin-left: 120px;
     font-family: "IBMPlexSansKR-Regular";
     font-size: 24px;
     background-color: #007BFF;
@@ -313,6 +329,7 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    z-index: 2;
 }
 
 .wrapper-button:hover {
@@ -320,30 +337,27 @@
     color: white;
 }
 
-
-
 /*HomeAfterInput의 자세히 보러가기 버튼*/
 .HomeAfterInput-section {
     position: relative;
-    width: 100%;
-    margin-top: -80px;
+    display: flex;
+    margin-left: 270px;
+    margin-top: -380px;
 }
 
-.ProgressDashboard-button {
-    width: 200px;
-    margin-left: 275px;
+.ProgressDashboard-Detail-button {
+    width: 20%;
+    padding: 6px 12px;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     background-color: #007BFF;
     color: white;
     font-family: "IBMPlexSansKR-Regular";
-    font-size: 16px;
+    font-size: 24px;
     text-align: center;
 }
 
-.ProgressDashboard-button:hover {
+.ProgressDashboard-Detail-button:hover {
     background-color: #0056b3;
-    color: white;
-    font-family: "IBMPlexSansKR-Regular";
 }

@@ -1,4 +1,4 @@
-import React, { useState }from "react";
+import React, { useState, useEffect }from "react";
 import Header from "../../components/Header";
 import CourseTable from "./CourseTable";
 import dummyCourses from "./dummyCourses";
@@ -8,8 +8,19 @@ import "../../styles/CourseList.css";
 
 const CourseList = () => {
 
-    const [favoriteIds, setFavoriteIds] = useState([]);
-    const [alarmIds, setAlarmIds] = useState([]);
+    //즐겨찾기, 알림설정 상태 보존
+    const getInitialFavorites = () => {
+        const stored = localStorage.getItem("favoriteIds")
+        return stored ? JSON.parse(stored) : [];
+    };
+
+    const getInitialAlarms = () => {
+        const stored = localStorage.getItem("alarmIds")
+        return stored ? JSON.parse(stored) : [];
+    };
+
+    const [favoriteIds, setFavoriteIds] = useState(getInitialFavorites());
+    const [alarmIds, setAlarmIds] = useState(getInitialAlarms());
     const [filteredCourses, setFilteredCourses] = useState(dummyCourses);
 
     const [filter, setFilter] = useState({
@@ -19,22 +30,33 @@ const CourseList = () => {
         categories: []
     });
 
+    useEffect(() => {
+        const storedFavorites = JSON.parse(localStorage.getItem("favoriteIds") || "[]");
+        const storedAlarms = JSON.parse(localStorage.getItem("alarmIds") || "[]");
+        setFavoriteIds(storedFavorites);
+        setAlarmIds(storedAlarms);
+    }, []);
+
     /*즐겨찾기 설정*/
     const handleToggleFavorite = (courseId) => {
-        setFavoriteIds((prev) =>
-        prev.includes(courseId)
-        ? prev.filter((id) => id !== courseId)
-        : [...prev, courseId]
-        );
+        setFavoriteIds((prev) =>{
+            const updated = prev.includes(courseId)
+            ? prev.filter((id) => id !== courseId)
+            : [...prev, courseId];
+            localStorage.setItem("favoriteIds", JSON.stringify(updated));
+            return updated;
+        });
     };
 
     /*알람 설정*/
     const handleToggleAlarm = (courseId) => {
-        setAlarmIds((prev) =>
-        prev.includes(courseId)
-        ? prev.filter((id) => id !==courseId)
-        : [...prev, courseId]
-        );
+        setAlarmIds((prev) => {
+            const updated = prev.includes(courseId)
+            ? prev.filter((id) => id !==courseId)
+            : [...prev, courseId];
+            localStorage.setItem("alarmIds", JSON.stringify(updated));
+            return updated;
+        });
     };
 
     /*필터 적용*/
