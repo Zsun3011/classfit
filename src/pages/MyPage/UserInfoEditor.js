@@ -1,33 +1,18 @@
-import React, {useState, useEffect} from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import NotificationManagerfirst from "./NotificationManagerfirst";
-import NotificationManagersecond from "./NotificationManagersecond";
 import "../../styles/MyPage.css";
 
 const UserInfoEditor = () => {
 
     const navigate = useNavigate();
 
-    //모달 관련
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalStep, setModalStep] = useState(1);
-    const handleClose = () => {
-        setIsModalOpen(false);
-        setModalStep(1); 
-    }
-
-    
     const handleLogout = () => {
         navigate("/");
     }
 
-    useEffect(() => {
-        if(isModalOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "auto";
-        }
-    }, [isModalOpen]);
+    const handleLeave = () => {
+        navigate("/Onboarding");
+    }
 
     return (
         <div className="UserInfoEditor-container">
@@ -51,23 +36,7 @@ const UserInfoEditor = () => {
                 <div className="MyPage-UserInfoBox">졸업유형: 일반</div>
             </div>
             <button className="UserInfoEditor-Logout" onClick={handleLogout}>로그아웃</button>
-            <button className="UserInfoEditor-Edit" onClick={() => setIsModalOpen(true)}>정보수정</button>
-            {isModalOpen && (
-                <div className="modal-overlay">
-                    {modalStep === 1 && (
-                        <NotificationManagerfirst 
-                            onNext={() => setModalStep(2)} 
-                            onClose={handleClose}
-                        />
-                    )}
-                    {modalStep === 2 && (
-                        <NotificationManagersecond
-                            onPrev={() => setModalStep(1)}
-                            onClose={handleClose}
-                        />
-                    )}
-                </div>
-            )}
+            <button className="UserInfoEditor-Leave" onClick={handleLeave}>회원탈퇴</button>
         </div>
     )
 }

@@ -2,8 +2,7 @@ import React from "react";
 
 //course: 과목 객체 전체, 
 // isFavorite: 즐겨찾기 여부, onToggleFavorite: 별 클릭 시 호출할 함수, 
-// isAlarm: 알람설정 여부, onToggleAlarm: 종 클릭 시 호출할 함수
-const CourseRow = ( {course, isFavorite, onToggleFavorite, isAlarm, onToggleAlarm}) => {
+const CourseRow = ( {course, isFavorite, onToggleFavorite}) => {
     return (
         <tr>
             <td onClick={() => onToggleFavorite(course.id)} style={{cursor: "pointer"}}>
@@ -19,13 +18,6 @@ const CourseRow = ( {course, isFavorite, onToggleFavorite, isAlarm, onToggleAlar
             <td>{course.professor}</td> {/*담당교수*/}
             <td>{course.capacity}</td> {/*정원*/}
             <td>{course.schedule}</td> {/*요일/시간*/}
-            <td onClick={() => onToggleAlarm(course.id)} style={{cursor: "pointer"}}>
-                <img
-                src={isAlarm ? "/icons/reminder-blue.png" : "/icons/reminder-gray.png"}
-                alt="알람"
-                className="Course-icon"
-                />
-            </td>
         </tr>
     )
 }

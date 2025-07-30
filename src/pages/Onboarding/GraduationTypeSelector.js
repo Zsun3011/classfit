@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Onboarding.css";
 
-const graduationType = ["일반 졸업", "복수 전공", "조기 졸업", "편입학", "기타"];
+const graduationType = ["일반 졸업", "복수 전공", "부전공"];
 
 const GraduationTypeSelector = () => {
     const navigate = useNavigate();

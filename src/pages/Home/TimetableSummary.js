@@ -5,6 +5,15 @@ import "../../styles/Home.css"
 
 const TimetableSummary = () => {
 
+
+    const info = {
+        totalCredits: "",
+        hasMorning: "",
+        freeDay: "",
+        major: [],
+        general: []
+    };
+
     const navigate = useNavigate();
 
     const handleCreateTable = () => {
@@ -28,7 +37,42 @@ const TimetableSummary = () => {
                     <button className="wrapper-button" onClick={handleCreateTable}>AI 시간표 생성</button>
                 </div>
                 <div className="TimetableSummary-section-bottom">
-                    <p>수강정보</p>
+                    <div className="dashboard-section">
+                        <div className="dashboard-subtitle">수강 정보</div>
+                        <div className="dashboard-list">
+                    <div>
+                        <span className="dashboard-label">• 학점:</span>{" "}
+                        <span className="dashboard-value highlight">{info.totalCredits}</span>
+                    </div>    
+                    <div>
+                        <span className="dashboard-label">• 오전 수업 포함 여부:</span>{" "}
+                        <span className="dashboard-value">{info.hasMorning}</span>
+                    </div>
+                    <div>
+                        <span className="dashboard-label">• 공강:</span>{" "}
+                        <span className="dashboard-value highlight">{info.freeDay}</span>
+                    </div>
+                </div>
+            </div>
+            <div className="dashboardsection-container">
+                <div className="dashboard-section">
+                    <div className="dashboard-subtitle">전공</div>
+                    <ul className="dashboard-list">
+                        {info.major.map((item, index) => (
+                            <li key={index}>• {item}</li>
+                        ))}
+                    </ul>
+                </div>
+
+                <div className="dashboard-section">
+                    <div className="dashboard-subtitle">교양</div>
+                    <ul className="dashboard-list">
+                        {info.general.map((item, index) => (
+                            <li key={index}>• {item}</li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
                 </div>
             </div>
     )
