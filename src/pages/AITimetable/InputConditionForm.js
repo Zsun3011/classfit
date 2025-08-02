@@ -84,6 +84,7 @@ const InputConditionForm = ({ onGenerate }) => {
         .join(", ");
     };
 
+
     return (
         <div className="inputCondition-container">
             <div className="inputCondition-title">시간표 조건 입력</div>
@@ -184,8 +185,8 @@ const InputConditionForm = ({ onGenerate }) => {
             </button>
 
             {isModalOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-container">
+                <div className="modal-overlay" onClick={handleCancelSelection}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>즐겨찾기에서 선택</h2>
                             <button className="modal-close" onClick={handleCancelSelection}>×</button>

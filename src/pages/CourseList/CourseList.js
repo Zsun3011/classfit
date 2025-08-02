@@ -22,7 +22,6 @@ const CourseList = () => {
     const [favoriteIds, setFavoriteIds] = useState(getInitialFavorites());
     const [alarmIds, setAlarmIds] = useState(getInitialAlarms());
     const [filteredCourses, setFilteredCourses] = useState(dummyCourses);
-
     const [filter, setFilter] = useState({
         professor: "",
         courseName: "",

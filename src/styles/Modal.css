@@ -20,12 +20,12 @@
     height: auto;
     max-width: 1000px;
     gap: 20px;
-    padding: 40px 100px 30px 100px;
+    padding: 30px 80px 30px 80px;
 }
 
 /* 모달 상단 헤더 */
 .modal-header {
-    padding: 20px;
+    padding: 10px;
     border-bottom: 1px solid #e0e0e0;
     display: flex;
     justify-content: space-between;
@@ -42,10 +42,6 @@
     height: 30px;
 }
 
-/* 모달 내부 콘텐츠 */
-.modal-content {
-    padding: 20px;
-}
 
 /* 즐겨찾기 과목 테이블 스타일 */
 .Course-table {
@@ -95,3 +91,4 @@
 .modal-button-confirm:hover {
     background-color: #0056b3;
 }
+

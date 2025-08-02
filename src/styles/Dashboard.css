@@ -1,6 +1,6 @@
 @font-face{
     font-family: 'IBMPlexSansKR-Regular';
-    src: url("../../public/fonts/IBMPlexSansKR-Regular.ttf") format("truetype");
+    src: url("../../public/font/IBMPlexSansKR-Regular.ttf") format("truetype");
 }
 
 .dashboard-container {
