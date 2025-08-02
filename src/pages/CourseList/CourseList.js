@@ -8,19 +8,13 @@ import "../../styles/CourseList.css";
 
 const CourseList = () => {
 
-    //즐겨찾기, 알림설정 상태 보존
+    //즐겨찾기
     const getInitialFavorites = () => {
         const stored = localStorage.getItem("favoriteIds")
         return stored ? JSON.parse(stored) : [];
     };
 
-    const getInitialAlarms = () => {
-        const stored = localStorage.getItem("alarmIds")
-        return stored ? JSON.parse(stored) : [];
-    };
-
     const [favoriteIds, setFavoriteIds] = useState(getInitialFavorites());
-    const [alarmIds, setAlarmIds] = useState(getInitialAlarms());
     const [filteredCourses, setFilteredCourses] = useState(dummyCourses);
     const [filter, setFilter] = useState({
         professor: "",
@@ -31,9 +25,7 @@ const CourseList = () => {
 
     useEffect(() => {
         const storedFavorites = JSON.parse(localStorage.getItem("favoriteIds") || "[]");
-        const storedAlarms = JSON.parse(localStorage.getItem("alarmIds") || "[]");
         setFavoriteIds(storedFavorites);
-        setAlarmIds(storedAlarms);
     }, []);
 
     /*즐겨찾기 설정*/
@@ -43,17 +35,6 @@ const CourseList = () => {
             ? prev.filter((id) => id !== courseId)
             : [...prev, courseId];
             localStorage.setItem("favoriteIds", JSON.stringify(updated));
-            return updated;
-        });
-    };
-
-    /*알람 설정*/
-    const handleToggleAlarm = (courseId) => {
-        setAlarmIds((prev) => {
-            const updated = prev.includes(courseId)
-            ? prev.filter((id) => id !==courseId)
-            : [...prev, courseId];
-            localStorage.setItem("alarmIds", JSON.stringify(updated));
             return updated;
         });
     };
@@ -82,9 +63,7 @@ const CourseList = () => {
                 <FavoriteCourseList 
                 courses={dummyCourses}
                 favoriteCourseIds={favoriteIds}
-                alarmCourseIds={alarmIds}
                 onToggleFavorite={handleToggleFavorite}
-                onToggleAlarm={handleToggleAlarm}
                 />
             </div>
             <CourseFilter 
@@ -99,9 +78,7 @@ const CourseList = () => {
                     <CourseTable
                     courses={filteredCourses}
                     favoriteCourseIds={favoriteIds}
-                    alarmCourseIds={alarmIds}
                     onToggleFavorite={handleToggleFavorite}
-                    onToggleAlarm={handleToggleAlarm}
                     />
                 </div>
             </div>

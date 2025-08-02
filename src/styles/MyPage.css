@@ -107,7 +107,7 @@
     cursor: pointer;
 }
 
-.UserInfoEditor-Edit {
+.UserInfoEditor-Leave {
     width:13%;
     padding: 5px 10px;
     margin-left: 1000px;
@@ -121,8 +121,8 @@
     cursor: pointer;
 }
 
-/*BookmarkManager*/
-.BookmarkManager-container {
+/*NotificationManager*/
+.NotificationManager-container {
     display: flex;
     flex-direction: column;
     position: relative;
@@ -135,95 +135,35 @@
     -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
     2px 2px 4px 0px rgba(0,0,0,0.25) inset;
     border-radius: 16px;
+    margin-bottom: 80px;
 }
 
-.BookmarkManager-title {
+.NotificationManager-title {
     font-family: "IBMPlexSansKR-Bold";
     font-size: 32px;
     color: #000000;
     margin-left: 20px;
 }
 
-.Alarm-set {
+.Notification-section {
     display: flex;
-    flex-direction: row;
-    position: absolute;
-    gap: 5px;
-    top: 60px;
-    right: 20px;
-    align-items: center;
-}
-
-.Alarm-title {
-    font-family: "IBMPlexSansKR-Medium";
-    font-size: 16px;
-    color: #000000;
-    align-items: center;
-}
-
-.Alarm-on {
-    width:60px;
-    padding: 5px 10px;
-    font-family: "IBMPlexSansKR-Regular";
-    font-size: 16px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.Alarm-off {
-    width:60px;
-    padding: 5px 10px;
-    font-family: "IBMPlexSansKR-Regular";
-    font-size: 16px;
-    background-color: white;
-    color: #000000;
-    border: 0.5px solid #000000;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-/*NotificationManagerfirst*/
-/*NotificationManagersecond*/
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.modal-container {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px 100px 180px 100px;
-    width: 400px;
-    height: 500px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    z-index: 2001;
-}
-
-.modal-container h1 {
-    font-family: "IBMPlexSansKR-Bold";
-    font-size: 32px;
-    color: #000000;
+    flex-direction: column;
+    margin-left: 20px;
 }
 
 .Notification-label {
     font-family: "IBMPlexSansKR-Medium";
     font-size: 24px;
     color: #000000;
+    margin-top: 5px;
 }
 
 .Notification-input {
     border: 0.5px solid #D9D9D9;
+    width: 97%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 3px;
 }
 
 .graduationtype-button-group {
@@ -252,37 +192,4 @@
 .graduationtype-button.active {
     background-color: #0056b3;
     color: white;
-}
-
-.modal-buttons {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-}
-
-.PrevPage-button {
-    width: 45%;
-    padding: 10px 30px;
-    font-family: "IBMPlexSansKR-Medium";
-    font-size: 16px;
-    background-color: white;
-    color: #000000;
-    border: 1px solid #000000;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 30px;
-}
-
-.NextPage-button {
-    width: 45%;
-    padding: 10px 30px;
-    font-family: "IBMPlexSansKR-Medium";
-    font-size: 16px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 30px;
 }
