@@ -37,6 +37,7 @@ function App() {
         <Route path="/aITimetable" element={<AITimetable />} />
         <Route path="/graduationDetail" element={<GraduationDetail />} />
         <Route path="/homeAfterInput" element={<HomeAfterInput />} />
+        <Route path="/myPage" element={<MyPage />} />
 
         <Route path="/courseList" 
               element={
@@ -47,16 +48,6 @@ function App() {
               setAlarmCourseIds={setAlarmCourseIds}
               />
               } 
-        />
-        <Route path="/myPage" 
-              element={
-              <MyPage 
-              favoriteCourseIds={favoriteCourseIds}
-              setFavoriteCourseIds={setFavoriteCourseIds}
-              alarmCourseIds={alarmCourseIds}
-              setAlarmCourseIds={setAlarmCourseIds}
-              />
-            }
         />
         </Routes>
       </BrowserRouter>

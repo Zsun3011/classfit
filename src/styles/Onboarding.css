@@ -404,8 +404,7 @@ input {
 .type-button-group {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 5px;
+    gap: 15px;
     margin-top: 40px;
 }
 
