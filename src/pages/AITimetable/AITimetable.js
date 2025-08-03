@@ -5,25 +5,35 @@ import InputConditionForm from "./InputConditionForm";
 import Timetable from "./Timetable";
 import Dashboard from "./Dashboard";
 import Header from "../../components/Header";
+import { useNavigate } from "react-router-dom";
 
+// 초기 데이터를 가져오는 함수들
 const getInitialTables = () => {
-    const stored = localStorage.getItem("savedTables");
-    return stored ? JSON.parse(stored) : [];
+    try {
+        const stored = localStorage.getItem("savedTables");
+        return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+        console.error("Error loading saved tables:", error);
+        return [];
+    }
 };
 
 const getLastTableId = () => {
-    const storedId = localStorage.getItem("lastTableId");
-    return storedId ? parseInt(storedId) : 0;
+    try {
+        const storedId = localStorage.getItem("lastTableId");
+        return storedId ? parseInt(storedId) : 0;
+    } catch (error) {
+        console.error("Error loading last table ID:", error);
+        return 0;
+    }
 };
 
-
 const AITimetable = () => {
-
     const [currentPage, setCurrentPage] = useState(1);
-    
     const [tables, setTables] = useState(getInitialTables);
     const [lastId, setLastId] = useState(getLastTableId);
     const [selectedTable, setSelectedTable] = useState(null);
+    const [selectedConditions, setSelectedConditions] = useState(null);
 
     const itemsPerPage = 2;
     const totalPages = Math.ceil(tables.length / itemsPerPage);
@@ -32,9 +42,8 @@ const AITimetable = () => {
     const currentProducts = tables.slice(startIndex, endIndex);
 
     const savedTableRef = useRef(null);
-
-    const [selectedConditions, setSelectedConditions] = useState(null);
-
+    const navigate = useNavigate();
+    
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
@@ -48,19 +57,53 @@ const AITimetable = () => {
     const handleDeleteTable = (id) => {
         const updatedTables = tables.filter((table) => table.id !== id);
         setTables(updatedTables);
-        setSelectedTable(null); // 모달 닫기
+        setSelectedTable(null);
 
         if (updatedTables.length === 0) {
             setLastId(0);
         }
     };
 
+    const handleSaveTable = () => {
+        if (selectedConditions) {
+            const newId = lastId + 1;
+            const newTable = {
+                id: Date.now(),
+                name: `시간표${newId}`,
+                point: `학점: ${selectedConditions.credit}`,
+                morning: `오전 수업 포함 여부: ${selectedConditions.preferredTimes?.includes("오전") ? "있음" : "없음"}`,
+                gbc: `공강: ${selectedConditions.avoidDays?.join(", ") || "없음"}`,
+                conditions: selectedConditions,
+                isNew: true
+            };
+            setTables([newTable, ...tables]);
+            setLastId(newId);
+        }
+    };
+
+    const handleConfirmTable = (conditions) => {
+        try {
+            sessionStorage.setItem("confirmedTable", JSON.stringify({
+                timetable: conditions,
+            }));
+            alert("확정된 시간표가 저장되었습니다.");
+            navigate("/home");
+        } catch (error) {
+            console.error("Error saving confirmed table:", error);
+            alert("시간표 저장 중 오류가 발생했습니다.");
+        }
+    };
+
+    // localStorage 동기화
     useEffect(() => {
-        localStorage.setItem("savedTables", JSON.stringify(tables));
-        localStorage.setItem("lastTableId", String(lastId));
+        try {
+            localStorage.setItem("savedTables", JSON.stringify(tables));
+            localStorage.setItem("lastTableId", String(lastId));
+        } catch (error) {
+            console.error("Error saving to localStorage:", error);
+        }
     }, [tables, lastId]);
 
-    
     return(
         <div>
             <Header />
@@ -83,31 +126,13 @@ const AITimetable = () => {
                         <Dashboard conditions={selectedConditions} />
                     </div>  
                     <div className="AiTimetable-button">
-                        <button className="button" onClick={() => {
-                            if (selectedConditions) {
-                                const newId = lastId + 1;
-                                const newTable = {
-                                    id: Date.now(), // 고유 ID
-                                    name: `시간표${newId}`,
-                                    point: `학점: ${selectedConditions.credit}`,
-                                    morning: `오전 수업 포함 여부: ${selectedConditions.preferredTimes.includes("오전") ? "있음" : "없음"}`,
-                                    gbc: `공강: ${selectedConditions.avoidDays.join(", ") || "없음"}`,
-                                    conditions: selectedConditions,
-                                    isNew: true
-                                };
-                                setTables([newTable, ...tables]);
-                                setLastId(newId);
-                            }
-                        }}>저장하기</button>
+                        <button className="button" onClick={handleSaveTable}>
+                            저장하기
+                        </button>
                         <button
                             className="button"
-                            onClick={() => {
-                                localStorage.setItem("confirmedTable", JSON.stringify({
-                                timetable: selectedConditions,
-                                }));
-                                alert("확정된 시간표가 저장되었습니다.");
-                            }}
-                            >
+                            onClick={() => handleConfirmTable(selectedConditions)}
+                        >
                             확정하기
                         </button>
                     </div>
@@ -120,9 +145,9 @@ const AITimetable = () => {
                     <div className="table-grid">
                         {currentProducts.map((table) => (
                             <TableCard
-                            key={table.id}
-                            table={table}
-                            onClick={() => setSelectedTable(table)}
+                                key={table.id}
+                                table={table}
+                                onClick={() => setSelectedTable(table)}
                             />
                         ))}
                     </div>
@@ -130,7 +155,7 @@ const AITimetable = () => {
                         {currentPage > 1 && (
                             <button 
                                 className='paging-button'
-                                onClick={()=> handlePageChange(currentPage - 1 )}
+                                onClick={() => handlePageChange(currentPage - 1)}
                             >
                                 Prev
                             </button>
@@ -140,7 +165,7 @@ const AITimetable = () => {
                                 <button 
                                     className={`paging-button ${currentPage === pageNumber ? "active": ""}`}
                                     key={pageNumber}
-                                    onClick={()=> handlePageChange(pageNumber)}
+                                    onClick={() => handlePageChange(pageNumber)}
                                 >
                                     {pageNumber}
                                 </button>
@@ -149,7 +174,7 @@ const AITimetable = () => {
                         {currentPage < totalPages && (
                             <button 
                                 className='paging-button'
-                                onClick={()=> handlePageChange(currentPage + 1 )}
+                                onClick={() => handlePageChange(currentPage + 1)}
                             >
                                 Next
                             </button>
@@ -158,36 +183,32 @@ const AITimetable = () => {
                     {selectedTable && (
                         <div className="modal-overlay" onClick={() => setSelectedTable(null)}>
                             <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-                            <div className="modal-header">
-                                <h2>{selectedTable.name}</h2>
-                                <button className="modal-close" onClick={() => setSelectedTable(null)}>×</button>
-                            </div>
-                            <div className="modal-content">
-                                <div className="AiTimetable-section-wrapper">
-                                    <div className="AiTimetable-section">
-                                        <Timetable conditions={selectedTable.conditions} isModal={true}/>
-                                        <Dashboard conditions={selectedTable.conditions} />
-                                    </div>
-                                    <div className="AiTimetable-button">
-                                            <button className="button-remove" 
+                                <div className="modal-header">
+                                    <h2>{selectedTable.name}</h2>
+                                    <button className="modal-close" onClick={() => setSelectedTable(null)}>×</button>
+                                </div>
+                                <div className="modal-content">
+                                    <div className="AiTimetable-section-wrapper">
+                                        <div className="AiTimetable-section">
+                                            <Timetable conditions={selectedTable.conditions} isModal={true}/>
+                                            <Dashboard conditions={selectedTable.conditions} />
+                                        </div>
+                                        <div className="AiTimetable-button">
+                                            <button 
+                                                className="button-remove" 
                                                 onClick={() => handleDeleteTable(selectedTable.id)}
                                             >
                                                 삭제하기
                                             </button>
                                             <button
                                                 className="button"
-                                                onClick={() => {
-                                                    localStorage.setItem("confirmedTable", JSON.stringify({
-                                                    timetable: selectedConditions,
-                                                    }));
-                                                    alert("확정된 시간표가 저장되었습니다.");
-                                                }}
-                                                >
+                                                onClick={() => handleConfirmTable(selectedTable.conditions)}
+                                            >
                                                 확정하기
                                             </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                     )}  

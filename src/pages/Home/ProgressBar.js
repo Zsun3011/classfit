@@ -15,7 +15,7 @@ const ProgressBar = ( { progressItems = [] }) => {
 
     return (
         <div className="ProgressBar-container">
-            <h1>졸업 진척률</h1>
+            <div className="ProgressBar-container-title">졸업 진척률</div>
             {progressItems.every(item => item.percent === 0) && (
                 <p>아직 수강 이력이 입력되지 않았어요.</p>
             )}

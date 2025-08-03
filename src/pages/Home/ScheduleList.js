@@ -4,7 +4,7 @@ import "../../styles/Home.css";
 const ScheduleList = () => {
     return (
         <div className="ScheduleList-container">
-            <h1>수강신청 기간 일정</h1>
+            <div className="ScheduleList-container-title">수강신청 기간 일정</div>
             <div className="ScheduleList-section">
               <div className="Schedule-title">
                 장바구니 기간              
