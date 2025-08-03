@@ -1,28 +1,21 @@
-import React from "react";
+import React, {useEffect} from "react";
 import "../../styles/Dashboard.css";
 import ProgressDashboard from "../../components/ProgressDashboard";
-import { exampleData as timetableData } from "./Timetable";
+import { exampleData } from "./Timetable";
 
-const Dashboard = () => {
-  // info는 props로 전달받는 수강 정보 객체
-  // 구조 예시:
-  // {
-  //   totalCredits: 18,
-  //   hasMorning: false,
-  //   freeDay: "금요일",
-  //   major: ["자료구조(필수)", "확률과 통계(필수)", "디지털 논리(선택)"],
-  //   general: ["항공우주학개론(필수)"]
-  // }
+const Dashboard = ({ conditions, onSubjectsParsed }) => {
+  const timetableData = conditions?.data || exampleData;
+
   const majorSubjects = timetableData.filter(c => c.type === "major").map(c => c.subject);
 
   const generalSubjects = timetableData.filter(c => c.type === "general").map(c => c.subject);
   
   const info = {
-      totalCredits: 18,
-      hasMorning: false,
-      freeDay: "금요일",
-      major: majorSubjects,
-      general: generalSubjects
+    totalCredits: conditions?.credit ?? "-",
+    hasMorning: conditions?.preferredTimes?.includes("오전") ?? false,
+    freeDay: conditions?.avoidDays?.join(", ") || "-",
+    major: majorSubjects,
+    general: generalSubjects
   };
 
   const progressDataAfter = [
@@ -32,6 +25,23 @@ const Dashboard = () => {
     {title: "공통과목", percent: 50, score: "5/10학점"},
     {title: "자율선택", percent: 70, score: "14/20학점"},
   ];
+
+  useEffect(() => {
+    const timetableData = conditions?.data || exampleData;
+
+    const majorSubjects = timetableData.filter(c => c.type === "major").map(c => c.subject);
+    const generalSubjects = timetableData.filter(c => c.type === "general").map(c => c.subject);
+
+    const parsedInfo = {
+      totalCredits: conditions?.credit ?? "-",
+      hasMorning: conditions?.preferredTimes?.includes("오전") ?? false,
+      freeDay: conditions?.avoidDays?.join(", ") || "-",
+      major: majorSubjects,
+      general: generalSubjects
+    };
+
+    onSubjectsParsed?.(parsedInfo); // 전체를 넘김
+  }, [conditions, onSubjectsParsed]);
 
   return (
     <div className="dashboard-container">      

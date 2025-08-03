@@ -15,29 +15,38 @@
 /*Home*/
 /*HomeAfterInput*/
 .Home-container {
-    margin-bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 80px auto;
+  width: 90%;
+  gap: 20px;
+}
+
+.Home-section{
+    display: flex;
+    width: 5%;
+    gap: 30px;
 }
 
 .Home-left {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    margin-top: 120px;
-    margin-left: 130px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
 .Home-right {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-    margin-top: -1362px;
-    margin-left: 680px;
+  flex-shrink: 0;
+  width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
-.Home-bottom-right {
+.Home-bottom{
     display: flex;
-    margin-top: 30px;
-    margin-left: 990px;
+    gap: 20px;
 }
 
 /*UserInfoCard*/
@@ -206,7 +215,7 @@
 .ProgressBar-container {
     display: flex;
     width: 490px;
-    height: 800px;
+    height: 740px;
     padding: 30px 17px;
     flex-direction: column;
     gap: 15px;
@@ -281,12 +290,10 @@
 
 /*TimetableSummary*/
 .TimetableSummary-container {
-    position: relative;
     display: flex;
     width: 630px;
-    height: 1035px;
+    height: 979px;
     padding: 38px;
-    margin-top: -50px;
     flex-direction: column;
     border-radius: 16px;
     background-color: #FFFBDE;
@@ -318,6 +325,18 @@
 .TimetableSummary-section-top {
     display: flex;
     margin-bottom: 10px;
+    zoom: 0.9;  
+    justify-content: center;
+
+}
+.TimetableSummary-section-bottom{
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+}
+
+.TimetableSummary-section-bottom .dashboard-section{
+    width: 30%;
 }
 
 .TimetableSummary-wrapper {
@@ -383,3 +402,4 @@
 .ProgressDashboard-Detail-button:hover {
     background-color: #0056b3;
 }
+

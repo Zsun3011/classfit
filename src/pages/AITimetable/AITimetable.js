@@ -1,4 +1,4 @@
-import React, {useState, useRef} from "react";
+import React, {useState, useRef, useEffect} from "react";
 import Banner from "./Banner";
 import TableCard from "./TableCard";
 import InputConditionForm from "./InputConditionForm";
@@ -6,50 +6,27 @@ import Timetable from "./Timetable";
 import Dashboard from "./Dashboard";
 import Header from "../../components/Header";
 
+const getInitialTables = () => {
+    const stored = localStorage.getItem("savedTables");
+    return stored ? JSON.parse(stored) : [];
+};
+
+const getLastTableId = () => {
+    const storedId = localStorage.getItem("lastTableId");
+    return storedId ? parseInt(storedId) : 0;
+};
+
+
 const AITimetable = () => {
 
-    const tables = [
-        {
-            id: 1,
-            name: "시간표1",
-            point: "학점:",
-            morning: "오전 수업 포함 여부:",
-            gbc: "공강:",
-            
-        },
-        {
-            id: 1,
-            name: "시간표2",
-            point: "학점:",
-            morning: "오전 수업 포함 여부:",
-            gbc: "공강:",
-            
-        },
-        {
-            id: 1,
-            name: "시간표3",
-            point: "학점:",
-            morning: "오전 수업 포함 여부:",
-            gbc: "공강:",
-            
-        },
-        {
-            id: 1,
-            name: "시간표4",
-            point: "학점:",
-            morning: "오전 수업 포함 여부:",
-            gbc: "공강:",
-            
-        },
-        
-    ];
-
     const [currentPage, setCurrentPage] = useState(1);
+    
+    const [tables, setTables] = useState(getInitialTables);
+    const [lastId, setLastId] = useState(getLastTableId);
+    const [selectedTable, setSelectedTable] = useState(null);
 
     const itemsPerPage = 2;
-
     const totalPages = Math.ceil(tables.length / itemsPerPage);
-
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentProducts = tables.slice(startIndex, endIndex);
@@ -68,6 +45,22 @@ const AITimetable = () => {
         }
     };
 
+    const handleDeleteTable = (id) => {
+        const updatedTables = tables.filter((table) => table.id !== id);
+        setTables(updatedTables);
+        setSelectedTable(null); // 모달 닫기
+
+        if (updatedTables.length === 0) {
+            setLastId(0);
+        }
+    };
+
+    useEffect(() => {
+        localStorage.setItem("savedTables", JSON.stringify(tables));
+        localStorage.setItem("lastTableId", String(lastId));
+    }, [tables, lastId]);
+
+    
     return(
         <div>
             <Header />
@@ -82,21 +75,54 @@ const AITimetable = () => {
                     setSelectedConditions(conditions);
                 }}
             />
-            <div className="AiTimetable-container">
-                <div className="AiTimetable-title">추천 시간표</div>
-                <div className="AiTimetable-section">
-                    <Timetable />
-                    <Dashboard />
+            {selectedConditions && (
+                <div className="AiTimetable-container">
+                    <div className="AiTimetable-title">추천 시간표</div>
+                    <div className="AiTimetable-section">
+                        <Timetable conditions={selectedConditions} />
+                        <Dashboard conditions={selectedConditions} />
+                    </div>  
+                    <div className="AiTimetable-button">
+                        <button className="button" onClick={() => {
+                            if (selectedConditions) {
+                                const newId = lastId + 1;
+                                const newTable = {
+                                    id: Date.now(), // 고유 ID
+                                    name: `시간표${newId}`,
+                                    point: `학점: ${selectedConditions.credit}`,
+                                    morning: `오전 수업 포함 여부: ${selectedConditions.preferredTimes.includes("오전") ? "있음" : "없음"}`,
+                                    gbc: `공강: ${selectedConditions.avoidDays.join(", ") || "없음"}`,
+                                    conditions: selectedConditions,
+                                    isNew: true
+                                };
+                                setTables([newTable, ...tables]);
+                                setLastId(newId);
+                            }
+                        }}>저장하기</button>
+                        <button
+                            className="button"
+                            onClick={() => {
+                                localStorage.setItem("confirmedTable", JSON.stringify({
+                                timetable: selectedConditions,
+                                }));
+                                alert("확정된 시간표가 저장되었습니다.");
+                            }}
+                            >
+                            확정하기
+                        </button>
+                    </div>
+                    <div className="AiTimetable-buttonText">*저장하지 않으면 해당 시간표는 삭제됩니다.</div>
                 </div>
-            </div>
+            )}
             <div className="Savedtable-cotainer" ref={savedTableRef}>
                 <div className="Savedtable-contianer-title">저장된 시간표</div>
                 <div className="table-container">
                     <div className="table-grid">
                         {currentProducts.map((table) => (
-                            <TableCard 
-                                key={table.id} 
-                                table={table} 
+                            <TableCard
+                            key={table.id}
+                            table={table}
+                            onClick={() => setSelectedTable(table)}
                             />
                         ))}
                     </div>
@@ -129,6 +155,42 @@ const AITimetable = () => {
                             </button>
                         )}
                     </div>
+                    {selectedTable && (
+                        <div className="modal-overlay" onClick={() => setSelectedTable(null)}>
+                            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h2>{selectedTable.name}</h2>
+                                <button className="modal-close" onClick={() => setSelectedTable(null)}>×</button>
+                            </div>
+                            <div className="modal-content">
+                                <div className="AiTimetable-section-wrapper">
+                                    <div className="AiTimetable-section">
+                                        <Timetable conditions={selectedTable.conditions} isModal={true}/>
+                                        <Dashboard conditions={selectedTable.conditions} />
+                                    </div>
+                                    <div className="AiTimetable-button">
+                                            <button className="button-remove" 
+                                                onClick={() => handleDeleteTable(selectedTable.id)}
+                                            >
+                                                삭제하기
+                                            </button>
+                                            <button
+                                                className="button"
+                                                onClick={() => {
+                                                    localStorage.setItem("confirmedTable", JSON.stringify({
+                                                    timetable: selectedConditions,
+                                                    }));
+                                                    alert("확정된 시간표가 저장되었습니다.");
+                                                }}
+                                                >
+                                                확정하기
+                                            </button>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    )}  
                 </div>
             </div>
         </div>

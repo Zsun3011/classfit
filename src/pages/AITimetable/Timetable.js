@@ -5,10 +5,6 @@ import "../../styles/Timetable.css";
 const days = ["월", "화", "수", "목", "금"];
 const hourStart = 8;       // 수업 시작 시간
 const hourEnd = 20;        // 수업 종료 시간
-const rowHeight = 60;      // 한 시간당 세로 높이(px)
-const colWidth = 120;      // 요일 한 칸의 가로 너비(px)
-const labelWidth = 50;     // 시간 라벨용 왼쪽 여백
-const labelHeight = 30;    // 요일 라벨용 상단 여백
 
 // 예시 시간표 데이터
 export const exampleData = [
@@ -17,17 +13,26 @@ export const exampleData = [
   { subject: "확률과 통계(필수)", day: "금", start: "10:30", end: "12:00", color: "#90be6d", type: "major" }
 ];
 
-// 시간 문자열 ("09:30")을 y 좌표(px)로 변환
-function timeToY(time) {
-  const [hour, minute] = time.split(":").map(Number);
-  const totalMinutes = (hour - hourStart) * 60 + minute;
-  return totalMinutes * (rowHeight / 60);
-}
 
-const Timetable = ({ data = exampleData }) => {
+
+const Timetable = ({ data = exampleData, isModal = false, isMini = false }) => {
+  const rowHeight = isMini ? 30 : 60;
+  const timeFontSize = isMini ? 8 : 16;
+  const labelWidth = isMini ? 30 : 50;
+  const labelHeight = isMini ? 20 : 30;
+
+
+  const colWidth = isMini ? 60 : isModal ? 90 : 120;
   const totalHours = hourEnd - hourStart;
   const height = totalHours * rowHeight + labelHeight;  // 총 세로 길이 (시간 + 라벨)
   const width = days.length * colWidth + labelWidth;    // 총 가로 길이 (요일 + 라벨)
+  
+  // 시간 문자열 ("09:30")을 y 좌표(px)로 변환
+  function timeToY(time) {
+    const [hour, minute] = time.split(":").map(Number);
+    const totalMinutes = (hour - hourStart) * 60 + minute;
+    return totalMinutes * (rowHeight / 60);
+  }
 
   return (
     <svg className="timetable-svg" width={width} height={height}>
@@ -45,6 +50,7 @@ const Timetable = ({ data = exampleData }) => {
             <text
               x={labelWidth - 5}
               y={y + 15}
+              fontSize={timeFontSize}
               textAnchor="end"
               className="timetable-time-label"
             >
@@ -67,6 +73,7 @@ const Timetable = ({ data = exampleData }) => {
             <text
               x={x + colWidth / 2}
               y={labelHeight - 8}
+              fontSize={timeFontSize}
               textAnchor="middle"
               className="timetable-day-label"
             >
@@ -103,12 +110,13 @@ const Timetable = ({ data = exampleData }) => {
             <text
               x={x + colWidth / 2}
               y={y + height / 2}
+              fontSize={timeFontSize}
               textAnchor="middle"
               className="timetable-class-text"
             >
               <tspan x={x + colWidth / 2} dy="-5">{mainTitle}</tspan>
               {detail && (
-                <tspan x={x + colWidth / 2} dy="25">{detail}</tspan>
+                <tspan x={x + colWidth / 2} dy={isMini ? "12" : "25"}>{detail}</tspan>
               )}
             </text>
           </g>

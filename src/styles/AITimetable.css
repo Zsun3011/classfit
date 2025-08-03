@@ -1,6 +1,6 @@
 @font-face{
     font-family: 'IBMPlexSansKR-Regular';
-    src: url("../../public/fonts/IBMPlexSansKR-Regular.ttf") format("truetype");
+    src: url("../../public/font/IBMPlexSansKR-Regular.ttf") format("truetype");
 }
 
 .banner{
@@ -26,7 +26,8 @@
     font-size: 24px;
 }
 
-.button{
+.button,
+.button-remove{
     font-family: 'IBMPlexSansKR-Regular';
     width: 240px;
     height: 48px;
@@ -36,6 +37,10 @@
     border: none;
     color: white;
     cursor: pointer;
+}
+
+.button-remove{
+    background-color: rgb(255, 36, 36);
 }
 
 .inputCondition-container,
@@ -99,12 +104,19 @@
     border: 1px solid #ccc;
     border-radius: 6px;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 587px;
+    align-items: center;
     position: relative; /* 기준점 잡기 */
+    cursor: pointer;
+    gap: 30px;
+    height: 300px;
 }
 
+
+.table-preview {
+    transform: scale(0.5);  
+    overflow: hidden;
+    z-index: 1000;
+}
 
 .table-name{
     font-size: 32px;
@@ -190,6 +202,15 @@
     padding: 60px 0px;
 }
 
+.AiTimetable-button{
+    display: flex;
+    gap: 20px;
+}
+
+.AiTimetable-buttonText{
+    margin-top: -50px;
+    color: #FA812F;
+}
 
 /* modal*/
 .modal-overlay {
@@ -247,7 +268,42 @@
 }
 
 .modal-content {
-    flex: 1;
-    overflow: auto;
-    padding: 20px;
+   flex: none; /* 크기 자동 확장 막기 */
+  max-height: 85vh; /* 화면 높이의 85%까지만 허용 */
+  overflow-y: auto; /* 넘칠 경우에만 스크롤 */
+}
+
+/* 모달 내에서만 적용되도록! */
+.modal-content .AiTimetable-section {
+  width: 100%;        /* 부모(modal-content) 기준으로 너비 꽉 채움 */
+  transform: scale(1); /* 이전에 줄였던 스케일 제거 */
+  display: flex;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.modal-content .timetable-svg {
+  width: 500px; /* 또는 flex: 1 */
+  min-width: 0; /* 오버플로우 방지 */
+}
+
+.modal-content .dashboard-container {
+  width: 400px; /* 또는 flex: 1 */
+  min-width: 0;
+}
+.modal-content .AiTimetable-section-wrapper {
+  transform: scale(0.85);         /* 전체를 축소 */
+  transform-origin: top center;   /* 축소 기준점 (위쪽 중앙) */
+  width: 100%;
+  overflow: hidden;               /* 혹시 모를 오버플로 방지 */
+}
+
+.modal-content .AiTimetable-button{
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.AiTimetable-section .ProgressDashboard-container{
+    width: 368px;
 }

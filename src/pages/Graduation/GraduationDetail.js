@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "../../components/Header";
 import GraduationProgress from "./GraduationProgress";
+import CourseManager from "./CourseManager";
 
 
 
@@ -16,7 +17,10 @@ const GraduationDetail = () => {
     return (
         <div>
             <Header />
-            <GraduationProgress progressItems={progressDataAfter} />
+            <div className="GraduationDetail-container">
+                <GraduationProgress progressItems={progressDataAfter} />
+                <CourseManager />
+            </div>
         </div>
     );
 };

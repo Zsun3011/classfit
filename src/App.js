@@ -34,7 +34,7 @@ function App() {
         <Route path="/admissionYearInput" element={<AdmissionYearInput />} />
         <Route path="/graduationTypeSelector" element={<GraduationTypeSelector/>} />
         <Route path="/courseHistoryUploader" element={<CourseHistoryUploader />} />
-        <Route path="/aITimetable" element={<AITimetable />} />
+        <Route path="/aiTimetable" element={<AITimetable />} />
         <Route path="/graduationDetail" element={<GraduationDetail />} />
         <Route path="/homeAfterInput" element={<HomeAfterInput />} />
         <Route path="/myPage" element={<MyPage />} />

@@ -1,14 +1,14 @@
 @font-face {
     font-family: 'IBMPlexSansKR-Regular';
-    src: url('../../public/fonts/IBMPlexSansKR-Regular.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Regular.ttf') format('truetype');
 }
   
 
 .ProgressDashboard-container {
     display: flex;
     flex-direction: column;
-    width: 95%;
     height: 90%;
+    width: 100%;
     background-color: white;
     padding: 16px;
     border-radius: 8px;
@@ -63,4 +63,10 @@
     border: none;
     border-radius: 6px;
     cursor: pointer;
+}
+
+.ProgressDashboard-title{
+    margin: 0px;
+    font-size: 30px;
+    font-weight: bold;
 }

@@ -1,27 +1,28 @@
 @font-face {
     font-family: 'IBMPlexSansKR-Regular';
-    src: url('../../public/fonts/IBMPlexSansKR-Regular.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Regular.ttf') format('truetype');
 }
   
 @font-face {
     font-family: 'IBMPlexSansKR-Medium';
-    src: url('../../public/fonts/IBMPlexSansKR-Medium.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Medium.ttf') format('truetype');
 }
   
 @font-face {
     font-family: 'IBMPlexSansKR-Bold';
-    src: url('../../public/fonts/IBMPlexSansKR-Bold.ttf') format('truetype');
+    src: url('../../public/font/IBMPlexSansKR-Bold.ttf') format('truetype');
 }
+
 /*ProgressBar*/
 .ProgressBar-container1 {
-    position: absolute;
+    font-family: "IBMPlexSansKR-Bold";
     display: flex;
     width: 70%;
-    height: 580px;
+    height: 550px;
     padding: 30px;
     flex-direction: column;
     margin-top: 100px;
-    margin-left: 300px;
+    margin-left:220px;
     gap: 15px;
     border-radius: 16px;
     background-color: #FFFBDE;
@@ -30,11 +31,14 @@
         2px 2px 4px 0px rgba(0, 0, 0, 0.25)inset;
 }
 
-.ProgressBar-container h1 {
-    padding-left: 20px;
+.ProgressBar-title{
+    margin-top: 20px;
+}
+.ProgressBar-title,
+.CourseManager-title,
+.GPAE-title {
     font-family: "IBMPlexSansKR-Bold";
     font-size: 32px;
-    color: #000000;
 }
 
 .ProgressBar-container p {
@@ -92,7 +96,7 @@
 /* CoursePanel.css */
 .CoursePanel-container{
     width: 55%;
-    height: 90%;
+    height: 380px;
     font-family: "IBMPlexSansKR-Regular";
     background: white;
     border-radius: 8px;
@@ -101,7 +105,7 @@
 }
 
 .course-panel {
-    height: 430px;
+    height: 380px;
     overflow-y:scroll;
     width: 100%;
 }
@@ -231,3 +235,4 @@
     background-color: white;
     box-shadow: none;
 }
+

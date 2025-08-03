@@ -6,7 +6,7 @@ const ProgressDashboard = ( { progressItems = [], onItemClick = null, selectedCo
     return (
 
         <div className="ProgressDashboard-container">
-            <h1 className="ProgressDashboard-title">Progress Bar</h1>
+            <div className="ProgressDashboard-title">Progress Bar</div>
             {progressItems.map((item, index) => (
                 <ProgressItem
                   key={index}

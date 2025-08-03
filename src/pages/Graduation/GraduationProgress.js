@@ -1,5 +1,4 @@
 import React , {useState} from "react";
-import { useNavigate } from "react-router-dom";
 import ProgressDashboard from "../../components/ProgressDashboard";
 import "../../styles/Graduation.css";
 import CoursePanel from "./CoursePanel";
@@ -68,7 +67,7 @@ const GraduationProgress = ({ progressItems = [] }) =>{
     return(
         <div className="ProgressBar-container1 graduation-progress">
             <div className="ProgressBar-top">
-                <h1>졸업 진척률</h1>
+                <div className="ProgressBar-title">졸업 진척률</div>
                 <div className="ProgressBar-section">
                     <div className="CourseInfoBox1">
                         <div className="Box-title">총 이수 학점</div>
