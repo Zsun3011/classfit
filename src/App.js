@@ -15,7 +15,6 @@ import AITimetable from './pages/AITimetable/AITimetable';
 import GraduationDetail from './pages/Graduation/GraduationDetail';
 import CourseList from './pages/CourseList/CourseList';
 import MyPage from './pages/MyPage/Mypage';
-import HomeAfterInput from './pages/Home/HomeAfterInput';
 
 function App() {
 
@@ -36,7 +35,6 @@ function App() {
         <Route path="/courseHistoryUploader" element={<CourseHistoryUploader />} />
         <Route path="/aiTimetable" element={<AITimetable />} />
         <Route path="/graduationDetail" element={<GraduationDetail />} />
-        <Route path="/homeAfterInput" element={<HomeAfterInput />} />
         <Route path="/myPage" element={<MyPage />} />
 
         <Route path="/courseList" 

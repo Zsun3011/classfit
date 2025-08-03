@@ -5,9 +5,9 @@ const UserInfoCard = () => {
     return (
         <div className="UserInfoCard-container">
             <div className="UserInfoCard-section-first">
-                <h1 className="School">
+                <div className="title">
                 한국항공대학교
-                </h1>
+                </div>
             </div>
             <div className="UserInfoCard-section-second">
                 {/*추후 백엔드 연결*/}

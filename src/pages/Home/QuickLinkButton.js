@@ -20,7 +20,7 @@ const QuickLinkButton = () => {
     
     return (
         <div className="QuickLinkButton-container">
-            <h1>바로가기</h1>
+            <div className="QuickLinkButton-container-title">바로가기</div>
                 <button className="QuickLinkButton" onClick={handleAiTimetable}>
                     AI시간표 생성
                 </button>
