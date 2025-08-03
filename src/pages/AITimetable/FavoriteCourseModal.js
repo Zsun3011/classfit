@@ -21,7 +21,6 @@ const FavoriteCourseModal = ({ courses, favoriteCourseIds, selectedCourses, onSe
                         <th>담당교수</th>
                         <th>정원</th>
                         <th>요일/시간</th>
-                        <th>알람</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,13 +47,6 @@ const FavoriteCourseModal = ({ courses, favoriteCourseIds, selectedCourses, onSe
                             <td>{course.professor}</td>
                             <td>{course.capacity}</td>
                             <td>{course.schedule}</td>
-                            <td>
-                                <img
-                                    src="/icons/reminder-gray.png"
-                                    alt="알람"
-                                    className="Course-icon"
-                                />
-                            </td>
                         </tr>
                     ))}
                 </tbody>

@@ -7,21 +7,16 @@ const QuickLinkButton = () => {
     const navigate = useNavigate();
 
     const handleAiTimetable = () => {
-        navigate("/aITimetable");
+        navigate("/aiTimetable");
     };
 
     const handleSavedTimetable = () => {
-        navigate("/");
+        navigate("/aiTimetable");
     };
 
     const handleBookmarksubject = () => {
-        navigate("/");
+        navigate("/courseList");
     };
-
-    const handleAlarmsubject = () => {
-        navigate("/");
-    };
-
     
     return (
         <div className="QuickLinkButton-container">
@@ -34,9 +29,6 @@ const QuickLinkButton = () => {
                 </button>
                 <button className="QuickLinkButton" onClick={handleBookmarksubject}>
                     즐겨찾기 과목 목록
-                </button>
-                <button className="QuickLinkButton" onClick={handleAlarmsubject}>
-                    과목 알림설정
                 </button>
         </div>
     )

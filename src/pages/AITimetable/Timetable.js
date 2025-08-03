@@ -5,10 +5,6 @@ import "../../styles/Timetable.css";
 const days = ["월", "화", "수", "목", "금"];
 const hourStart = 8;       // 수업 시작 시간
 const hourEnd = 20;        // 수업 종료 시간
-const rowHeight = 60;      // 한 시간당 세로 높이(px)
-const colWidth = 120;      // 요일 한 칸의 가로 너비(px)
-const labelWidth = 50;     // 시간 라벨용 왼쪽 여백
-const labelHeight = 30;    // 요일 라벨용 상단 여백
 
 // 예시 시간표 데이터
 export const exampleData = [

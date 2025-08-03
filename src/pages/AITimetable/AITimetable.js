@@ -99,7 +99,17 @@ const AITimetable = () => {
                                 setLastId(newId);
                             }
                         }}>저장하기</button>
-                        <button className="button" >확정하기</button>
+                        <button
+                            className="button"
+                            onClick={() => {
+                                localStorage.setItem("confirmedTable", JSON.stringify({
+                                timetable: selectedConditions,
+                                }));
+                                alert("확정된 시간표가 저장되었습니다.");
+                            }}
+                            >
+                            확정하기
+                        </button>
                     </div>
                     <div className="AiTimetable-buttonText">*저장하지 않으면 해당 시간표는 삭제됩니다.</div>
                 </div>
@@ -164,7 +174,17 @@ const AITimetable = () => {
                                             >
                                                 삭제하기
                                             </button>
-                                            <button className="button" >확정하기</button>
+                                            <button
+                                                className="button"
+                                                onClick={() => {
+                                                    localStorage.setItem("confirmedTable", JSON.stringify({
+                                                    timetable: selectedConditions,
+                                                    }));
+                                                    alert("확정된 시간표가 저장되었습니다.");
+                                                }}
+                                                >
+                                                확정하기
+                                            </button>
                                     </div>
                                 </div>
                             </div>

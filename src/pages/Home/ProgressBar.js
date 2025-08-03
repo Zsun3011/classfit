@@ -10,7 +10,7 @@ const ProgressBar = ( { progressItems = [] }) => {
 
     //수강 이력 입력하기 페이징
     const handleInput = () => {
-        navigate("/MyPage");
+        navigate("/graduationDetail");
     }
 
     return (

@@ -15,10 +15,6 @@ const CourseManager = () => {
     const [courses, setCourses] = useState(getInitialCourses);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editCourse, setEditCourse] = useState(null);
-    
-    const handleClose = () => {
-        setIsModalOpen(false);
-    }
 
     // 임시 과목 데이터베이스 (백엔드 연동 전)
     const getCourseInfo = (courseName) => {

@@ -303,3 +303,7 @@
     justify-content: center;
     margin-top: 50px;
 }
+
+.AiTimetable-section .ProgressDashboard-container{
+    width: 368px;
+}
