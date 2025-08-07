@@ -15,6 +15,7 @@ import AITimetable from './pages/AITimetable/AITimetable';
 import GraduationDetail from './pages/Graduation/GraduationDetail';
 import CourseList from './pages/CourseList/CourseList';
 import MyPage from './pages/MyPage/Mypage';
+import CommunityBoard from "./pages/Community/CommunityBoard";
 
 function App() {
 
@@ -36,6 +37,8 @@ function App() {
         <Route path="/aiTimetable" element={<AITimetable />} />
         <Route path="/graduationDetail" element={<GraduationDetail />} />
         <Route path="/myPage" element={<MyPage />} />
+        <Route path="/CommunityBoard" element={<CommunityBoard/>} />
+        
 
         <Route path="/courseList" 
               element={

@@ -20,6 +20,9 @@ const Header = () => {
                 <Link to="/aiTimetable" className={currentPage === "/aiTimetable" ? "active" : ""}>
                  AI추천
                 </Link>
+                <Link to="/CommunityBoard" className={currentPage === "/CommunityBoard" ? "active" : ""}>
+                 게시판
+                </Link>
                 <Link to="/graduationDetail" className={currentPage === "/graduationDetail" ? "active" : ""}>
                  진척도
                 </Link>

@@ -45,7 +45,7 @@ const CourseManager = () => {
         setCourses(prev => prev.filter(course => course.id !== id));
     };
     
-     const handleAddOrEdit = (courseData) => {
+    const handleAddOrEdit = (courseData) => {
         if (editCourse) {
             // 수정 모드
             setCourses(prev =>

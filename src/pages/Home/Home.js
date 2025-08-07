@@ -5,6 +5,7 @@ import ScheduleList from "./ScheduleList";
 import QuickLinkButton from "./QuickLinkButton";
 import ProgressBar from "./ProgressBar";
 import TimetableSummary from "./TimetableSummary";
+import RecommendationBanner from "../Community/RecommendationBanner";
 
 const progressDataBefore = [
     {title: "전체", percent: 0, score: "0/120학점"},
@@ -16,9 +17,10 @@ const progressDataBefore = [
 
 const Home = () => {
     return (
-        <div>
+        <div className="Home">
             <Header />
             <div className="Home-container">
+                <RecommendationBanner/>
                 <div className="Home-section">
                     <div className="Home-left">
                         <UserInfoCard />
