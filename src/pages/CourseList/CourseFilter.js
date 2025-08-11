@@ -154,9 +154,11 @@ const CourseFilter = ({ filter, setFilter, onApplyFilter}) => {
                             />
                     </div>
                 </div>
-                <button className="CourseFilter-apply-button" onClick={handleFilterSubmit}>
-                필터 적용 후 과목 탐색
-                </button>
+                <div className="CourseFilter-actions">
+                    <button className="CourseFilter-apply-button" onClick={handleFilterSubmit}>
+                        필터 적용 후 과목 탐색
+                    </button>
+                </div>
             </div>
         </div>
     )

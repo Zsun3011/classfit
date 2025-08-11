@@ -13,7 +13,7 @@ const UserInfoCard = () => {
                 {/*추후 백엔드 연결*/}
                 <span className="Hi">안녕하세요</span>
                 <div className="UserInfoCard-section-second-detail">
-                    <span className="User">사용자이름</span>
+                    <span className="User">사용자 이름</span>
                     <span className="text">님!</span>
                 </div>
             </div>
