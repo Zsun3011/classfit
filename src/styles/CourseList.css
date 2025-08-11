@@ -19,8 +19,7 @@
     flex-direction: column;
     width: 80%;
     padding: 30px;
-    margin-top: 30px;
-    margin-left: 130px;
+    margin: 30px auto 0;
     background-color: white;
     box-shadow: 
     -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
@@ -81,8 +80,7 @@
     flex-direction: column;
     width: 80%;
     padding: 30px;
-    margin-top: 100px;
-    margin-left: 130px;
+    margin: 100px auto 0;
     background-color: white;
     box-shadow: 
     -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
@@ -102,17 +100,17 @@
 .CourseFilter-container {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     width: 80%;
+    height: auto;
     padding: 30px;
-    margin-top: 50px;
-    margin-left: 130px;
+    margin: 50px auto 0;
     background-color: #FFFBDE;
     box-shadow: 
     -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
     2px 2px 4px 0px rgba(0,0,0,0.25) inset;
     border-radius: 16px;
-    gap: 5px;
+    gap: 16px 20px;
+    flex-wrap: wrap;
 }
 
 .CourseFilter-title {

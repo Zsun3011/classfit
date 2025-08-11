@@ -21,7 +21,7 @@ body {
 
 .Home .Recommendation-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1230px;
     margin-left: 25px;
 }
 .Home{
@@ -38,14 +38,14 @@ body {
   margin: 30px auto;
   margin-top: -1    0px;
   width: 90%;
-  gap: 20px;
+  gap: 30px;
 }
 
 .Home-section{
     display: flex;
     width: 100%; /* 전체 너비 사용 */
-    max-width: 1160px; /* 최대 너비 제한 */
-    gap: 30px;
+    max-width: 680px; /* 최대 너비 제한 */
+    gap: 5%;
     justify-content: center; /* 섹션 내부 요소들 중앙 정렬 */
 }
 
@@ -53,27 +53,33 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .Home-right {
   flex-shrink: 0;
-  width: 680px;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
+  margin-bottom: 20px ;
 }
 
 .Home-bottom{
     display: flex;
-    gap: 20px;
-    margin-left: 25px;
+    width: 100%;
+    max-width: 1290px; /* 최대 너비 제한 */
+    gap: 2%;
+    margin-left: 2%;
 }
 
 /*UserInfoCard*/
 .UserInfoCard-container {
     display: flex;
-    width: 464px;
+    width: 100%;
+    max-width: 490px;
+    height: auto;
     padding: 30px;
     flex-direction: column;
     border-radius: 16px;
@@ -147,11 +153,11 @@ body {
 /*ScheduleList*/
 .ScheduleList-container {
     display: flex;
-    width: 803px;
+    width: 80%;
     padding: 20px;
     border-radius: 16px;
     background-color: white;
-    height: 230px;
+    height: auto;
     flex-direction: column;
     box-shadow: 
         -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
@@ -169,42 +175,48 @@ body {
 
 .ScheduleList-section {
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #D9D9D9;
     padding: 8px 20px;
+    flex-wrap: wrap;
 }
 
 .Schedule-title {
-    width: 30%;
+    flex: 1;
+    min-width: 100px;
     font-family: "IBMPlexSansKR-Regular";
     font-size: 16px;
     color: #000000;
 }
 
 .Schedule-date {
-    width: 40%;
+    flex: 1.5;
+    min-width: 150px;
+    width: 50%;
     font-family: "IBMPlexSansKR-Regular";
     font-size: 16px;
-    color:#FA812F
+    color:#FA812F;
+    text-align: center;
 }
 
 .Schedule-Dday {
-    width: 5%;
+    flex: 0.5;
+    min-width: 40px;
     font-family: "IBMPlexSansKR-Medium";
     font-size: 16px;
     color: #000000;
+    text-align: right;
 }
 
 /*QuickLinkButton*/
 .QuickLinkButton-container {
     display: flex;
-    width: 356px;
+    width: 40%;
     padding: 20px;
     border-radius: 16px;
     background-color: white;
-    height: 230px;
+    height: auto;
     flex-direction: column;
     box-shadow: 
         -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
@@ -241,11 +253,12 @@ body {
 /*ProgressBar*/
 .ProgressBar-container {
     display: flex;
-    width: 490px;
-    height: 740px;
-    padding: 30px 17px;
+    width: 100%;
+    max-width: 490px;
+    gap: 20px;
+    height: 100%;
+    padding: 30px;
     flex-direction: column;
-    gap: 15px;
     border-radius: 16px;
     background-color: #FFFBDE;
     box-shadow: 
@@ -254,7 +267,7 @@ body {
 }
 
 .ProgressBar-container-title {
-    padding-left: 20px;
+    padding-left: 10px;
     font-family: "IBMPlexSansKR-Regular";
     font-weight: bold;
     margin-bottom: 20px;
@@ -263,7 +276,7 @@ body {
 }
 
 .ProgressBar-container p {
-    padding-left: 20px;
+    margin-left: -5px;
     font-family: "IBMPlexSansKR-Regular";
     font-size: 16px;
     color: #FA812F;
@@ -321,8 +334,10 @@ body {
 .TimetableSummary-container {
     display: flex;
     position: relative;
-    width: 630px;
-    height: 945px;
+    width: 100%; 
+    height: auto;
+    max-width: 630px;
+    min-height: 1000px;
     padding: 38px;
     flex-direction: column;
     border-radius: 16px;
@@ -334,9 +349,10 @@ body {
 
 .TimetableSummary-container-title {
     font-size: 32px;
-    font-weight: bold ;
-    font-size: 32px;
+    font-family: "IBMPlexSansKR-Regular";
+    font-weight: bold;
     margin-bottom: 20px;
+    margin-top: -10px;
     color: #000000;
 }
 
@@ -362,8 +378,9 @@ body {
     justify-content: center;
 
 }
+
 .TimetableSummary-section-bottom{
-    margin-top: 30px;
+    margin-top: 10px;
     display: flex;
     gap: 10px;
 }
@@ -436,3 +453,28 @@ body {
     background-color: #0056b3;
 }
 
+/* 미디어 쿼리 */
+/* (765px 이하) */
+@media (max-width: 765px) {
+    .Home-section {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .Home-left,
+    .Home-right {
+      width: 100%;
+      max-width: none;
+    }
+  
+    .ProgressBar-container,
+    .TimetableSummary-container {
+      width: 100%;
+      height: auto;
+    }
+  
+    .title {
+      font-size: 1.8rem;
+    }
+  }
+  

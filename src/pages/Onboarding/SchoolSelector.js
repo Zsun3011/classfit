@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Onboarding.css";
+import { post } from "../../api";
+import config from "../../config";
+import { useCookies } from "react-cookie";
 
 const university = [
     "한국항공대학교"
@@ -9,6 +12,7 @@ const university = [
 const SchoolSelector = () => {
 
     const navigate = useNavigate();
+    const [cookies] = useCookies(["accessToken"]);
 
     const [input, setInput] = useState("");
     const [selected, setSelected] = useState("");
@@ -32,13 +36,26 @@ const SchoolSelector = () => {
         setList(false);
     };
 
-    const handleNext = () => {
-
+    const handleNext = async () => {
         if(!input || !major){
             alert("대학교와 전공을 모두 입력해 주세요.")
             return; // 조건에 맞지 않으면 다음으로 넘어가지 못 함.
         }
-        navigate("/admissionYearInput")
+
+        try {
+            await post (
+                config.PROFILE.STEP1,
+                {
+                    university: input,
+                    major: major
+                },
+            );
+            console.log("STEP1 성공");
+            navigate("/admissionYearInput", { replace: true });
+        } catch (error) {
+            console.error("STEP1 실패:", error.response?.data || error.message);
+        }
+        
     };
 
     return (

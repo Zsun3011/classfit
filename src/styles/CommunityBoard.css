@@ -311,11 +311,11 @@
 
 .Recommendation-container {
     border: 2px solid #FA812F;
-    height: 85px;
+    height: auto;
     font-family: "IBMPlexSansKR-Regular";
     display: flex;
     width: 70%;
-    padding: 0px 30px;
+    padding: 10px 30px 10px 30px;
     margin: 100px 0px 0px 220px;
     border-radius: 16px;
     background-color: #fff;
@@ -335,6 +335,7 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    flex-wrap: wrap;
 }
 
 .Recommendation-text {

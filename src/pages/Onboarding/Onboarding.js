@@ -20,7 +20,7 @@ const Onboarding = () => {
         }
 
         if( password !== passwordcheck) {
-            alert("비밀번호를 다시 확인해주세요.")
+            alert("비밀번호가 일치하지 않습니다.")
             return;
         }
 

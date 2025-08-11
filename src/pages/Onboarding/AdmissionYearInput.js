@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Onboarding.css";
+import { post } from "../../api";
+import config from "../../config";
+import { useCookies } from "react-cookie";
 
 const AdmissionYearInput = () => {
     
     const navigate = useNavigate();
+    const [cookies] = useCookies(["accessToken"]);
     
     const [admissionYear, setAdmissionYear] = useState("");
 
@@ -12,13 +16,28 @@ const AdmissionYearInput = () => {
         navigate("/SchoolSelector")
     };
     
-    const handleNext = () => {
+    const handleNext = async () => {
     
         if(!admissionYear){
             alert("입학년도를 입력해 주세요.")
             return; // 조건에 맞지 않으면 다음으로 넘어가지 못 함.
         }
-        navigate("/GraduationTypeSelector")
+
+        try {
+            await post (
+                config.PROFILE.STEP2,
+                { enrollmentYear: Number(admissionYear)},
+                {
+                    headers: {
+                        Authorization: `Bearer ${cookies.accessToken}`
+                    }
+                }
+            );
+            console.log("STEP2 성공");
+            navigate("/GraduationTypeSelector", { replace: true });
+        } catch (error) {
+            console.error("STEP2 실패:", error);
+        }
     };
     
     return (
@@ -42,7 +61,7 @@ const AdmissionYearInput = () => {
                 {/*입학년도 입력*/}
                 <div className="AdmissionYearInput-title">입학년도</div>
                 <input 
-                    type="admissionYear" 
+                    type="text" 
                     placeholder="숫자 4자리로 입력해주세요."
                     value={admissionYear}
                     onChange={(e) => setAdmissionYear(e.target.value)} 

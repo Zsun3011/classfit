@@ -1,26 +1,47 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Onboarding.css";
+import { post } from "../../api";
+import config from "../../config";
+import { useCookies } from "react-cookie";
 
 const CourseHistoryUploader = () => {
     
     const navigate = useNavigate();
+    const [cookies] = useCookies(["accessToken"]);
     
     const [coursehistory, setCoursehistory] = useState("");
 
     const handlePrevious = () => {
         navigate("/GraduationTypeSelector")
     };
-    
-    const handleNext = () => {
-    
-        navigate("/Home")
+     
+    const handleSubmit = async () => {
+
+        try {
+            await post (
+                config.PROFILE.STEP4,
+                {
+                    completedCourses: [
+                        {
+                            courseCode: "TEMP_CODE", // 필요 시 검색 기능으로 대체
+                            courseTitle: coursehistory
+                        }
+                    ]
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${cookies.accessToken}`
+                    }
+                }
+            );
+            console.log("STEP4 성공");
+            navigate("/Home", { replace: true });
+        } catch (error) {
+            console.error("STEP4 실패:", error);
+        }
     };
 
-    const handleSubmit = () => {
-        navigate("/Home")
-    };
-    
     return (
         <div className="CourseHistoryUploader-container">
             {/*왼쪽 부분*/}
@@ -42,7 +63,7 @@ const CourseHistoryUploader = () => {
                 {/*이전 수강 이력 입력*/}
                 <div className="CourseHistoryUploader-title">이전 수강 이력</div>
                 <input 
-                    type="coursehistory" 
+                    type="text" 
                     placeholder="과목명을 검색해 추가하세요."
                     value={coursehistory}
                     onChange={(e) => setCoursehistory(e.target.value)} 
@@ -50,7 +71,7 @@ const CourseHistoryUploader = () => {
                 <div className="sub-description1">과거에 수강한 과목을 입력하거나 건너뛰세요.</div>
                 <div className="button-container">
                     <button className="previous-button" onClick={handlePrevious}>이전</button>
-                    <button className="next-button1" onClick={handleNext}>나중에하기</button>
+                    <button className="next-button1" onClick={handleSubmit}>나중에하기</button>
                 </div>
                 <div className="submit-container">
                     <button className="submit-button" onClick={handleSubmit}>제출</button>
