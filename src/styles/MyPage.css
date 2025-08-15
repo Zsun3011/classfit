@@ -206,3 +206,11 @@
     background-color: #0056b3;
     color: white;
 }
+
+/* 미디어 쿼리 */
+@media (max-width: 765px) {
+    .UserInfoEditor-section-right {
+        display: flex;
+        margin: 100px 0 0 10px;
+    }
+}

@@ -1,25 +1,50 @@
-import React from "react";
+import React, { useState} from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/MyPage.css";
-import { post } from "../../api";
+import api from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
 
 const UserInfoEditor = () => {
 
-    const [cookies, removeCookie] = useCookies(["accessToken"]);
+    const [cookies, , removeCookie] = useCookies(["accessToken", "refreshToken"]);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const clearClientAuth = () => {
+        removeCookie("accessToken", {path: "/"});
+        removeCookie("refreshToken", {path: "/"});
+        localStorage.removeItem("userId");
+        localStorage.removeItem("refreshToken");
+    }
 
     // 로그아웃
     const handleLogout = async () => {
-        try {
-            await post(config.AUTH.LOGOUT, {});
-            console.log("로그아웃 성공");
 
-            removeCookie("accessToken", { path: "/"});
+        if(loading) return;
+        setLoading(true);
+
+        try {
+            
+            const refreshToken = cookies.refreshToken || localStorage.getItem("refreshToken") || null;
+            const res = await api.post(config.AUTH.LOGOUT, refreshToken ? {refreshToken} : {},
+                {
+                    withCredentials: true,
+                    validateStatus: () => true,
+                }
+            );
+
+            if(res.status >= 200 && res.status < 300) {
+                console.log("로그아웃 성공");
+            } else {
+                console.warn("서버 로그아웃 실패:", res.status, res.data);
+            }
+        } catch(error) {
+            console.warn("네트워크 오류:", error.message);
+        } finally {
+            clearClientAuth();
             navigate("/", { replace: true });
-        } catch (error) {
-            console.error("로그아웃 실패:", error);
+            setLoading(false);
         }
     };
 
@@ -52,7 +77,13 @@ const UserInfoEditor = () => {
                 </div>
             </div>
             <div className="UserInfoEditor-section-right">
-                <button className="UserInfoEditor-Logout" onClick={() => handleLogout(removeCookie, navigate)}>로그아웃</button>
+                <button 
+                className="UserInfoEditor-Logout" 
+                onClick={handleLogout}
+                disabled={loading}
+                >
+                    {loading ? "처리중" : "로그아웃"}
+                </button>
                 <button className="UserInfoEditor-Leave" onClick={handleLeave}>회원탈퇴</button>
             </div>
         </div>

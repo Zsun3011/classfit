@@ -18,7 +18,7 @@ const Header = () => {
                  홈
                 </Link>
                 <Link to="/aiTimetable" className={currentPage === "/aiTimetable" ? "active" : ""}>
-                 AI추천
+                 시간표 추천
                 </Link>
                 <Link to="/CommunityBoard" className={currentPage === "/CommunityBoard" ? "active" : ""}>
                  게시판

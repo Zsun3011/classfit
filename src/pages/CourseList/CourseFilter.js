@@ -83,6 +83,7 @@ const CourseFilter = ({ filter, setFilter, onApplyFilter}) => {
     return (
         <div className="CourseFilter-container">
             <h1 className="CourseFilter-title">과목 필터링</h1>
+            <div className="CourseFilter-section-up">
             {/*교수명 입력*/}
             <div className="filter-group1">
                 <h1>교수명</h1>
@@ -127,37 +128,41 @@ const CourseFilter = ({ filter, setFilter, onApplyFilter}) => {
                 </button>
                 </div>
             </div>
-            
-            {/*영역 선택*/}
-            <div className="filter-group4">
-                <h1>영역</h1>
-                <div className="category-options">
-                    {categories.map((category) => (
-                        <div key={category} className="category-item">
-                            <span className="category-text">{category}</span>
-                                <input
-                                    type="checkbox"
-                                    className="checkbox"
-                                    checked={selectedCategories.includes(category)}
-                                    onChange={() => handleCategoryClick(category)}
-                                />
-                        </div>
-                    ))}
+            </div>
+            <div className="CourseFilter-section-bottom">
+                <div className="CourseFilter-section-bottom-left">
+                    {/*영역 선택*/}
+                    <div className="filter-group4">
+                        <h1>영역</h1>
+                        <div className="category-options">
+                            {categories.map((category) => (
+                                <div key={category} className="category-item">
+                                    <span className="category-text">{category}</span>
+                                        <input
+                                            type="checkbox"
+                                            className="checkbox"
+                                            checked={selectedCategories.includes(category)}
+                                            onChange={() => handleCategoryClick(category)}
+                                        />
+                                </div>
+                            ))}
     
-                    <div className="category-item">
-                        <span className="category-text">전체</span>
-                            <input
-                                type="checkbox"
-                                className="checkbox"
-                                checked={categoryAll}
-                                onChange={handleCategoryAll}
-                            />
+                            <div className="category-item">
+                                <span className="category-text">전체</span>
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox"
+                                        checked={categoryAll}
+                                        onChange={handleCategoryAll}
+                                    />
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="CourseFilter-actions">
-                    <button className="CourseFilter-apply-button" onClick={handleFilterSubmit}>
-                        필터 적용 후 과목 탐색
-                    </button>
+                <div className="CourseFilter-section-bottom-right">
+                            <button className="CourseFilter-apply-button" onClick={handleFilterSubmit}>
+                                필터 적용 후 과목 탐색
+                            </button>
                 </div>
             </div>
         </div>
