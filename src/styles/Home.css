@@ -13,11 +13,13 @@
     src: url('../../public/font/IBMPlexSansKR-Bold.ttf') format('truetype');
 }
 
+/*
 body {
     overflow-x: hidden; /* 가로 스크롤 방지 */
-    margin: 0;
+    /*margin: 0;
     padding: 0;
 }
+*/
 
 .Home .Recommendation-container {
     width: 100%;
@@ -37,15 +39,16 @@ body {
   align-items: center;
   margin: 30px auto;
   margin-top: -1    0px;
-  width: 90%;
+  width: 100%;
   gap: 30px;
+  min-width: 765px;
 }
 
 .Home-section{
     display: flex;
     width: 100%; /* 전체 너비 사용 */
     max-width: 680px; /* 최대 너비 제한 */
-    gap: 5%;
+    gap: 30px;
     justify-content: center; /* 섹션 내부 요소들 중앙 정렬 */
 }
 
@@ -70,8 +73,10 @@ body {
     display: flex;
     width: 100%;
     max-width: 1290px; /* 최대 너비 제한 */
-    gap: 2%;
-    margin-left: 2%;
+    gap: 30px;
+    margin: 0 auto;
+    /*margin-left: 2%;*/
+    padding-bottom: 8px;
 }
 
 /*UserInfoCard*/
@@ -153,7 +158,6 @@ body {
 /*ScheduleList*/
 .ScheduleList-container {
     display: flex;
-    width: 80%;
     padding: 20px;
     border-radius: 16px;
     background-color: white;
@@ -162,7 +166,9 @@ body {
     box-shadow: 
         -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
         1px 1px 10px 5px rgba(0, 0, 0, 0.25) inset;
-
+    max-width: 800px;
+    width: 800px;
+    margin-left: 10px;
 }
 
 .ScheduleList-container-title {
@@ -212,7 +218,6 @@ body {
 /*QuickLinkButton*/
 .QuickLinkButton-container {
     display: flex;
-    width: 40%;
     padding: 20px;
     border-radius: 16px;
     background-color: white;
@@ -221,6 +226,8 @@ body {
     box-shadow: 
         -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
         1px 1px 10px 5px rgba(0, 0, 0, 0.25) inset;
+    width: 400px;
+    margin-right: -10px;
 }
 
 .QuickLinkButton-container-title {
@@ -334,9 +341,10 @@ body {
 .TimetableSummary-container {
     display: flex;
     position: relative;
-    width: 100%; 
+    width: 100%;
     height: auto;
     max-width: 630px;
+    flex: 0 0 630px;
     min-height: 1000px;
     padding: 38px;
     flex-direction: column;
@@ -454,11 +462,9 @@ body {
 }
 
 /* 미디어 쿼리 */
-/* (765px 이하) */
-@media (max-width: 765px) {
+@media (max-width: 1300px) {
     .Home-section {
       flex-direction: column;
-      align-items: center;
     }
   
     .Home-left,
@@ -466,15 +472,12 @@ body {
       width: 100%;
       max-width: none;
     }
-  
+
     .ProgressBar-container,
     .TimetableSummary-container {
       width: 100%;
       height: auto;
     }
-  
-    .title {
-      font-size: 1.8rem;
-    }
+
   }
   

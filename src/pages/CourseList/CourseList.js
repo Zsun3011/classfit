@@ -5,6 +5,8 @@ import dummyCourses from "./dummyCourses";
 import FavoriteCourseList from "./FavoriteCourseList";
 import CourseFilter from "./CourseFilter";
 import "../../styles/CourseList.css";
+import { get, post, del } from "../../api";
+import config from "../../config";
 
 const CourseList = () => {
 
