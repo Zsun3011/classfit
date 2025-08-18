@@ -4,6 +4,9 @@ import "../../styles/Onboarding.css";
 import { post } from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
+import { isProfileCompleted, readProfile, saveProfile } from "./commonutil";
+import { buildProfilePayload } from "./payload.js";
+
 
 const AdmissionYearInput = () => {
     
@@ -11,16 +14,20 @@ const AdmissionYearInput = () => {
     const [cookies] = useCookies(["accessToken"]);
     const [admissionYear, setAdmissionYear] = useState("");
 
-    // 토큰없으면 로그인으로
+    // 토큰없으면 로그인으로, 온보딩 완료면 홈으로
     useEffect(() => {
         if(!cookies.accessToken) {
             alert("로그인이 필요합니다.");
             navigate("/", { replace: true});
             return;
         }
-        const prev = JSON.parse(localStorage.getItem("profileData") || "{}");
+        const prev = readProfile();
         if (!prev.university || !prev.major) {
             navigate("/SchoolSelector", { replace: true });
+        }
+        if (isProfileCompleted()) {
+            navigate("/Home", {replace: true});
+            return;
         }
     },[cookies.accessToken, navigate]);
 
@@ -41,12 +48,14 @@ const AdmissionYearInput = () => {
             return;
         }
 
-        const prev = JSON.parse(localStorage.getItem("profileData") || "{}");
-        const payload = { ...prev, enrollmentYear: yearNum };
+        const payload = buildProfilePayload({
+            includeCourses: false,
+            override: {enrollmentYear: yearNum},
+        });
 
         try {
             await post (config.PROFILE.STEP2, payload);
-            localStorage.setItem("profileData", JSON.stringify(payload));
+            saveProfile({enrollmentYear: yearNum});
             console.log("STEP2 성공");
             navigate("/GraduationTypeSelector", { replace: true });
         } catch (error) {

@@ -202,3 +202,51 @@ select{
 .modal-button-confirm:hover {
     background-color: #0056b3;
 }
+
+/* 마이페이지에서 사용함 */
+.input-container-search {
+    margin-left: -30px;
+    margin-top: 10px;
+}
+
+.CourseHistoryManager .dropdown-list {
+    left: 0;
+}
+
+.dropdown-item:hover {
+    background-color: #0056b3;
+    color: #fff;
+}
+
+.CourseManager-chip {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-family: "IBMPlexSansKR-Medium";
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    transition: filter .15s ease;
+}
+
+.CourseManager-chip.primary {
+    background: #EAF3FF;
+    border-color: #CFE2FF;
+    color: #0B63CE;
+}
+
+.CourseManager-chip.retry {
+    background: #FFECEC;
+    border-color: #FFCACA;
+    color: #D14141;
+}
+
+.CourseManager-chip:hover {
+    filter: brightness(0.97);
+}
+
+.Edit-description {
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 16px;
+    color: #D14141;
+}

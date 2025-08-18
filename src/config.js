@@ -37,6 +37,11 @@ const config = {
         REQUIRE: (id) => `${BASE_URL}/api/graduation/requirements/${id}`, // PUT, DELETE
         PROGRESS: (studentId) => `${BASE_URL}/api/graduation/requirements/${studentId}`, // 요약 (GET)
     },
+
+    // 회원탈퇴
+    USER: {
+        ME: `${BASE_URL}/api/users/me`, // GET(내 정보), DELETE(회원탈퇴)
+    },
 };
 
 export default config;

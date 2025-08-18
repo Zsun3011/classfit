@@ -2,17 +2,12 @@ import React, {useState, useEffect} from "react";
 import CourseManageTableRow from "./CourseManageTableRow";
 import CourseManageModal from "./CourseManageModal";
 import "../../styles/CourseManager.css";
-
-//상태 보존
-const getInitialCourses = () => {
-    const stored = localStorage.getItem("courseHistory");
-    return stored ? JSON.parse(stored) : [];
-};
+import { load, subscribe, upsertByName, patchById, removeById } from "../MyPage/CourseHistoryStore";
 
 const CourseManager = () => {
     const [selectedYear, setSelectedYear] = useState("2025");
     const [selectedSemester, setSelectedSemester] = useState("1학기");
-    const [courses, setCourses] = useState(getInitialCourses);
+    const [courses, setCourses] = useState(() => load());
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editCourse, setEditCourse] = useState(null);
 
@@ -32,39 +27,35 @@ const CourseManager = () => {
         return courseDatabase[courseName] || { category: "일반선택", credit: 3 };
     };
 
+    useEffect(() => subscribe(setCourses), []);
 
-    useEffect(() => {
-        localStorage.setItem("courseHistory", JSON.stringify(courses));
-    }, [courses]);
-        
-    const filteredCourses = courses.filter(course => 
-        course.year === selectedYear && course.semester === selectedSemester
+    const filteredCourses = courses.filter (
+        (c) => c.year === selectedYear && c.semester === selectedSemester
     );
-    
+
     const handleRemoveCourse = (id) => {
-        setCourses(prev => prev.filter(course => course.id !== id));
+        removeById(id);
     };
     
     const handleAddOrEdit = (courseData) => {
+
+        const info = getCourseInfo(courseData.name);
+
         if (editCourse) {
             // 수정 모드
-            setCourses(prev =>
-                prev.map(course => (course.id === courseData.id ? {
-                    ...course,
-                    ...courseData,
-                    category: getCourseInfo(courseData.name).category,
-                    credit: getCourseInfo(courseData.name).credit
-                } : course))
-            );
+            patchById(courseData.id, {
+                ...courseData,
+                category: info.category,
+                credit: info.credit,
+            });
             setEditCourse(null);
         } else {
             // 추가 모드
-            const info = getCourseInfo(courseData.name);
-            setCourses(prev => [...prev, {
+            upsertByName({
                 ...courseData,
                 category: info.category,
-                credit: info.credit
-            }]);
+                credit: info.credit,
+            });
         }
         setIsModalOpen(false);
     };

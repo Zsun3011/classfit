@@ -4,6 +4,24 @@ import "../../styles/Onboarding.css";
 import { post } from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
+import {setUid, saveProfile, saveDisplayName, isProfileCompleted, 
+        readPreloginName, clearPreloginName, wipeLegacyGlobalKeys,
+        chooseUidFromLogin} from "./commonutil.js";
+
+// 토큰에서 name 추출
+const getNameFromToken = (token = "") => {
+    try {
+        const base64Url = token.split(".")[1] || "";
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const json = decodeURIComponent (
+            atob(base64).split("").map( c => "%" + ("00"+c.charCodeAt(0).toString(16)).slice(-2)).join("")
+        );
+        const payload = JSON.parse(json);
+        return payload?.name || payload?.given_name || payload?.nickname || "";
+    } catch {
+        return "";
+    }
+};
 
 const LoginMethodSelector = () => {
 
@@ -38,7 +56,7 @@ const LoginMethodSelector = () => {
             const res = await post(config.AUTH.LOGIN, data, 
                 {
                     headers: { "Content-Type": "application/json", Accept: "application/json"},
-                    withCredentials: true,
+                    //withCredentials: true,
                 }
             );
             console.log("로그인 성공:", res);
@@ -55,10 +73,11 @@ const LoginMethodSelector = () => {
                 return;
             }
 
-            // userId 있으면 저장(숫자 보장)
-            const userId = result?.userId ?? result?.id ?? result?.memberId ?? null;
-            if(userId) localStorage.setItem("userId", String(userId));
-    
+            wipeLegacyGlobalKeys();
+
+            const userUid = chooseUidFromLogin(result, accessToken, email);
+            setUid(userUid);
+
             // 인터셉터가 쿠키에서 access/refresh 읽게 했으므로 쿠키에 저장
             setCookie("accessToken", accessToken, {
                 path: "/",
@@ -74,8 +93,18 @@ const LoginMethodSelector = () => {
                 localStorage.setItem("refreshToken", refreshToken);
             }
 
-            // 토큰 저장 끝난 후 이동
-            navigate("/SchoolSelector", { replace: true });
+            const serverName = (result?.name || "").trim();
+            const preName    = (readPreloginName(email) || "").trim();
+            const tokenName  = (getNameFromToken(accessToken) || "").trim();
+            const finalName  = (serverName || preName || tokenName || "").trim();
+            if (finalName) {
+                saveDisplayName(finalName);       // 계정별 표시 이름
+                saveProfile({ name: finalName }); // 프로필에도 동기화
+            }
+            if (preName) clearPreloginName(email); // 임시 저장 제거
+
+            // 토큰 저장 끝난 후, 온보딩 완료 여부에 따라 이동하는 곳 결정
+            navigate(isProfileCompleted() ? "/Home" : "/SchoolSelector", { replace: true});
 
         } catch (error) {
             const status = error.response?.status;
