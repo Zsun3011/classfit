@@ -190,9 +190,13 @@ input {
     justify-content: center;
     gap: 80px;
     width: 940px;
-    height: 300px;
+    min-height: 300px;
     margin: 150px auto;
     padding: 30px;
+}
+
+.CourseHistoryUploader-container {
+    margin-bottom: 150px auto 250px;
 }
 
 /*왼쪽 화면*/
@@ -381,7 +385,7 @@ input {
     font-family: "IBMPlexSansKR-Regular";
     font-size: 16px;
     margin-top: -15px;
-    color: rgba(0, 0, 0, 0.5);
+    color: #D14141;
 }
 
 /*졸업 유형 선택 버튼*/
@@ -420,23 +424,30 @@ input {
 
 /*제출 버튼*/
 .submit-container {
-    margin-top: 170px;
+    margin-top: 30px;
+    margin-bottom: -30px;
+    margin-right: 80px;
     align-self: flex-end;
 }
 
 .submit-button {
-    width:170%;
-    padding: 10px 40px;
+    width:175%;
+    padding: 11px 40px;
     font-family: "IBMPlexSansKR-Medium";
     font-size: 16px;
-    background-color: #0056b3;
+    background-color: #91C8E4;
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    margin-top: 40px;
 }
 
-.sub-description1 {
-    margin-bottom: 7px;
+.submit-button:hover {
+    background-color: #4682A9;
+}
+
+/* 마이페이지에서만 졸업유형 버튼 간격 조정 */
+.NotificationManager-container .type-button-group {
+    margin-top: -1px;
+    margin-bottom: 20px;
 }
