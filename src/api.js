@@ -79,7 +79,7 @@ api.interceptors.response.use(
       if(originalRequest?.retry || isAuthPath) {
         console.error("로그인 만료됨. 다시 로그인해 주세요.");
         clearTokens();
-        window.location.href = "/login";
+        window.location.href = "/";
         return Promise.reject(error);
       }
 
@@ -127,7 +127,7 @@ api.interceptors.response.use(
     } catch (e) {
       // 재발급 실패 -> 쿠키 제거하고 로그인 이동
       clearTokens();
-      window.location.href = "/login";
+      window.location.href = "/";
       return Promise.reject(e);
     } finally {
       isRefreshing = false;

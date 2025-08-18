@@ -9,7 +9,6 @@ const InputConditionForm = ({ onGenerate }) => {
     const [credit, setCredit] = useState("");
     const [preferredTimes, setPreferredTimes] = useState([]);
     const [avoidDays, setAvoidDays] = useState([]);
-    const [keywords, setKeywords] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tempSelectedCourses, setTempSelectedCourses] = useState([]);
 
@@ -32,7 +31,6 @@ const InputConditionForm = ({ onGenerate }) => {
             ▪ 희망 학점: ${credit || "없음"}
             ▪ 선호 시간대: ${preferredTimes.length > 0 ? preferredTimes.join(", ") : "없음"}
             ▪ 피하고 싶은 요일: ${avoidDays.length > 0 ? avoidDays.join(", ") : "없음"}
-            ▪ 관심 키워드: ${keywords.length > 0 ? keywords.join(", ") : "없음"}
         `.trim();
 
         alert(message);
@@ -41,8 +39,7 @@ const InputConditionForm = ({ onGenerate }) => {
             selectedSubjects,
             credit,
             preferredTimes,
-            avoidDays,
-            keywords
+            avoidDays
         });
     };
 
@@ -158,24 +155,6 @@ const InputConditionForm = ({ onGenerate }) => {
                                 }
                             />
                             {day}
-                        </label>
-                    ))}
-                </div>
-
-                {/* 교양 관심 키워드 */}
-                <div className="form-group">
-                    <label>교양 관심 키워드</label>
-                    {["철학과 역사", "문학과 예술", "인간과 사회", "자연과 과학", "세계와 문학", "자기계발", "소양"].map((keyword) => (
-                        <label key={keyword}>
-                            <input
-                                type="checkbox"
-                                value={keyword}
-                                checked={keywords.includes(keyword)}
-                                onChange={() =>
-                                    handleCheckbox(keyword, setKeywords, keywords)
-                                }
-                            />
-                            {keyword}
                         </label>
                     ))}
                 </div>

@@ -41,12 +41,51 @@
     border-collapse: collapse;
     background-color: white;
     border-radius: 8px;
+    table-layout: fixed; /* 테이블 레이아웃을 고정으로 설정 */
 }
 
 .Course-table th,
 .Course-table td {
     padding: 12px 15px;
     text-align: center;
+    overflow: hidden; /* 넘치는 내용 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트에 ... 표시 */
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+}
+
+/* 각 열의 너비를 고정 설정 */
+.Course-table th:nth-child(1),
+.Course-table td:nth-child(1) {
+    width: 8%; /* 즐겨찾기 */
+}
+
+.Course-table th:nth-child(2),
+.Course-table td:nth-child(2) {
+    width: 37%; /* 과목명 - 가장 넓게 */
+}
+
+.Course-table th:nth-child(3),
+.Course-table td:nth-child(3) {
+    width: 10%; /* 영역 */
+}
+
+.Course-table th:nth-child(4){
+    width: 10%; /* 학점 */
+}
+
+.Course-table th:nth-child(5),
+.Course-table td:nth-child(5) {
+    width: 10%; /* 담당교수 */
+}
+
+.Course-table th:nth-child(6),
+.Course-table td:nth-child(6) {
+    width: 25%; /* 시간 */
+}
+
+.Course-table th:nth-child(7),
+.Course-table td:nth-child(7) {
+    width: 10%; /* 담당교수 */
 }
 
 .Course-table th {
@@ -280,4 +319,19 @@
         margin-bottom: 10px;
     }
 
+    /* 반응형에서도 테이블 열 너비 유지 */
+    .Course-table th:nth-child(2),
+    .Course-table td:nth-child(2) {
+        width: 30%; /* 모바일에서는 과목명을 더 넓게 */
+    }
+
+    .Course-table th:nth-child(5),
+    .Course-table td:nth-child(5) {
+        width: 12%; /* 담당교수 열을 좁게 */
+    }
+
+    .Course-table th:nth-child(7),
+    .Course-table td:nth-child(7) {
+        width: 18%; /* 시간 열을 좁게 */
+    }
 }

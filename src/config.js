@@ -20,8 +20,8 @@ const config = {
 
     INTEREST: {
         ENROLL: `${BASE_URL}/api/interest/settings`, // 과목 즐겨찾기 등록 (POST)
-        LIST: userId => `${BASE_URL}/api/interest/user/${userId}`, // 즐겨찾기 조회 (GET)
-        DELETE: id => `${BASE_URL}/api/interest/settings/${id}`, // 즐겨찾기에서 삭제 (DELETE)
+        LIST: `${BASE_URL}/api/interest/me`, // 즐겨찾기 조회 (GET),
+        DELETE: (subjectId) => `${BASE_URL}/api/interest/subjects/${subjectId}`,     // 즐겨찾기에서 삭제 (DELETE)
     },
 
     // 수강이력
@@ -36,6 +36,14 @@ const config = {
         LIST: `${BASE_URL}/api/graduation/requirements`, // 요건 리스트 가져오기 (GET)
         REQUIRE: (id) => `${BASE_URL}/api/graduation/requirements/${id}`, // PUT, DELETE
         PROGRESS: (studentId) => `${BASE_URL}/api/graduation/requirements/${studentId}`, // 요약 (GET)
+    },
+
+    //과목 조회
+    SUBJECT: {
+        LIST: `${BASE_URL}/api/subjects`,
+        DETAIL: (id) => `${BASE_URL}/api/subjects/${id}`,
+        SEARCH: `${BASE_URL}/api/subjects/search`,
+        BY_SUBJECT_ID: (subjectId) => `${BASE_URL}/api/subjects/id/${subjectId}`,
     },
 };
 

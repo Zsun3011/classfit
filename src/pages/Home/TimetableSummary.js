@@ -2,8 +2,8 @@ import React, {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import BaseTimetable from "../../components/BaseTimetable";
 import "../../styles/Home.css"
-import Timetable from "../AITimetable/Timetable"; 
-import Dashboard from "../AITimetable/Dashboard"; 
+import Timetable from "../Timetable/Timetable"; 
+import Dashboard from "../Timetable/Dashboard"; 
 
 const TimetableSummary = () => {
     const [confirmedTable, setConfirmedTable] = useState(null);
@@ -18,7 +18,7 @@ const TimetableSummary = () => {
     const navigate = useNavigate();
 
     const handleCreateTable = () => { 
-        navigate("/aITimetable"); 
+        navigate("/Timetable"); 
     }
 
     // 무한 업데이트 방지를 위한 useEffect 수정

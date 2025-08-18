@@ -11,7 +11,7 @@ import SchoolSelector from './pages/Onboarding/SchoolSelector';
 import AdmissionYearInput from './pages/Onboarding/AdmissionYearInput';
 import GraduationTypeSelector from './pages/Onboarding/GraduationTypeSelector';
 import CourseHistoryUploader from './pages/Onboarding/CourseHistoryUploader';
-import AITimetable from './pages/AITimetable/AITimetable';
+import TimetableRecommendation from './pages/Timetable/TimetableRecommendation';
 import GraduationDetail from './pages/Graduation/GraduationDetail';
 import CourseList from './pages/CourseList/CourseList';
 import MyPage from './pages/MyPage/Mypage';
@@ -34,7 +34,7 @@ function App() {
         <Route path="/admissionYearInput" element={<AdmissionYearInput />} />
         <Route path="/graduationTypeSelector" element={<GraduationTypeSelector/>} />
         <Route path="/courseHistoryUploader" element={<CourseHistoryUploader />} />
-        <Route path="/aiTimetable" element={<AITimetable />} />
+        <Route path="/Timetable" element={<TimetableRecommendation />} />
         <Route path="/graduationDetail" element={<GraduationDetail />} />
         <Route path="/myPage" element={<MyPage />} />
         <Route path="/CommunityBoard" element={<CommunityBoard/>} />

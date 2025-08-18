@@ -2,14 +2,14 @@ import React, {useState, useEffect} from "react";
 import "../../styles/CourseList.css";
 
 const weekdays = ["월", "화", "수", "목", "금"];
-const categories = ["전공", "교양", "공통과목", "자율선택"];
+const categories = ["전공필수", "전공선택", "교양필수", "교양선택"];
 
 //실제 영역 종류
 const categoryMap = {
-    "전공": ["전필", "전선"],
-    "교양": ["교필", "교선"],
-    "공통과목": ["공통"],
-    "자율선택": ["자율"]
+    "전공필수": ["전필"],
+    "전공선택": ["전선"],
+    "교양필수": ["교필"],
+    "교양선택": ["교선"],
 };
 
 const CourseFilter = ({ filter, setFilter, onApplyFilter}) => {
