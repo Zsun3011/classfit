@@ -207,6 +207,26 @@
     color: white;
 }
 
+.Notification-button-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 98%;
+    margin-top: 16px;
+}
+
+.Notification-save-button {
+    width:100px;
+    padding: 5px 10px;
+    font-family: "IBMPlexSansKR-Regular";
+    font-size: 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
 /* 미디어 쿼리 */
 @media (max-width: 765px) {
     .UserInfoEditor-section-right {

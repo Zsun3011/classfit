@@ -9,6 +9,8 @@ const hourStart = 8;
 const hourEnd = 20;
 
 const dayMap = { 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "토", 7: "일" };
+const dayRev = { "월":1, "화":2, "수":3, "목":4, "금":5, "토":6, "일":7 };
+
 const toMin = (t) => (t ? t.split(":").map(Number)[0] * 60 + t.split(":").map(Number)[1] : null);
 const overlap = (a, b) => a.day === b.day && Math.max(toMin(a.start), toMin(b.start)) < Math.min(toMin(a.end), toMin(b.end));
 
@@ -100,11 +102,14 @@ async function buildSchedule(conditions) {
   
   // 7) 블록 변환
   const blocks = chosen.map((c) => ({
+    id: c.id,
     subject: c.name + (requiredIds.has(Number(c.id)) ? "(필수)" : ""),
     day: c.day,
+    dayNum: dayRev[c.day] || 1,
     start: c.start,
     end: c.end,
     type: c.category,
+    credit: Number(creditMap.get(c.id) ?? 0),
     color: requiredIds.has(Number(c.id)) ? "#8ecae6" : palette[idx++ % palette.length],
   }));
 

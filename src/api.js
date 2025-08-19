@@ -61,6 +61,17 @@ const onRefreshed = (newToken) => {
   pendingRequests = [];
 };
 
+const NotRetry = (req) => {
+  const url = (req?.url || "").toLowerCase();
+  const method = (req?.method || "").toLowerCase();
+
+  if(req?.noRetry) return true;
+  if (url.includes("/api/auth/")) return true;
+  // 회원탈퇴는 재시도 금지
+  if (method === "delete" && /\api\/users\/me(\?.*)?$/.test(url)) return true;
+  return false;
+};
+
 // 응답 인터셉터
 api.interceptors.response.use(
   (response) => response,
@@ -71,29 +82,32 @@ api.interceptors.response.use(
     // 네트워크 오류 혹은 응답 없음
     if (!response) return Promise.reject(error);
 
-    const url = (originalRequest?.url || "").toLowerCase();
-    const isAuthPath = url.includes("/api/auth/");
-
     // 401에러 처리
-    if (status === 401) {
-      if(originalRequest?.retry || isAuthPath) {
+    if (status !== 401) {
+      return Promise.reject(error);
+    }
+
+    if (NotRetry(originalRequest)) {
+      return Promise.reject(error);
+    }
+     
+    if(originalRequest?._retry) {
         console.error("로그인 만료됨. 다시 로그인해 주세요.");
         clearTokens();
         window.location.href = "/";
         return Promise.reject(error);
-      }
+    }
 
-      // 동시 401 방지: 갱신 중이면 큐에 등록해 둠
-      if (isRefreshing) {
-        return new Promise((resolve) => {
+    // 동시 401 방지: 갱신 중이면 큐에 등록해 둠
+    if (isRefreshing) {
+      return new Promise((resolve) => {
           pendingRequests.push((newToken) => {
             originalRequest.headers = originalRequest.headers || {};
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
             resolve(api(originalRequest));
           });
-        });
-      }
-    }
+      });
+   }
 
     // 재발급 시도
     originalRequest._retry = true;
@@ -101,18 +115,18 @@ api.interceptors.response.use(
 
     try {
       // refreshToken은 쿠키 또는 로컬스토리지에 보관 중이어야 함
-      const refreshToken = 
+    const refreshToken = 
         cookies.get("refreshToken") || localStorage.getItem("refreshToken");
-      if (!refreshToken) {
-        throw new Error("NO_REFRESH_TOKEN");
-      }
 
-      const reissueRes = await axios.post(
+     const reissueRes = await axios.post(
         appconfig.AUTH.REISSUE_TOKEN,
-        { refreshToken },
-        { headers: { "Content-Type": "application/json", Accept: "application/json"}}
-      );
-
+        refreshToken ? { refreshToken } : {},
+        {
+             withCredentials: true,
+             headers: { "Content-Type": "application/json", Accept: "application/json" }
+        }
+     );
+      
       const body = reissueRes.data;
       const ok = body?.isSuccess ?? true;
       const newAccessToken = body?.result?.accessToken ?? body?.accessToken;

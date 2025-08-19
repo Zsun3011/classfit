@@ -4,6 +4,8 @@ import "../../styles/Onboarding.css";
 import { post } from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
+import { isProfileCompleted, saveProfile } from "./commonutil";
+import { buildProfilePayload } from "./payload.js";
 
 const university = ["한국항공대학교"];
 
@@ -17,9 +19,7 @@ const SchoolSelector = () => {
     const [major, setMajor] = useState("");
     const [list, setList] = useState(false);
 
-    const filteredSchools = university.filter((school) =>
-        school.includes(input)
-    );
+    const filteredSchools = university.filter((school) =>school.includes(input));
 
     const handleChange = (e) => {
         const value = e.target.value;
@@ -34,16 +34,19 @@ const SchoolSelector = () => {
         setList(false);
     };
 
-    // 토큰이 없으면 로그인으로
+    // 토큰이 없으면 로그인으로, 온보딩 완료면 홈으로
     useEffect(() => {
         if(!cookies.accessToken) {
             alert("로그인이 필요합니다.");
             navigate("/", { replace: true});
+            return;
         }
-    },[cookies.accessToken, navigate]);
 
-    // 정보 저장 / 로드용
-    const saveProfileData = (data) => localStorage.setItem("profileData", JSON.stringify(data));
+        if(isProfileCompleted()){
+            navigate("/Home", {replace: true});
+            return;
+        } 
+    },[cookies.accessToken, navigate]);
 
     const handleNext = async () => {
         if(!input.trim() || !major.trim()){
@@ -51,20 +54,23 @@ const SchoolSelector = () => {
             return; // 조건에 맞지 않으면 다음으로 넘어가지 못 함.
         }
 
-        // 요청 바디 준비
-        const payload = {
+        const override = {
             university: input.trim(),
             major: major.trim(),
-            enrollmentYear: 0, // 임시, step2에서 입력 예정
-            graduationType: "UNDERGRAD", // step3 기본값
-            completedCourses: [], // step4 기본값
+            enrollmentYear: 0,
         };
+
+        const payload = buildProfilePayload({
+            includeCourses: false,
+            graduationType: "UNDERGRAD",
+            override,
+        });
 
         try {
             await post (config.PROFILE.STEP1, payload);
-            saveProfileData(payload); // 다음 단계에 이어서 사용
+            saveProfile(override);
             console.log("STEP1 성공");
-            navigate("/admissionYearInput", { replace: true });
+            navigate("/AdmissionYearInput", { replace: true });
         } catch (error) {
             const status = error.response?.status;
             const data = error.response?.data;

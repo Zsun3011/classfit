@@ -45,6 +45,19 @@ const config = {
         SEARCH: `${BASE_URL}/api/subjects/search`,
         BY_SUBJECT_ID: (subjectId) => `${BASE_URL}/api/subjects/id/${subjectId}`,
     },
+
+    // 회원탈퇴
+    USER: {
+        ME: `${BASE_URL}/api/users/me`, // GET(내 정보), DELETE(회원탈퇴)
+    },
+
+    // 시간표 관리
+    TIMETABLE: {
+        CREATE: `${BASE_URL}/api/timetables`, // 시간표 생성 (POST)
+        LIST: `${BASE_URL}/api/timetables/me`, // 내 시간표 전체 조회 (GET)
+        UPDATE: (timetableId) => `${BASE_URL}/api/timetables/${timetableId}`, // 시간표 수정 (PUT)
+        DELETE: (timetableId) => `${BASE_URL}/api/timetables/${timetableId}`, // 시간표 삭제 (DELETE)
+    },
 };
 
 export default config;

@@ -23,9 +23,6 @@ const Header = () => {
                 <Link to="/CommunityBoard" className={currentPage === "/CommunityBoard" ? "active" : ""}>
                  게시판
                 </Link>
-                <Link to="/graduationDetail" className={currentPage === "/graduationDetail" ? "active" : ""}>
-                 진척도
-                </Link>
                 <Link to="/courseList" className={currentPage === "/courseList" ? "active" : ""}>
                  과목조회
                 </Link>

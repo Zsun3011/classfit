@@ -4,45 +4,50 @@ import "../../styles/Onboarding.css";
 import { post } from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
+import { buildProfilePayload } from "./payload";
+import CourseHistoryManager from "../MyPage/CourseHistoryManager";
+import { isProfileCompleted, readProfile, saveProfile, markProfileCompleted, readDisplayName } from "./commonutil";
 
 const CourseHistoryUploader = () => {
     
     const navigate = useNavigate();
     const [cookies] = useCookies(["accessToken"]);
-    
-    const [coursehistory, setCoursehistory] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // 토큰 없으면 로그인으로
+    // 토큰 없으면 로그인으로, 온보딩 순서 가드
     useEffect (() => {
         if(!cookies.accessToken) {
             alert("로그인이 필요합니다.");
             navigate("/", { replace: true});
             return;
         }
-        const prev = JSON.parse(localStorage.getItem("profileData") || "{}");
+        const prev = readProfile();
         if (!prev.university || !prev.major || !prev.enrollmentYear || !prev.graduationType) {
         navigate("/GraduationTypeSelector", { replace: true });
+        return;
+        }
+        // 이미 온보딩 끝났으면 홈으로 가기 (URL 직접 입력 방지)
+        if (isProfileCompleted()) {
+            navigate("/Home", {replace: true});
         }
     },[cookies.accessToken, navigate]);
 
-    const buildPayload = (isSkip = false) => {
-        const prev = JSON.parse(localStorage.getItem("profileData") || "{}");
-        const trimmed = coursehistory.trim();
-        // 나중에 제출하기 하면 빈 배열로 아니면 과목 코드랑 타이틀 전송
-        const completedCourses = isSkip || !trimmed ? [] : [{ courseCode: "TEMP_CODE", courseTitle: trimmed }];
-        return {...prev, completedCourses};
-        };
+    // CourseHistoryManager 변경사항을 profileData에도 저장 -> 마이페이지/진척도페이지에 동기화
+    const handleHistoryChange = (list) => {
+        saveProfile({courseHistory: list});
+    };
 
     const submit = async (isSkip = false) => {
         if (loading) return;
         setLoading(true);
 
-        const payload = buildPayload(isSkip);
+        const payload = buildProfilePayload({includeCourses: !isSkip});
 
         try {
             await post(config.PROFILE.STEP4, payload);
-            localStorage.setItem("profileData", JSON.stringify(payload));
+            const displayName = (readDisplayName() || readProfile().name || "").trim();
+            saveProfile({completedCourses: payload.completedCourses ?? [], name: displayName});
+            markProfileCompleted();
             console.log("STEP4 성공");
             navigate("/Home", { replace: true });
         } catch(error) {
@@ -78,6 +83,7 @@ const CourseHistoryUploader = () => {
     const handleSkip = () => {
         submit(true); // 나중에 하기 (빈 배열)
     }
+
     return (
         <div className="CourseHistoryUploader-container">
             {/*왼쪽 부분*/}
@@ -96,27 +102,22 @@ const CourseHistoryUploader = () => {
     
             {/*오른쪽 부분*/}
             <div className="CourseHistoryUploader-right">
-                {/*이전 수강 이력 입력*/}
                 <div className="CourseHistoryUploader-title">이전 수강 이력</div>
-                <input 
-                    type="text" 
-                    placeholder="과목명을 검색해 추가하세요."
-                    value={coursehistory}
-                    onChange={(e) => setCoursehistory(e.target.value)} 
-                />
-                <div className="sub-description1">과거에 수강한 과목을 입력하거나 건너뛰세요.</div>
-                <div className="button-container">
-                    <button className="previous-button" onClick={handlePrevious}>이전</button>
-                    <button className="next-button1" onClick={handleSkip}>나중에하기</button>
-                </div>
+                {/* 마이페이지의 컴포넌트 재사용 */}
+                <CourseHistoryManager onChange={handleHistoryChange} />
+                {/*이전 수강 이력 입력*/}
+                <div className="sub-description1">과거에 수강한 과목을 추가하거나, 건너뛰기할 수 있습니다.</div>
                 <div className="submit-container">
                     <button 
                     className="submit-button" 
                     onClick={handleSubmit}
-                    disabled={loading}
                     >
-                        {loading ? "처리중" : "제출"}
+                        제출
                     </button>
+                </div>
+                <div className="button-container">
+                    <button className="previous-button" onClick={handlePrevious}>이전</button>
+                    <button className="next-button1" onClick={handleSkip}>나중에하기</button>
                 </div>
             </div>
         </div>

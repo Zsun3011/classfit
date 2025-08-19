@@ -2,6 +2,38 @@ import React, { useEffect, useRef, useState } from "react";
 import "../../styles/Home.css";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
+import { keyFor, readProfile, getUid, readDisplayName } from "../Onboarding/commonutil";
+
+const graduationLabel = {
+    UNDERGRAD: "일반",
+    DOUBLE_MAJOR: "복수전공",
+    MINOR: "부전공",
+};
+
+// 토큰에서 name 추출
+const getNameFromToken = (token = "") => {
+    try {
+        const base64Url = token.split(".")[1] || "";
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const json = decodeURIComponent(
+            atob(base64).split("").map(c => "%" + ("00"+c.charCodeAt(0).toString(16)).slice(-2)).join("")
+        );
+        const payload = JSON.parse(json);
+        return payload?.name || payload?.given_name || payload?.nickname || "";
+    } catch {
+        return "";
+    }
+};
+
+// 졸업유형 표시 폴백
+const getGraduationText = (p) => {
+    if (!p || typeof p !== "object") return "졸업 유형";
+    const key = p.graduationType;
+    if (key && graduationLabel[key]) return graduationLabel[key];
+    const ko = (p.graduationTypeKo || "").trim();
+    if (ko) return ko === "일반 졸업" ? "일반" : ko.replace(/\s/g, "");
+    return "졸업 유형";
+};
 
 const UserInfoCard = () => {
 
@@ -11,24 +43,8 @@ const UserInfoCard = () => {
     const [loading, setLoading] = useState(true);
     const ranRef = useRef(false);
 
-    const graduationLabel = {
-        UNDERGRAD: "일반",
-        DOUBLE_MAJOR: "복수전공",
-        MINOR: "부전공",
-    };
-
-    const nameFromToken = (token) => {
-        try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            return payload.name
-        } catch {
-            return undefined;
-        }
-    };
-
-    // 토큰 없으면 로그인으로
+    // 토큰 없으면 로그인으로, 프로필은 있는대로 표시(비어 있으면 플레이스 홀더)
     useEffect(() => {
-        // alert 중복 방지
         if (ranRef.current) return;
         ranRef.current = true;
 
@@ -38,43 +54,44 @@ const UserInfoCard = () => {
             return;
         }
 
-        // API가 따로 없어서 온보딩에서 저장한 localStorage 사용함
-        try {
-            
-            // 온보딩에서 저장해둔 프로필 가져오기
-            const local = JSON.parse(localStorage.getItem("profileData") || "{}");
-
-            if (!local.university || !local.major || !local.enrollmentYear) {
-                alert("온보딩 입력이 완료되지 않았습니다. 초기 페이지로 돌아갑니다.")
-                navigate("/SchoolSelector", {replace: true});
-                setProfile(null);
-            } else {
-                const displayName = nameFromToken(cookies.accessToken) || local.name;
-                setProfile({...local, name: displayName });
-            }
-        } catch {
-            setProfile(null);
-        } finally {
-            setLoading(false);
-        }
+        setProfile(readProfile());
+        setLoading(false);
     
     }, [cookies.accessToken, navigate]);
 
-    if (loading) {
-        return (
-            <div className="UserInfoCard-container">
-                <div className="UserInfoCard-section-first">
-                    <div className="title">불러오는 중</div>
-                </div>
-            </div>
-        );
-    }
+    useEffect(() => {
+        const apply = (data) => {
+            const savedName = readDisplayName().trim();
+            const tokenName = (getNameFromToken(cookies.accessToken) || "").trim();
+            const name = savedName || tokenName || data.name || "";
+            setProfile({...data, name});
+        };
+        const onCustom = (e) => apply(e.detail || readProfile());
+        const onStorage = (e) => {
+            const uid = getUid();
+            if(uid && e.key === keyFor("profileData", uid)) {
+                try {
+                    apply(JSON.parse(e.newValue || "{}"));
+                } catch {
+                    apply(readProfile());
+                }
+            }
+        };
+        
+        window.addEventListener("profile:update", onCustom);
+        window.addEventListener("storage", onStorage);
+        return () => {
+            window.removeEventListener("profile:update", onCustom);
+            window.removeEventListener("storage", onStorage);
+        };
+    },[]);
 
     const university = profile?.university || "학교 정보";
     const userName = profile?.name || "사용자 이름";
     const major = profile?.major || "전공";
     const year = (profile?.enrollmentYear ?? "") !== "" ? profile.enrollmentYear : "입학년도";
-    const graduationType = graduationLabel[profile?.graduationType] || "졸업 유형";
+    const graduationText = getGraduationText(profile);
+    
     return (
         <div className="UserInfoCard-container">
             <div className="UserInfoCard-section-first">
@@ -94,7 +111,7 @@ const UserInfoCard = () => {
                 {/*추후 백엔드 연결*/}
                 <div className="UserInfoBox">학과: {major}</div>
                 <div className="UserInfoBox">입학년도: {year}</div>
-                <div className="UserInfoBox">졸업유형: {graduationType}</div>
+                <div className="UserInfoBox">졸업유형: {graduationText}</div>
             </div>
         </div>
     );

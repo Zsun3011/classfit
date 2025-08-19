@@ -394,7 +394,8 @@ body {
 }
 
 .TimetableSummary-section-bottom .dashboard-section{
-    width: 30%;
+    width: 370px;
+    height: 200px;
 }
 
 .TimetableSummary-wrapper {

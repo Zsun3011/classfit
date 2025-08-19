@@ -4,19 +4,15 @@ import "../../styles/Onboarding.css";
 import { post } from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
+import { toGradEnum, buildProfilePayload } from "./payload";
+import { isProfileCompleted, readProfile, saveProfile } from "./commonutil";
 
-// 서버 ENUM 매핑
-const graduationType = {
-    "일반 졸업": "UNDERGRAD", 
-    "복수 전공": "DOUBLE_MAJOR", 
-    "부전공": "MINOR",
-};
 
 const GraduationTypeSelector = () => {
     const navigate = useNavigate();
     const [cookies] = useCookies(["accessToken"]);
-        
-    const [graduationtype, setGraduationtype] = useState("");
+
+    const [typeKo, setTypeKo] = useState("");
     const [loading, setLoading] = useState(false);
 
     // 토큰 없으면 로그인으로
@@ -26,9 +22,13 @@ const GraduationTypeSelector = () => {
             navigate("/", { replace: true});
             return;
         }
-        const prev = JSON.parse(localStorage.getItem("profileData") || "{}");
+        const prev = readProfile();
         if (!prev.university || !prev.major || !prev.enrollmentYear) {
             navigate("/AdmissionYearInput", { replace: true });
+        }
+        if (isProfileCompleted()) {
+            navigate("/Home", {replace: true});
+            return;
         }
     },[cookies.accessToken, navigate]);
 
@@ -38,31 +38,30 @@ const GraduationTypeSelector = () => {
         
     const handleNext = async () => {
         
-        if(!graduationtype){
+        if(!typeKo){
             alert("졸업 유형을 선택해 주세요.")
             return; // 조건에 맞지 않으면 다음으로 넘어가지 못 함.
         }
 
-        if (loading) return;
-        setLoading(true);
-
-        const prev = JSON.parse(localStorage.getItem("profileData") || "{}");
-        const payload = {
-            ...prev, graduationType: graduationType[graduationtype],
-        };
+        // 서버 스키마로 페이로드 구성 (항상 UNDERGRAD로 전송)
+        const gt = toGradEnum(typeKo);
+        const payload = buildProfilePayload({
+            graduationType: gt, // 로컬 기준 ENUM
+            includeCourses: false,
+        });
 
         try {
             await post (config.PROFILE.STEP3, payload);
-            localStorage.setItem("profileData", JSON.stringify(payload));
+            saveProfile({ graduationType: toGradEnum(typeKo), graduationTypeKo: typeKo});
             console.log("STEP3 성공");
             navigate("/CourseHistoryUploader", { replace: true });
         } catch (error) {
             const status = error.response?.status;
             const data = error.response?.data;
-            console.error("STEP3 실패:", { status, data, message: error.message });
+            console.error("STEP3 실패:", { status, data, payload });
 
             if (status === 400){
-                alert(data?.message || "입력 형식이 올바르지 않거나 필수 값이 부족합니다.");
+                alert(data?.message || "입력 형식이 올바르지 않습니다. 다시 확인해 주세요.");
             } else if (status === 401) {
                 alert("로그인이 필요합니다. 다시 로그인해 주세요.");
                 navigate("/", { replace: true});
@@ -98,11 +97,11 @@ const GraduationTypeSelector = () => {
             <div className="GraduationTypeSelector-right">
                 {/*졸업 유형 선택*/}
                 <div className="type-button-group">
-                    {Object.keys(graduationType).map((type) => (
+                    {["일반 졸업", "복수 전공", "부전공"].map((type) => (
                         <button
                             key={type}
-                            className={`type-button ${graduationtype === type ? "active" : ""}`}
-                            onClick={() => setGraduationtype(type)}
+                            className={`type-button ${typeKo === type ? "active" : ""}`}
+                            onClick={() => setTypeKo(type)}
                         >
                             {type}
                         </button>
@@ -116,7 +115,7 @@ const GraduationTypeSelector = () => {
                     onClick={handleNext}
                     disabled={loading}
                     >
-                        다음
+                        {loading ? "처리중" : "다음"}
                     </button>
                 </div>
             </div>

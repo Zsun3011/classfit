@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import FavoriteCourseModal from "./FavoriteCourseModal"; // FavoriteCourseModal 컴포넌트 import
+import FavoriteCourseModal from "./FavoriteCourseModal"; 
 import "../../styles/MyPage.css";
 import "../../styles/CourseList.css";
-import dummyCourses from "../CourseList/dummyCourses";
 
-const InputConditionForm = ({ onGenerate }) => {
+const InputConditionForm = ({ onGenerate, courses }) => { // ✅ courses props 추가
     const [selectedSubjects, setSelectedSubjects] = useState([]);
     const [credit, setCredit] = useState("");
     const [preferredTimes, setPreferredTimes] = useState([]);
@@ -15,14 +14,13 @@ const InputConditionForm = ({ onGenerate }) => {
     const [favoriteIds, setFavoriteIds] = useState([]);
 
     useEffect(() => {
-    const storedFavorites = JSON.parse(localStorage.getItem("favoriteIds") || "[]");
-    setFavoriteIds(storedFavorites);
+        const storedFavorites = JSON.parse(localStorage.getItem("favoriteIds") || "[]");
+        setFavoriteIds(storedFavorites);
     }, []);
-
 
     const handleSubmit = () => {
         const selectedSubjectNames = selectedSubjects
-            .map(id => dummyCourses.find(course => course.id === id)?.name)
+            .map(id => courses.find(course => course.id === id)?.name)
             .filter(Boolean);
 
         const message = `
@@ -74,13 +72,12 @@ const InputConditionForm = ({ onGenerate }) => {
         setIsModalOpen(true);
     };
 
-   const getSelectedSubjectNames = () => {
-    return selectedSubjects
-        .map(id => dummyCourses.find(course => course.id === id)?.name)
-        .filter(Boolean)
-        .join(", ");
+    const getSelectedSubjectNames = () => {
+        return selectedSubjects
+            .map(id => courses.find(course => course.id === id)?.name)
+            .filter(Boolean)
+            .join(", ");
     };
-
 
     return (
         <div className="inputCondition-container">
@@ -172,7 +169,7 @@ const InputConditionForm = ({ onGenerate }) => {
                         </div>
                         <div className="modal-content">
                             <FavoriteCourseModal
-                                courses={dummyCourses}
+                                courses={courses} // ✅ API 데이터 활용
                                 favoriteCourseIds={favoriteIds}
                                 selectedCourses={tempSelectedCourses}
                                 onSelectCourse={handleSelectCourse}
@@ -183,7 +180,6 @@ const InputConditionForm = ({ onGenerate }) => {
                     </div>
                 </div>
             )}
-
         </div>
     );
 };

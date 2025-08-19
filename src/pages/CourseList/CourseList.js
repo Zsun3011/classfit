@@ -8,6 +8,8 @@ import "../../styles/CourseList.css";
 import { get } from "../../api";
 import config from "../../config";
 
+const dayMap = { 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "토", 7: "일",};
+
 const CourseList = () => {
   const [allCourses, setAllCourses] = useState([]);          // 전체 과목 (상세 합친 결과)
   const [filteredCourses, setFilteredCourses] = useState([]); // 필터된 과목
@@ -20,8 +22,6 @@ const CourseList = () => {
     days: [],
     categories: [],
   });
-
-   const dayMap = { 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "토", 7: "일",};
 
   // 초기 로드: LIST → 각 id로 DETAIL 조회 → 병합
   useEffect(() => {

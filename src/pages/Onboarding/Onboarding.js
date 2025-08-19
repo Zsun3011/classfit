@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/Onboarding.css";
 import { post } from "../../api";
 import config from "../../config";
+import { savePreloginName } from './commonutil.js';
 
 const Onboarding = () => {
     
@@ -41,7 +42,7 @@ const Onboarding = () => {
             };
 
             // 절대경로(endpoint) 사용
-            const res = await post(config.AUTH.SIGNUP, payload);
+            const res = await post(config.AUTH.SIGNUP, payload, { withCredentials: false} );
 
             // wrapper 형태라면:
             if (res && res.isSuccess === false) {
@@ -49,6 +50,7 @@ const Onboarding = () => {
                 return;
             }
 
+            savePreloginName(email, name);
             console.log("회원가입 성공:", res);
             alert("회원가입이 완료되었습니다. 로그인 해주세요.");
             navigate("/");
@@ -58,7 +60,6 @@ const Onboarding = () => {
             console.log("data:", error.response?.data);
 
         const status = error.response?.status;
-
         const serverMsg =
             error.response?.data?.message ||
             error.response?.data?.result ||
