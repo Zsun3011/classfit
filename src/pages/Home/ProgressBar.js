@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import ProgressDashboard from "../../components/ProgressDashboard";
 import "../../styles/Home.css";
 
 
@@ -39,7 +38,7 @@ const ProgressBar = ( { progressItems = [] }) => {
                 </div>
             </div>
             <div className="ProgressBar-section">
-                <ProgressDashboard progressItems={progressItems} />
+               
             </div>
         </div>
     )

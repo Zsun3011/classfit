@@ -390,13 +390,36 @@ body {
 .TimetableSummary-section-bottom{
     margin-top: 10px;
     display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 
 .TimetableSummary-section-bottom .dashboard-section{
     width: 370px;
-    height: 200px;
+    height: 170px;
 }
+
+.TimetableSummary-section-bottom .dashboard-section1{
+    display: flex;
+    width: 100%;
+    height: 45px;
+    gap: 20px;
+    margin-left: 15px;
+}
+
+.TimetableSummary-section-bottom .dashboard-list1{
+    display: flex;
+    gap: 30px;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #444;
+}
+
+.TimetableSummary-section-bottom .dashboardsection-container{
+    flex-direction: row;
+    width: 640px;
+    gap: 20px;
+}   
 
 .TimetableSummary-wrapper {
     display: flex;

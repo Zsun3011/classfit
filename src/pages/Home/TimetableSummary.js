@@ -1,119 +1,116 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import BaseTimetable from "../../components/BaseTimetable";
-import "../../styles/Home.css"
-import Timetable from "../Timetable/Timetable"; 
-import Dashboard from "../Timetable/Dashboard"; 
+import "../../styles/Home.css";
+import Timetable from "../Timetable/Timetable";
+import { getDashboardInfo } from "../../components/dashboardUtils";
 
 const TimetableSummary = () => {
-    const [confirmedTable, setConfirmedTable] = useState(null);
-    const [info, setInfo] = useState({
-        totalCredits: "",
-        hasMorning: "",
-        freeDay: "",
-        major: [],
-        general: [],
-    });
+  const [confirmedTable, setConfirmedTable] = useState(null);
+  const [info, setInfo] = useState({
+    totalCredits: 0,
+    hasMorning: false,
+    freeDay: "-",
+    major: [],
+    general: [],
+  });
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleCreateTable = () => { 
-        navigate("/Timetable"); 
+  const handleCreateTable = () => {
+    navigate("/aITimetable");
+  };
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("confirmedTable");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      setConfirmedTable(parsed.timetable);
     }
+  }, []);
 
-    // 무한 업데이트 방지를 위한 useEffect 수정
-    useEffect(() => {
-        const stored = sessionStorage.getItem("confirmedTable");
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            setConfirmedTable(parsed.timetable);
-        }
-    }, []); // 빈 의존성 배열로 마운트 시에만 실행
+  // Timetable 생성 결과(blocks 등)를 받아 요약 갱신
+  const handleGenerated = useCallback(({ blocks, totalCredit }) => {
+    const { hasMorning, freeDays, majors, generals } = getDashboardInfo(blocks);
 
-    // info 업데이트를 위한 별도 함수 (무한 루프 방지)
-    const handleSubjectsParsed = (parsedInfo) => {
-        setInfo(prevInfo => {
-            // 이전 값과 비교하여 실제로 변경된 경우에만 업데이트
-            if (JSON.stringify(prevInfo) !== JSON.stringify(parsedInfo)) {
-                return parsedInfo;
-            }
-            return prevInfo;
-        });
-    };
+    setInfo({
+      totalCredits: totalCredit ?? 0,
+      hasMorning,
+      freeDay: freeDays.length ? freeDays.join(", ") : "-",
+      major: majors.map((m) => `${m.subject} (${m.kind}, ${m.credit}학점)`),
+      general: generals.map((g) => `${g.subject} (${g.kind}, ${g.credit}학점)`),
+    });
+  }, []);
 
-    return (
-        <div className="TimetableSummary-container">
-            {!confirmedTable && <div className="TimetableSummary-overlay"></div>}
-            <div className="TimetableSummary-container-title">나의 시간표</div>
+  return (
+    <div className="TimetableSummary-container">
+      {!confirmedTable && <div className="TimetableSummary-overlay"></div>}
+      <div className="TimetableSummary-container-title">나의 시간표</div>
 
-            <div className="TimetableSummary-section-top">
-                {confirmedTable ? (
-                    <>
-                        <Timetable conditions={confirmedTable} />
-                        <div style={{ display: "none" }}>
-                            <Dashboard 
-                                conditions={confirmedTable}
-                                onSubjectsParsed={handleSubjectsParsed}
-                            />
-                        </div>
-                    </>
-                ) : (
-                    <BaseTimetable />
-                )}
-            </div>
+      <div className="TimetableSummary-section-top">
+        {confirmedTable ? (
+          <>
+            {/* onGenerated으로 블록/학점 전달받아 info 갱신 */}
+            <Timetable conditions={confirmedTable} onGenerated={handleGenerated} />
+          </>
+        ) : (
+          <BaseTimetable />
+        )}
+      </div>
 
-            {!confirmedTable && (
-                <div className="TimetableSummary-wrapper">
-                    <div className="wrapper-label">
-                        아직 나의 시간표가 만들어지지 않았어요.
-                    </div>
-                    <div className="wrapper-descriptor">
-                        당신의 학업 요구에 맞는 시간표를 AI가 추천해드립니다.
-                    </div>
-                    <button className="wrapper-button" onClick={handleCreateTable}>AI 시간표 생성</button>
-                </div>
-            )}
-
-            <div className="TimetableSummary-section-bottom">
-                <div className="dashboard-section">
-                    <div className="dashboard-subtitle">수강 정보</div>
-                    <div className="dashboard-list">
-                        <div>
-                            <span className="dashboard-label">• 학점:</span>{" "}
-                            <span className="dashboard-value highlight">{info.totalCredits}</span>
-                        </div>  
-                        <div>
-                            <span className="dashboard-label">• 오전 수업 포함 여부:</span>{" "}
-                            <span className="dashboard-value">{info.hasMorning ? "O" : "X"}</span>
-                        </div>
-                        <div>
-                            <span className="dashboard-label">• 공강:</span>{" "}
-                            <span className="dashboard-value highlight">{info.freeDay}</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="dashboardsection-container">
-                    <div className="dashboard-section">
-                        <div className="dashboard-subtitle">전공</div>
-                        <ul className="dashboard-list">
-                            {info.major.map((item, index) => (
-                                <li key={index}>• {item}</li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className="dashboard-section">
-                        <div className="dashboard-subtitle">교양</div>
-                        <ul className="dashboard-list">
-                            {info.general.map((item, index) => (
-                                <li key={index}>• {item}</li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-            </div>
+      {!confirmedTable && (
+        <div className="TimetableSummary-wrapper">
+          <div className="wrapper-label">아직 나의 시간표가 만들어지지 않았어요.</div>
+          <div className="wrapper-descriptor">
+            당신의 학업 요구에 맞는 시간표를 AI가 추천해드립니다.
+          </div>
+          <button className="wrapper-button" onClick={handleCreateTable}>
+            AI 시간표 생성
+          </button>
         </div>
-    )
-}
+      )}
+
+      <div className="TimetableSummary-section-bottom">
+        <div className="dashboard-section1">
+          <div className="dashboard-subtitle">수강 정보</div>
+          <div className="dashboard-list1">
+            <div>
+              <span className="dashboard-label">• 학점:</span>{" "}
+              <span className="dashboard-value highlight">{info.totalCredits}</span>
+            </div>
+            <div>
+              <span className="dashboard-label">• 오전 수업 포함 여부:</span>{" "}
+              <span className="dashboard-value">{info.hasMorning ? "O" : "X"}</span>
+            </div>
+            <div>
+              <span className="dashboard-label">• 공강:</span>{" "}
+              <span className="dashboard-value highlight">{info.freeDay}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="dashboardsection-container">
+          <div className="dashboard-section">
+            <div className="dashboard-subtitle">전공</div>
+            <ul className="dashboard-list">
+              {info.major.map((item, index) => (
+                <li key={index}>• {item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="dashboard-section">
+            <div className="dashboard-subtitle">교양</div>
+            <ul className="dashboard-list">
+              {info.general.map((item, index) => (
+                <li key={index}>• {item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default TimetableSummary;

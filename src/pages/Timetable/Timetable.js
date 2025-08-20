@@ -109,7 +109,7 @@ async function buildSchedule(conditions) {
     start: c.start,
     end: c.end,
     type: c.category,
-    credit: Number(creditMap.get(c.id) ?? 0),
+    credit: creditMap.get(c.id) ?? 0,
     color: requiredIds.has(Number(c.id)) ? "#8ecae6" : palette[idx++ % palette.length],
   }));
 
@@ -211,23 +211,36 @@ const Timetable = ({ conditions, data: dataProp, onGenerated, isModal = false, i
         {data.map((course, idx) => {
           const dayIndex = days.indexOf(course.day);
           if (dayIndex === -1) return null;
+
           const x = labelWidth + dayIndex * colWidth;
           const y = labelHeight + timeToY(course.start);
           const h = timeToY(course.end) - timeToY(course.start);
-          const m = course.subject.match(/^(.+?)\((.+)\)$/);
-          const main = m ? m[1] : course.subject;
-          const sub = m ? `(${m[2]})` : "";
+
+          // 과목명 분리
+          const m = course.subject.match(/^(.+?)(\(.+\))?$/);
+          const main = m?.[1] || course.subject;
+          const tail = m?.[2] || "";
+
+          // ✅ 간단 줄바꿈
+          const maxChars = Math.max(4, Math.floor(colWidth / (timeFontSize * 0.8)));
+          const lines = main.match(new RegExp(`.{1,${maxChars}}`, "g")) || [main];
+          if (tail) lines.push(tail);
+
+          const lineGap = isMini ? 12 : 18;
+          const startY = y + h / 2 - ((lines.length - 1) * lineGap) / 2;
 
           return (
             <g key={`class-${idx}`}>
-              <rect x={x + 1} y={y + 1} width={colWidth - 2} height={h - 2} fill={course.color || "#ccc"} rx={6} />
-              <text x={x + colWidth / 2} y={y + h / 2} fontSize={timeFontSize} textAnchor="middle" className="timetable-class-text">
-                <tspan x={x + colWidth / 2} dy="-5">{main}</tspan>
-                {sub && <tspan x={x + colWidth / 2} dy={isMini ? "12" : "25"}>{sub}</tspan>}
+              <rect x={x+1} y={y+1} width={colWidth-2} height={h-2} fill={course.color||"#ccc"} rx={6}/>
+              <text x={x+colWidth/2} y={startY} fontSize={timeFontSize} textAnchor="middle" className="timetable-class-text">
+                {lines.map((line,i)=>
+                  <tspan key={i} x={x+colWidth/2} dy={i?lineGap:0}>{line}</tspan>
+                )}
               </text>
             </g>
           );
         })}
+
       </svg>
     </div>
   );

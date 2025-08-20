@@ -237,7 +237,7 @@ const TimetableRecommendation = () => {
             <div className="modal-overlay" onClick={() => setSelectedTable(null)}>
               <div className="modal-container" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                  <h2>{selectedTable.__vm?.name || `시간표 #${selectedTable.timetableId}`}</h2>
+                  <h2>{selectedTable.__vm?.name}</h2>
                   <button className="modal-close" onClick={() => setSelectedTable(null)}>×</button>
                 </div>
                 <div className="modal-content">
