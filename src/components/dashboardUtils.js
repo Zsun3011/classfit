@@ -18,8 +18,8 @@ export const normalize = (c) => {
   const end = c.end ?? c.endTime ?? null;
 
   const cat = (c.category ?? c.courseType ?? c.discipline ?? c.type ?? "").toString();
-  const isMajor = /전공/i.test(cat);
-  const isGeneral = /교양|일반/i.test(cat) || (!isMajor && /교/i.test(cat));
+  const isMajor = /전/i.test(cat);
+  const isGeneral = !isMajor && /교/i.test(cat);
   const kind = /필/i.test(cat) ? "필수" : "선택";
 
   return {

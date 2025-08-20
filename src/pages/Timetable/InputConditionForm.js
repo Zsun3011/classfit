@@ -3,7 +3,7 @@ import FavoriteCourseModal from "./FavoriteCourseModal";
 import "../../styles/MyPage.css";
 import "../../styles/CourseList.css";
 
-const InputConditionForm = ({ onGenerate, courses }) => { // ✅ courses props 추가
+const InputConditionForm = ({ onGenerate }) => { // courses props 제거 (API에서 직접 조회하므로 불필요)
     const [selectedSubjects, setSelectedSubjects] = useState([]);
     const [credit, setCredit] = useState("");
     const [preferredTimes, setPreferredTimes] = useState([]);
@@ -11,16 +11,12 @@ const InputConditionForm = ({ onGenerate, courses }) => { // ✅ courses props �
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tempSelectedCourses, setTempSelectedCourses] = useState([]);
 
-    const [favoriteIds, setFavoriteIds] = useState([]);
-
-    useEffect(() => {
-        const storedFavorites = JSON.parse(localStorage.getItem("favoriteIds") || "[]");
-        setFavoriteIds(storedFavorites);
-    }, []);
+    // 선택된 과목의 정보를 저장 (API에서 조회한 즐겨찾기 과목 정보 저장용)
+    const [selectedSubjectInfo, setSelectedSubjectInfo] = useState([]);
 
     const handleSubmit = () => {
-        const selectedSubjectNames = selectedSubjects
-            .map(id => courses.find(course => course.id === id)?.name)
+        const selectedSubjectNames = selectedSubjectInfo
+            .map(subject => subject.subjectName || subject.name)
             .filter(Boolean);
 
         const message = `
@@ -57,8 +53,10 @@ const InputConditionForm = ({ onGenerate, courses }) => { // ✅ courses props �
         );
     };
 
-    const handleConfirmSelection = () => {
+    const handleConfirmSelection = (selectedCourseData) => {
+        // FavoriteCourseModal에서 선택된 과목 정보를 받아서 저장
         setSelectedSubjects(tempSelectedCourses);
+        setSelectedSubjectInfo(selectedCourseData || []); // 과목 정보도 함께 저장
         setIsModalOpen(false);
     };
 
@@ -73,8 +71,8 @@ const InputConditionForm = ({ onGenerate, courses }) => { // ✅ courses props �
     };
 
     const getSelectedSubjectNames = () => {
-        return selectedSubjects
-            .map(id => courses.find(course => course.id === id)?.name)
+        return selectedSubjectInfo
+            .map(subject => subject.subjectName || subject.name)
             .filter(Boolean)
             .join(", ");
     };
@@ -169,8 +167,6 @@ const InputConditionForm = ({ onGenerate, courses }) => { // ✅ courses props �
                         </div>
                         <div className="modal-content">
                             <FavoriteCourseModal
-                                courses={courses} // ✅ API 데이터 활용
-                                favoriteCourseIds={favoriteIds}
                                 selectedCourses={tempSelectedCourses}
                                 onSelectCourse={handleSelectCourse}
                                 onConfirm={handleConfirmSelection}

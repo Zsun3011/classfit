@@ -18,7 +18,7 @@ const TimetableSummary = () => {
   const navigate = useNavigate();
 
   const handleCreateTable = () => {
-    navigate("/aITimetable");
+    navigate("/Timetable");
   };
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const TimetableSummary = () => {
             당신의 학업 요구에 맞는 시간표를 AI가 추천해드립니다.
           </div>
           <button className="wrapper-button" onClick={handleCreateTable}>
-            AI 시간표 생성
+            시간표 생성
           </button>
         </div>
       )}

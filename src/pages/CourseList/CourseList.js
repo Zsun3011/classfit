@@ -5,7 +5,7 @@ import CourseTable from "./CourseTable";
 import FavoriteCourseList from "./FavoriteCourseList";
 import CourseFilter from "./CourseFilter";
 import "../../styles/CourseList.css";
-import { get } from "../../api";
+import { get, post, del } from "../../api";
 import config from "../../config";
 
 const dayMap = { 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "토", 7: "일",};
@@ -23,25 +23,21 @@ const CourseList = () => {
     categories: [],
   });
 
-  // 초기 로드: LIST → 각 id로 DETAIL 조회 → 병합
+  // 초기 로드 시 즐겨찾기 서버에서 가져오기
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
-        // 1) LIST 호출
+        // 과목 리스트 불러오기
         const res = await get(config.SUBJECT.LIST, { sortBy: "id", direction: "asc" });
         const list = Array.isArray(res?.result) ? res.result : [];
 
-        // 2) 각 id로 DETAIL 병렬 호출
         const detailResults = await Promise.allSettled(
           list.map((c) => get(config.SUBJECT.DETAIL(c.id)))
         );
 
-        // 3) LIST + DETAIL 합치기
         const merged = list.map((c, idx) => {
           const detail = detailResults[idx].status === "fulfilled" ? detailResults[idx].value?.result : {};
-          const dayStr = detail?.dayOfWeek ? dayMap[detail.dayOfWeek] || detail.dayOfWeek: "-"; // 숫자 -> 요일
-
           return {
             id: c.id,
             name: c.name,
@@ -49,7 +45,7 @@ const CourseList = () => {
             description: c.description || "-",
             credit: detail?.credit ?? "-",
             professor: detail?.professor ?? "-",
-            dayOfWeek: dayStr,
+            dayOfWeek: detail?.dayOfWeek ? dayMap[detail.dayOfWeek] : "-",
             start: detail?.start ?? "-",
             end: detail?.end ?? "-",
           };
@@ -58,9 +54,10 @@ const CourseList = () => {
         setAllCourses(merged);
         setFilteredCourses(merged);
 
-        // 즐겨찾기 불러오기
-        const storedFavorites = JSON.parse(localStorage.getItem("favoriteIds") || "[]");
-        setFavoriteIds(storedFavorites);
+        //즐겨찾기 가져오기
+        const favRes = await get(config.INTEREST.LIST);
+        setFavoriteIds(Array.isArray(favRes) ? favRes : []);
+
       } catch (e) {
         console.error("과목 불러오기 실패:", e);
         alert("과목 목록을 불러오지 못했습니다.");
@@ -71,14 +68,21 @@ const CourseList = () => {
   }, []);
 
   // 즐겨찾기 토글
-  const handleToggleFavorite = (courseId) => {
-    setFavoriteIds((prev) => {
-      const updated = prev.includes(courseId)
-        ? prev.filter((id) => id !== courseId)
-        : [...prev, courseId];
-      localStorage.setItem("favoriteIds", JSON.stringify(updated));
-      return updated;
-    });
+  const handleToggleFavorite = async (courseId) => {
+    try {
+      if (favoriteIds.includes(courseId)) {
+        //즐겨찾기 해제
+        await del(config.INTEREST.DELETE(courseId));
+        setFavoriteIds((prev) => prev.filter((id) => id !== courseId));
+      } else {
+        //즐겨찾기 등록
+        await post(config.INTEREST.ENROLL(courseId));
+        setFavoriteIds((prev) => [...prev, courseId]);
+      }
+    } catch (e) {
+      console.error("즐겨찾기 토글 실패:", e);
+      alert("즐겨찾기 처리 중 오류가 발생했습니다.");
+    }
   };
 
   // 필터 적용

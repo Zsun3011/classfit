@@ -19,9 +19,9 @@ const config = {
     },
 
     INTEREST: {
-        ENROLL: `${BASE_URL}/api/interest/settings`, // 과목 즐겨찾기 등록 (POST)
-        LIST: `${BASE_URL}/api/interest/me`, // 즐겨찾기 조회 (GET),
-        DELETE: (subjectId) => `${BASE_URL}/api/interest/subjects/${subjectId}`,     // 즐겨찾기에서 삭제 (DELETE)
+        ENROLL: (subjectId) => `${BASE_URL}/api/interest/subjects/${subjectId}`, // 등록 (POST)
+        LIST: `${BASE_URL}/api/interest/me`, // 조회 (GET)
+        DELETE: (subjectId) => `${BASE_URL}/api/interest/subjects/${subjectId}`, // 삭제 (DELETE)
     },
 
     // 수강이력

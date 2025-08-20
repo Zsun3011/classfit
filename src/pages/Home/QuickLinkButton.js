@@ -7,11 +7,11 @@ const QuickLinkButton = () => {
     const navigate = useNavigate();
 
     const handleAiTimetable = () => {
-        navigate("/aiTimetable");
+        navigate("/Timetable");
     };
 
     const handleSavedTimetable = () => {
-        navigate("/aiTimetable");
+        navigate("/Timetable");
     };
 
     const handleBookmarksubject = () => {
