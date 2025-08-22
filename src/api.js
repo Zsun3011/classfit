@@ -68,7 +68,7 @@ const NotRetry = (req) => {
   if(req?.noRetry) return true;
   if (url.includes("/api/auth/")) return true;
   // 회원탈퇴는 재시도 금지
-  if (method === "delete" && /\api\/users\/me(\?.*)?$/.test(url)) return true;
+  if (method === "delete" && /\/api\/users\/me(\?.*)?$/.test(url)) return true;
   return false;
 };
 

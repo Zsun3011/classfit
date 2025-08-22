@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 
 const NewPost = ({onClose, onSubmit, editPost = null }) => {
     const [title, setTitle] = useState(editPost ? editPost.title : "");
     const [content, setContent] = useState(editPost ? editPost.content : "");
+
+    useEffect(() => {
+        setTitle(editPost?.title ?? "");
+        setContent(editPost?.content ?? "");
+    }, [editPost]);
 
     const handleSubmit = () => {
         if (!title.trim() || !content.trim()) {

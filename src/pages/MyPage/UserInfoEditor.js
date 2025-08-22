@@ -4,7 +4,7 @@ import "../../styles/MyPage.css";
 import api from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
-import { readProfile, purgeAllForUid, readDisplayName, getUid, clearUid, keyFor, wipeLegacyGlobalKeys } from "../Onboarding/commonutil";
+import { readProfile, purgeAllForUid,readDisplayName, getUid, clearUid, keyFor, wipeLegacyGlobalKeys } from "../Onboarding/commonutil";
 
 const graduationLabel = {
     UNDERGRAD: "일반",
