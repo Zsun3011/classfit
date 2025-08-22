@@ -1,4 +1,4 @@
-import { getUid, keyFor, saveProfile } from "../Onboarding/commonutil";
+import { getUid, keyFor } from "../Onboarding/commonutil";
 
 
 const BASE_KEY = "courseHistory";
