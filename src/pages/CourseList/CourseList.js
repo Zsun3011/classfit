@@ -29,11 +29,11 @@ const CourseList = () => {
       setLoading(true);
       try {
         // 과목 리스트 불러오기
-        const res = await get(config.SUBJECT.LIST, { sortBy: "id", direction: "asc" });
+        const res = await get(config.SUBJECTS.LIST, { sortBy: "id", direction: "asc" });
         const list = Array.isArray(res?.result) ? res.result : [];
 
         const detailResults = await Promise.allSettled(
-          list.map((c) => get(config.SUBJECT.DETAIL(c.id)))
+          list.map((c) => get(config.SUBJECTS.DETAIL(c.id)))
         );
 
         const merged = list.map((c, idx) => {

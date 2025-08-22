@@ -5,6 +5,8 @@ import "../../styles/CommunityBoard.css";
 import NewPost from "./NewPost";
 import PostDetail from "./PostDetail";
 import RecommendationBanner from "./RecommendationBanner";
+import { post, put, del } from "../../api";
+import config from "../../config";
 
 const CommunityBoard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,34 +28,78 @@ const CommunityBoard = () => {
         setIsModalOpen(true);
     };
 
-    
-    const handleAddPost = (newPost) => {
-        if (editingPost) {
-            const updatedPosts = posts.map(post => 
-                post.id === editingPost.id 
-                    ? { ...post, title: newPost.title, content: newPost.content }
-                    : post
+    // 게시글 생성/수정 공용 핸들러
+    const handleAddPost = async (newPost) => {
+        try {
+            if (editingPost) {
+                const res = await put(config.COMMUNITY.UPDATE(editingPost.id),
+                {
+                    title: newPost.title.trim(),
+                    content: newPost.content.trim(),
+                    type: "GENERAL",
+                }
             );
-            setPosts(updatedPosts);
-            if (selectedPost && selectedPost.id === editingPost.id) {
-                setSelectedPost({ ...selectedPost, title: newPost.title, content: newPost.content });
+
+            const updated = res.data;
+
+            setPosts((prev) =>
+                prev.map((p) =>
+                    p.id === editingPost.id
+                        ? {...p, title: updated.title, content: updated.content}
+                        : p
+                    )
+            );
+
+            if (selectedPost?.id === editingPost.id) {
+                setSelectedPost((prev) => ({ ...prev, title: updated.title, content: updated.content}));
             }
-            
             setEditingPost(null);
-        } else {
-            const post = {
-                id: Date.now(),
-                title: newPost.title,
-                content: newPost.content,
-                createdAt: new Date(),
+            setIsModalOpen(false);
+            } else {
+            // 새로운 게시글 생성
+            const res = await post(config.COMMUNITY.CREATE, {
+                title: newPost.title.trim(),
+                content: newPost.content.trim(),
+                postType: "GENERAL",
+            });
+
+            const created = res.data;
+
+            const createPost = {
+                id: created.id,
+                title: created.title,
+                content: created.content,
+                createdAt: new Date(created.createdAt || Date.now()),
                 comments: [], 
-                commentCount: 0 
+                commentCount: created.commentCount ?? 0,
             };
-            setPosts([post, ...posts]);
+            setPosts(posts => [createPost, ...posts]);
+            console.log("게시글 등록 성공");
+            }
+        }catch(e) {
+            console.error("게시글 수정 실패:", e);
+            alert("게시글 수정에 실패했습니다.");
+            console.error("게시글 생성 실패:", e);
+            alert("게시글 등록에 실패했습니다."); 
         }
-        setIsModalOpen(false);
     };
 
+    // 게시글 삭제
+    const handleDeletePost = async (postId) => {
+        try { 
+            await del(config.COMMUNITY.DELETE(postId));
+            setPosts((prev) => prev.filter((p) => p.id !== postId));
+            if(selectedPost?.id === postId) {
+                setIsDetailOpen(false);
+                setSelectedPost(null);
+            }
+        } catch(e) {
+            console.error("게시글 삭제 실패:", e);
+            alert("게시글 삭제에 실패했습니다.");
+        }
+    };
+
+    // 댓글 생성
     const handleCommentAdd = (postId, newComment) => {
         const updatedPosts = posts.map(post => 
             post.id === postId 
@@ -75,11 +121,6 @@ const CommunityBoard = () => {
     const handleCloseDetail = () => {
         setIsDetailOpen(false);
         setSelectedPost(null);
-    };
-
-    const handleDeletePost = (postId) => {
-        const updatedPosts = posts.filter(post => post.id !== postId);
-        setPosts(updatedPosts);
     };
 
     const handleEditPost = (post) => {

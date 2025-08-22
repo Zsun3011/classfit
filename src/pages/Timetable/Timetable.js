@@ -16,7 +16,7 @@ const overlap = (a, b) => a.day === b.day && Math.max(toMin(a.start), toMin(b.st
 
 /** DETAIL 한 건 조회(학점/교수용) */
 async function fetchDetail(id) {
-  const res = await get(config.SUBJECT.DETAIL(id));
+  const res = await get(config.SUBJECTS.DETAIL(id));
   return res?.result ?? {};
 }
 
@@ -26,7 +26,7 @@ async function buildSchedule(conditions) {
   const target = Number(targetRaw) || 0;
 
   // 1) LIST 로드(이제 dayOfWeek/start/end/카테고리 포함됨)
-  const listRes = await get(config.SUBJECT.LIST, { sortBy: "id", direction: "asc" });
+  const listRes = await get(config.SUBJECTS.LIST, { sortBy: "id", direction: "asc" });
   const list = Array.isArray(listRes?.result) ? listRes.result : [];
 
   // 2) 후보 정리

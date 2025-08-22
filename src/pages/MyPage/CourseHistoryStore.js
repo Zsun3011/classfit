@@ -7,7 +7,7 @@ const norm = (s = "") => s.trim().toLowerCase();
 
 const storageKey = (uid = getUid()) => 
     uid ? keyFor(BASE_KEY, uid) : `${BASE_KEY}:__nouid__`;
-const eventName = (uid = getUid()) =>
+const uidEvent = (uid = getUid()) =>
     uid ? `${BASE_EVT}:${uid}` : `${BASE_EVT}:__nouid__`;
 
 const parse = (raw) => {
@@ -27,8 +27,8 @@ export const load = () => {
 
 const write = (items, uid = getUid()) => {
     localStorage.setItem(storageKey(uid), JSON.stringify(items));
-    saveProfile({courseHistory: items});
-    window.dispatchEvent(new CustomEvent(eventName(uid), { detail: items}));
+    window.dispatchEvent(new CustomEvent(uidEvent(uid), {detail: items}));
+    window.dispatchEvent(new CustomEvent(BASE_EVT, { detail: {uid, items}}));
 };
 
 // 저장, 변경 
@@ -36,21 +36,21 @@ export const save = (items) => write(items);
 
 export const subscribe = (cb) => {
     const uid = getUid();
-    const evt = eventName(uid);
-    const key =storageKey(uid);
-
     const onLocal = (e) => cb(e.detail ?? load());
+    const onGlobal = (e) => cb((e.detail?.items ?? e.detail) ?? load());
     const onStorage = (e) => {
-        if (e.key === key) cb(parse(e.newValue));
+        if (e.key === storageKey(uid)) cb(parse(e.newValue));
     };
 
-    window.addEventListener(evt, onLocal);
+    window.addEventListener(uidEvent(uid), onLocal);
+    window.addEventListener(BASE_EVT, onGlobal);
     window.addEventListener("storage", onStorage);
 
     cb(load());
 
     return () => {
-        window.removeEventListener(evt, onLocal);
+        window.removeEventListener(uidEvent(uid), onLocal);
+        window.removeEventListener(BASE_EVT, onGlobal);
         window.removeEventListener("storage", onStorage);
     };
 };
@@ -96,3 +96,6 @@ export const removeById = (id) => {
     const list = load().filter((it) => it.id !== id);
     write(list, uid);
 };
+
+// 서버 -> 로컬 초기화
+export const replaceAll = (items) => write(items);
