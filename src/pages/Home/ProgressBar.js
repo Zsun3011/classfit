@@ -24,7 +24,7 @@ const ProgressBar = ( { progressItems = [] }) => {
         fetchProgress();
     }, []);
 
-    const { totalEarnedCredits, totalRequiredCredits } = progress;
+    const { totalEarnedCredits, totalRequiredCredits } = progress || {};
     const percent = Math.floor((totalEarnedCredits / totalRequiredCredits) * 100);
     const remain = totalRequiredCredits - totalEarnedCredits;
 

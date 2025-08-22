@@ -34,7 +34,7 @@ const TimetableRecommendation = () => {
       day: dayMap[s.day] || "-",
       start: (s.startTime || "").slice(0, 5),
       end: (s.endTime || "").slice(0, 5),
-      type: s.courseType || s.discipline || "-",
+      category: s.category ?? s.courseType ?? s.discipline ?? s.type ?? "",
       credit: Number(s.credit ?? 0),
       color: palette[i % palette.length],
     }));
