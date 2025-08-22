@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Onboarding.css";
 import { post } from "../../api";
@@ -15,6 +15,10 @@ const CourseHistoryUploader = () => {
     const [cookies] = useCookies(["accessToken"]);
     const [loading, setLoading] = useState(false);
     const [list, setList] = useState([]);
+    const [stats, setStats] = useState({ current: 0, total: 0 }); 
+
+    const hasCurrent = stats.current > 0;
+    const hasAny = useMemo(() => Array.isArray(list) && list.length > 0, [list]); 
 
     // 토큰 없으면 로그인으로, 온보딩 순서 가드
     useEffect (() => {
@@ -83,8 +87,7 @@ const CourseHistoryUploader = () => {
      
     const handleSubmit =  () => {
         saveProfile({courseHistory: list});
-        const hasCourses = Array.isArray(list) && list.length > 0;
-        submit(!hasCourses); // 과목 입력해서 제출 없으면 빈 배열
+        submit(!hasAny);
     }
 
     return (
@@ -92,7 +95,7 @@ const CourseHistoryUploader = () => {
             {/*왼쪽 부분*/}
             <div className="CourseHistoryUploader-left">
                 <h1>기존 수강 이력</h1>
-                <p>이전에 수강한 과목을 검색해 추가하거나, 이 단계를 건너뛸 수 있습니다.</p>
+                <p>이전에 수강한 과목을 검색해 추가하거나, 나중에 할 수 있습니다.</p>
     
                 {/*진행 표시바*/}
                 <div className="progress-bar">
@@ -107,12 +110,13 @@ const CourseHistoryUploader = () => {
             <div className="CourseHistoryUploader-right">
                 <div className="CourseHistoryUploader-title">이전 수강 이력</div>
                 {/* 마이페이지의 컴포넌트 재사용 */}
-                <CourseHistoryManager onChange={handleHistoryChange} />
+                <CourseHistoryManager onChange={handleHistoryChange} onStats={setStats} />
                 {/*이전 수강 이력 입력*/}
-                <div className="sub-description1">과거에 수강한 과목을 추가하거나, 건너뛰기할 수 있습니다.</div>
                 <div className="button-container">
                     <button className="previous-button" onClick={handlePrevious}>이전</button>
-                    <button className="next-button1" onClick={handleSubmit}>나중에하기</button>
+                    <button className="next-button1" onClick={handleSubmit} disabled={loading}>
+                       {hasCurrent ? "추가하기" : "나중에하기"}
+                    </button>
                 </div>
             </div>
         </div>

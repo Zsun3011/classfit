@@ -288,11 +288,24 @@ select{
 .Edit-description {
     font-family: "IBMPlexSansKR-Regular";
     font-size: 16px;
-    color: #D14141;
+    color: #FA812F;
+    margin-bottom: 10px;
 }
 
 .CourseManage-icon {
     width: 40px;
     height: 40px;
     margin-bottom: -5px;
+}
+
+.search-row{
+    display: flex;
+    flex-direction: column;
+}
+
+.Edit-section{
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 10px;
 }

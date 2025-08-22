@@ -41,14 +41,7 @@ const config = {
     USER: {
         ME: `${BASE_URL}/api/users/me`, // GET(내 정보), DELETE(회원탈퇴)
     },
-    // 시간표 관리
-    TIMETABLE: {
-        CREATE: `${BASE_URL}/api/timetables`, // 시간표 생성 (POST)
-        LIST: `${BASE_URL}/api/timetables/me`, // 내 시간표 전체 조회 (GET)
-        UPDATE: (timetableId) => `${BASE_URL}/api/timetables/${timetableId}`, // 시간표 수정 (PUT)
-        DELETE: (timetableId) => `${BASE_URL}/api/timetables/${timetableId}`, // 시간표 삭제 (DELETE)
-    },
-    
+
     // 게시글
     COMMUNITY: {
         CREATE: `${BASE_URL}/api/community/posts`, // (POST) 게시글 생성
@@ -57,12 +50,22 @@ const config = {
         LIST: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}` // (GET) 게시글 조회
     },
 
+    // 시간표 관리
+    TIMETABLE: {
+        CREATE: `${BASE_URL}/api/timetables`, // 시간표 생성 (POST)
+        LIST: `${BASE_URL}/api/timetables/me`, // 내 시간표 전체 조회 (GET)
+        UPDATE: (timetableId) => `${BASE_URL}/api/timetables/${timetableId}`, // 시간표 수정 (PUT)
+        DELETE: (timetableId) => `${BASE_URL}/api/timetables/${timetableId}`, // 시간표 삭제 (DELETE)
+    },
+
+    //과목 조회
     SUBJECTS: {
         SEARCH: () => `${BASE_URL}/api/subjects/search`, // GET(과목 검색), params: { name, professor }
         DETAIL: (id) => `${BASE_URL}/api/subjects/${id}`, // GET (과목 가져오기)
         LIST: `${BASE_URL}/api/subjects`,
         BY_SUBJECT_ID: (subjectId) => `${BASE_URL}/api/subjects/id/${subjectId}`,
     },
+
 };
 
 export default config;

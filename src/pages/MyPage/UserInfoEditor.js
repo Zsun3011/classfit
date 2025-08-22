@@ -87,7 +87,7 @@ const UserInfoEditor = () => {
           window.removeEventListener("profile:update", onCustom);
           window.removeEventListener("storage", onStorage);
         };
-      }, []);   
+      }, [cookies.accessToken]);  
 
     const clearClientAuth = () => {
         removeCookie("accessToken", {path: "/"});

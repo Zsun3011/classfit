@@ -7,16 +7,11 @@ import "../../styles/Modal.css"
 
 const FavoriteCourseModal = ({ selectedCourses, onSelectCourse, onConfirm, onCancel }) => {
     const [favoriteCourses, setFavoriteCourses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     // 즐겨찾기 과목 목록을 API에서 조회
     useEffect(() => {
         const fetchFavoriteCourses = async () => {
             try {
-                setLoading(true);
-                setError(null);
-                
                 const response = await get(config.INTEREST.LIST);
                 // API 응답 구조에 따라 조정 필요 (response.result 또는 response 직접 사용)
                 const courses = Array.isArray(response) ? response : (response?.result || []);
@@ -24,9 +19,6 @@ const FavoriteCourseModal = ({ selectedCourses, onSelectCourse, onConfirm, onCan
                 setFavoriteCourses(courses);
             } catch (err) {
                 console.error("즐겨찾기 과목 조회 실패:", err);
-                setError("즐겨찾기 과목을 불러오는데 실패했습니다.");
-            } finally {
-                setLoading(false);
             }
         };
 

@@ -31,7 +31,7 @@ const LoginMethodSelector = () => {
     const [passwordError, setPasswordError] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const [cookies, setCookie] = useCookies(["accessToken", "refreshToken"]);
+    const [, setCookie] = useCookies(["accessToken", "refreshToken"]);
     const navigate = useNavigate();
 
     

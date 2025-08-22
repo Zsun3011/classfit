@@ -8,6 +8,7 @@ import "../../styles/CourseManager.css";
 
 export default function CourseHistoryManager({
   onChange,
+  onStats,
   syncServer = false,
   authReady = true,
 }) {
@@ -90,7 +91,7 @@ export default function CourseHistoryManager({
   const currentYear = new Date().getFullYear();
   const endYear = currentYear;
   const enrollment = typeof profile.enrollmentYear === "number" ? profile.enrollmentYear : endYear;
-  const startYear = Math.min(enrollment, endYear - 2);
+  const startYear = Math.min(enrollment, endYear);   // 입학년도부터 현재년도까지만
 
   const yearOptions = useMemo(
     () => Array.from({ length: endYear - startYear + 1 }, (_, i) => String(startYear + i)),
@@ -245,73 +246,77 @@ export default function CourseHistoryManager({
       }
     }
     removeById(id);
+    setItems(load());
+    onChangeRef.current?.(load());
   };
 
   const filtered = items.filter((it) => it.year === year && it.semester === semester);
+
+  useEffect(() => {
+    onStats?.({ current: filtered.length, total: items.length });
+  }, [filtered.length, items.length, onStats]);
 
   return (
     <div className="CourseHistoryManager">
       {/* 연도/학기 선택 + 검색 */}
       <div className="search-row">
-        <div className="select-group">
-          <select value={year} onChange={(e) => setYear(e.target.value)}>
-            {yearOptions.map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-          <select value={semester} onChange={(e) => setSemester(e.target.value)}>
-            <option value="1학기">1학기</option>
-            <option value="2학기">2학기</option>
-            <option value="여름학기">여름학기</option>
-            <option value="겨울학기">겨울학기</option>
-          </select>
-        </div>
-
-        <div className="Edit-description">
-          수강한 과목의 해당 연도와 학기를 먼저 선택한 후 과목 추가 및 검색을 해 주세요.
-        </div>
-
-        {/* 입력 + 드롭다운 */}
-        <div className="input-container-search" style={{ maxWidth: 480, position: "relative" }}>
-          <input
-            type="text"
-            placeholder="과목명을 검색하세요."
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              if (e.target.value.trim()) requestOpen(); // 타이핑할 때만 열기
-              else setOpen(false);
-            }}
-            // onFocus로 자동 열기는 제거 
-            className="course-manage-modal-input"
-          />
-
-          {open && query.trim() !== "" && (
-            candidates.length > 0 ? (
-              <ul className="dropdown-list">
-                {candidates.map((s) => (
-                  <li
-                    key={s.id}
-                    className="dropdown-item"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      addCourseBySubject(s);
-                    }}
-                    title={s.description || ""}
-                  >
-                    {s.name}
-                    {s.professor ? ` · ${s.professor}` : ""}
-                    {typeof s.credit === "number" ? ` · ${s.credit}학점` : ""}
-                  </li>
+        <div className="Edit-description">수강한 과목의 해당 연도와 학기를 먼저 선택해 주세요.</div>
+          <div className="Edit-section">
+            <div className="select-group">
+              <select value={year} onChange={(e) => setYear(e.target.value)}>
+                {yearOptions.map((y) => (
+                  <option key={y} value={y}>{y}</option>
                 ))}
-              </ul>
-            ) : (
-              <div className="dropdown-list no-result">검색 결과가 없습니다.</div>
-            )
-          )}
+              </select>
+              <select value={semester} onChange={(e) => setSemester(e.target.value)}>
+                <option value="1학기">1학기</option>
+                <option value="2학기">2학기</option>
+                <option value="여름학기">여름학기</option>
+                <option value="겨울학기">겨울학기</option>
+              </select>
+            </div>
+
+            {/* 입력 + 드롭다운 */}
+            <div className="input-container-search" style={{ maxWidth: 480, position: "relative" }}>
+              <input
+                type="text"
+                placeholder="과목명을 검색하세요."
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  if (e.target.value.trim()) requestOpen(); // 타이핑할 때만 열기
+                  else setOpen(false);
+                }}
+                // onFocus로 자동 열기는 제거 
+                className="course-manage-modal-input"
+              />
+
+              {open && query.trim() !== "" && (
+                candidates.length > 0 ? (
+                  <ul className="dropdown-list">
+                    {candidates.map((s) => (
+                      <li
+                        key={s.id}
+                        className="dropdown-item"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          addCourseBySubject(s);
+                        }}
+                        title={s.description || ""}
+                      >
+                        {s.name}
+                        {s.professor ? ` · ${s.professor}` : ""}
+                        {typeof s.credit === "number" ? ` · ${s.credit}학점` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="dropdown-list no-result">검색 결과가 없습니다.</div>
+                )
+              )}
+          </div>
         </div>
       </div>
-
       {/* 선택된 과목 리스트 */}
       <table className="Course-table" style={{ marginTop: 16 }}>
         <thead>
