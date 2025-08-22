@@ -118,7 +118,7 @@ async function buildSchedule(conditions) {
 
 const Timetable = ({ conditions, data: dataProp, onGenerated, isModal = false, isMini = false }) => {
   const [data, setData] = useState([]); // ✅ 누락된 상태 추가
-  const [summary, setSummary] = useState({ totalCredit: 0, count: 0 });
+  const [, setSummary] = useState({ totalCredit: 0, count: 0 });
   const [loading, setLoading] = useState(false);
   const displayOnly = Array.isArray(dataProp);
 
