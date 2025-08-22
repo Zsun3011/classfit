@@ -50,7 +50,6 @@ const LoginMethodSelector = () => {
         setLoading(true);
 
         try {
-            console.log("LOGIN URL:", config.AUTH.LOGIN, "BASE:", config?.API_URL);
 
             const data = { email, password };
             const res = await post(config.AUTH.LOGIN, data, 

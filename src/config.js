@@ -42,6 +42,20 @@ const config = {
     USER: {
         ME: `${BASE_URL}/api/users/me`, // GET(내 정보), DELETE(회원탈퇴)
     },
+
+    SUBJECTS: {
+        SEARCH: () => `${BASE_URL}/api/subjects/search`, // GET(과목 검색), params: { name, professor }
+        DETAIL: (id) => `${BASE_URL}/api/subjects/${id}`, // GET (과목 가져오기)
+    },
+
+    // 게시글
+    COMMUNITY: {
+        CREATE: `${BASE_URL}/api/community/posts`, // (POST) 게시글 생성
+        UPDATE: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}`, // (PUT) 게시글 수정
+        DELETE: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}`, // (DELETE) 게시글 삭제
+        LIST: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}` // (GET) 게시글 조회
+    }
+    
 };
 
 export default config;

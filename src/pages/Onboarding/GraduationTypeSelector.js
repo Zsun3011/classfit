@@ -4,7 +4,7 @@ import "../../styles/Onboarding.css";
 import { post } from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
-import { toGradEnum, buildProfilePayload } from "./payload";
+import { toGradEnum, buildProfilePayload } from "./payload.js";
 import { isProfileCompleted, readProfile, saveProfile } from "./commonutil";
 
 

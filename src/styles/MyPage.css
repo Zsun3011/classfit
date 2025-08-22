@@ -227,6 +227,11 @@
     cursor: pointer;
 }
 
+.dropdown-list.no-result {
+    font-family: "IBMPlexSansKR-Regular";
+    color: #888;
+}
+
 /* 미디어 쿼리 */
 @media (max-width: 765px) {
     .UserInfoEditor-section-right {

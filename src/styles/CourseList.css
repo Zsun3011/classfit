@@ -254,6 +254,11 @@
     background-color: #0056B3;
 }
 
+/* step4에서만 폰트 크기 줄임 */
+.CourseHistoryUploader-container .Course-table th {
+    font-size: 18px;
+}
+
 /* 미디어 쿼리 */
 @media (max-width: 1100px) {
     .CourseFilter-container {
