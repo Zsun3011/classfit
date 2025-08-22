@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Onboarding.css";
 import { post } from "../../api";
@@ -8,11 +8,17 @@ import { buildProfilePayload } from "./payload";
 import CourseHistoryManager from "../MyPage/CourseHistoryManager";
 import { isProfileCompleted, readProfile, saveProfile, markProfileCompleted, readDisplayName } from "./commonutil";
 
+
 const CourseHistoryUploader = () => {
     
     const navigate = useNavigate();
     const [cookies] = useCookies(["accessToken"]);
     const [loading, setLoading] = useState(false);
+    const [list, setList] = useState([]);
+    const [stats, setStats] = useState({ current: 0, total: 0 }); 
+
+    const hasCurrent = stats.current > 0;
+    const hasAny = useMemo(() => Array.isArray(list) && list.length > 0, [list]); 
 
     // 토큰 없으면 로그인으로, 온보딩 순서 가드
     useEffect (() => {
@@ -33,15 +39,18 @@ const CourseHistoryUploader = () => {
     },[cookies.accessToken, navigate]);
 
     // CourseHistoryManager 변경사항을 profileData에도 저장 -> 마이페이지/진척도페이지에 동기화
-    const handleHistoryChange = (list) => {
-        saveProfile({courseHistory: list});
-    };
+    const handleHistoryChange = useCallback((next) => {
+        setList(next);
+        saveProfile({courseHistory: next});
+    },[]);
 
     const submit = async (isSkip = false) => {
         if (loading) return;
         setLoading(true);
 
-        const payload = buildProfilePayload({includeCourses: !isSkip});
+        const payload = buildProfilePayload({
+            includeCourses: !isSkip,
+        });
 
         try {
             await post(config.PROFILE.STEP4, payload);
@@ -77,11 +86,8 @@ const CourseHistoryUploader = () => {
     };
      
     const handleSubmit =  () => {
-        submit(false); // 과목 입력해서 제출
-    }
-
-    const handleSkip = () => {
-        submit(true); // 나중에 하기 (빈 배열)
+        saveProfile({courseHistory: list});
+        submit(!hasAny);
     }
 
     return (
@@ -89,7 +95,7 @@ const CourseHistoryUploader = () => {
             {/*왼쪽 부분*/}
             <div className="CourseHistoryUploader-left">
                 <h1>기존 수강 이력</h1>
-                <p>이전에 수강한 과목을 검색해 추가하거나, 이 단계를 건너뛸 수 있습니다.</p>
+                <p>이전에 수강한 과목을 검색해 추가하거나, 나중에 할 수 있습니다.</p>
     
                 {/*진행 표시바*/}
                 <div className="progress-bar">
@@ -104,20 +110,13 @@ const CourseHistoryUploader = () => {
             <div className="CourseHistoryUploader-right">
                 <div className="CourseHistoryUploader-title">이전 수강 이력</div>
                 {/* 마이페이지의 컴포넌트 재사용 */}
-                <CourseHistoryManager onChange={handleHistoryChange} />
+                <CourseHistoryManager onChange={handleHistoryChange} onStats={setStats} />
                 {/*이전 수강 이력 입력*/}
-                <div className="sub-description1">과거에 수강한 과목을 추가하거나, 건너뛰기할 수 있습니다.</div>
-                <div className="submit-container">
-                    <button 
-                    className="submit-button" 
-                    onClick={handleSubmit}
-                    >
-                        제출
-                    </button>
-                </div>
                 <div className="button-container">
                     <button className="previous-button" onClick={handlePrevious}>이전</button>
-                    <button className="next-button1" onClick={handleSkip}>나중에하기</button>
+                    <button className="next-button1" onClick={handleSubmit} disabled={loading}>
+                       {hasCurrent ? "추가하기" : "나중에하기"}
+                    </button>
                 </div>
             </div>
         </div>

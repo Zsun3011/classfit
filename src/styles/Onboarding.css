@@ -195,8 +195,10 @@ input {
     padding: 30px;
 }
 
+
 .CourseHistoryUploader-container {
     margin-bottom: 150px auto 250px;
+    overflow: visible;
 }
 
 /*왼쪽 화면*/
@@ -251,12 +253,33 @@ input {
     flex-direction: column;
 }
 
+/* 오른쪽 패널을 컨테이너 너비보다 크게 */
+.CourseHistoryUploader-right {
+  /* 기존의 width:50% 를 이겨야 하므로 특이성 올림 */
+  width: 800px;             /* 원하는 넓이로 */
+  flex: 0 0 800px;          /* shrink 금지 + 고정 basis */
+  margin-left: auto;         /* 라인의 오른쪽 끝으로 밀착 */
+  min-width: 0;              /* 긴 내용 줄바꿈 허용 */
+}
+
+.CourseHistoryUploader-right .Course-table th:nth-child(1), .Course-table td:nth-child(1) {
+    width: 30%;
+}
+
+.CourseHistoryUploader-right .Course-table th:nth-child(2), .Course-table td:nth-child(2) {
+    width: 15%;
+}
+
 .SchoolSelector-title,
 .AdmissionYearInput-title,
 .GraduationTypeSelector-title,
 .CourseHistoryUploader-title {
     font-family: "IBMPlexSansKR-Medium";
     font-size: 24px;
+}
+
+.CourseHistoryUploader-title{
+    margin-bottom: 20px;
 }
 
 /*input 설정*/
@@ -385,7 +408,7 @@ input {
     font-family: "IBMPlexSansKR-Regular";
     font-size: 16px;
     margin-top: -15px;
-    color: #D14141;
+    color: #FA812F;
 }
 
 /*졸업 유형 선택 버튼*/

@@ -57,6 +57,16 @@
 .Course-table th:nth-child(1),
 .Course-table td:nth-child(1) {
     width: 8%; /* 즐겨찾기 */
+}햐
+
+.CourseHistoryManager .Course-table th:nth-child(1),
+.Course-table td:nth-child(1) {
+    width: 30%; /* 과목명 */
+}
+
+.CourseHistoryManager .Course-table th:nth-child(2),
+.Course-table td:nth-child(2) {
+    width: 15%; /* 과목명 */
 }
 
 .Course-table th:nth-child(2),
@@ -291,6 +301,11 @@
 
 .CourseFilter-apply-button:hover {
     background-color: #0056B3;
+}
+
+/* step4에서만 폰트 크기 줄임 */
+.CourseHistoryUploader-container .Course-table th {
+    font-size: 18px;
 }
 
 /* 미디어 쿼리 */

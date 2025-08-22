@@ -141,6 +141,8 @@ const NotificationManager = () => {
             <div className="Notification-section">
                 <div className="Notification-label">이전 수강 이력</div>
                 <CourseHistoryManager
+                syncServer
+                authReady={Boolean(cookies.accessToken)}
                 onChange={(items) => {
                     saveProfile({courseHistory: items});
                 }}
