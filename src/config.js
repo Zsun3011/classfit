@@ -33,9 +33,8 @@ const config = {
 
     // 졸업요건 / 진척도
     GRADUATION: {
-        LIST: `${BASE_URL}/api/graduation/requirements`, // 요건 리스트 가져오기 (GET)
-        REQUIRE: (id) => `${BASE_URL}/api/graduation/requirements/${id}`, // PUT, DELETE
-        PROGRESS: (studentId) => `${BASE_URL}/api/graduation/requirements/${studentId}`, // 요약 (GET)
+        LIST: `${BASE_URL}/api/graduation/requirements`, // 졸업 요건 전체 조회 (GET)
+        PROGRESS_ME: `${BASE_URL}/api/graduation/progress/me`, // 내 졸업 진행도 조회 (GET)
     },
 
     //과목 조회

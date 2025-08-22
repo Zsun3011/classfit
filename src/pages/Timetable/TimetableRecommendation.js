@@ -127,13 +127,30 @@ const TimetableRecommendation = () => {
     }
   };
 
-  // 확정
-  const handleConfirmTable = () => {
-    if (!conditions) return;
-    sessionStorage.setItem("confirmedTable", JSON.stringify({ timetable: conditions }));
-    alert("확정된 시간표가 저장되었습니다.");
+  //확정
+  const handleConfirmTable = async () => {
+    if (!latestBlocks?.length || !conditions) return alert("확정할 시간표가 없습니다.");
+    const latest = tables[0];
+    if (!latest) return alert("저장된 시간표가 없습니다.");
+
+    const pt = conditions.preferredTimes || [];
+    const preferTime = pt.length ? pt.join(",") : "오전,오후"; // 선택 없으면 기본값
+    const payload = {
+      preferCredit: Number(conditions.credit || 0),
+      preferTime,
+      morningClassNum: latestBlocks.filter(b => +((b.start||"00:00").split(":")[0]) < 12).length,
+      freePeriodNum: ["월","화","수","목","금"].filter(d => !latestBlocks.some(b => b.day === d)).length,
+      essentialCourse: latestBlocks.filter(b=>/\(필수\)$/.test(b.subject)).map(b=>b.subject.replace(/\(필수\)$/,"")).join(","),
+      graduationRate: 0,
+      timeSlots: blocksToSlots(latestBlocks),
+    };
+
+    await api.put(config.TIMETABLE.UPDATE(latest.timetableId), payload); // ✅ 서버에도 확정 반영
+    sessionStorage.setItem("confirmedTable", JSON.stringify(payload));   // 로컬에서도 유지
+    alert("시간표가 확정되었습니다.");
     navigate("/home");
   };
+
 
   // 페이지네이션 계산
   const totalPages = Math.ceil(tables.length / itemsPerPage);

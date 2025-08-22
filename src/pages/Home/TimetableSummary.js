@@ -4,6 +4,8 @@ import BaseTimetable from "../../components/BaseTimetable";
 import "../../styles/Home.css";
 import Timetable from "../Timetable/Timetable";
 import { getDashboardInfo } from "../../components/dashboardUtils";
+import { get } from "../../api";
+import config from "../../config";
 
 const TimetableSummary = () => {
   const [confirmedTable, setConfirmedTable] = useState(null);
@@ -22,11 +24,22 @@ const TimetableSummary = () => {
   };
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("confirmedTable");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setConfirmedTable(parsed.timetable);
+    async function fetchConfirmed() {
+      try {
+        // 내 시간표 목록 가져오기
+        const res = await get(config.TIMETABLE.LIST);
+        const list = Array.isArray(res) ? res : res?.result || [];
+
+        // timetableId 기준 최신 하나 선택
+        const latest = list.sort((a,b)=> (b.timetableId||0)-(a.timetableId||0))[0];
+        if (latest) {
+          setConfirmedTable(latest);
+        }
+      } catch (e) {
+        console.error("시간표 불러오기 실패", e);
+      }
     }
+    fetchConfirmed();
   }, []);
 
   // Timetable 생성 결과(blocks 등)를 받아 요약 갱신
@@ -49,10 +62,7 @@ const TimetableSummary = () => {
 
       <div className="TimetableSummary-section-top">
         {confirmedTable ? (
-          <>
-            {/* onGenerated으로 블록/학점 전달받아 info 갱신 */}
-            <Timetable conditions={confirmedTable} onGenerated={handleGenerated} />
-          </>
+          <Timetable data={confirmedTable.timeSlots} onGenerated={handleGenerated} />
         ) : (
           <BaseTimetable />
         )}
