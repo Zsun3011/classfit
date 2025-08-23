@@ -97,12 +97,8 @@ export default function CourseHistoryManager({
   const currentYear = new Date().getFullYear();
   const endYear = currentYear;
   const enrollment = typeof profile.enrollmentYear === "number" ? profile.enrollmentYear : endYear;
-<<<<<<< HEAD
-  const startYear = Math.min(enrollment, endYear - 2);
-=======
   const startYear = Math.min(enrollment, endYear);   // 입학년도부터 현재년도까지만
-
->>>>>>> origin/main
+  
   const yearOptions = useMemo(
     () => Array.from({ length: endYear - startYear + 1 }, (_, i) => String(startYear + i)),
     [startYear, endYear]
