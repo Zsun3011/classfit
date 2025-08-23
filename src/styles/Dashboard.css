@@ -6,7 +6,7 @@
 .dashboard-container {
   font-family: 'IBMPlexSansKR-Regular';
   background-color: #fdf6e3;
-  padding: 20px;
+  padding: 20px 20px 0px 20px;
   border-radius: 12px;
   width: 400px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -63,5 +63,5 @@
 
 .dashboardsection-container{
   display: flex;
-  gap: 15px;
+  flex-direction: column;
 }

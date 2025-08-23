@@ -18,8 +18,8 @@ const FavoriteCourseList = ({courses, favoriteCourseIds, onToggleFavorite}) => {
                         <th>영역</th>
                         <th>학점</th>
                         <th>담당교수</th>
-                        <th>정원</th>
                         <th>요일/시간</th>
+                        <th>강좌유형</th>
                     </tr>
                 </thead>
                 <tbody>

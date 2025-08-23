@@ -31,6 +31,10 @@ const LoginMethodSelector = () => {
     const [password, setPassword] = useState("");
     const [passwordError, setPasswordError] = useState(false);
     const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
     const [, setCookie] = useCookies(["accessToken", "refreshToken"]);
     const navigate = useNavigate();
 

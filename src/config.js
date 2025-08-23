@@ -19,9 +19,9 @@ const config = {
     },
 
     INTEREST: {
-        ENROLL: `${BASE_URL}/api/interest/settings`, // 과목 즐겨찾기 등록 (POST)
-        LIST: userId => `${BASE_URL}/api/interest/user/${userId}`, // 즐겨찾기 조회 (GET)
-        DELETE: id => `${BASE_URL}/api/interest/settings/${id}`, // 즐겨찾기에서 삭제 (DELETE)
+        ENROLL: (subjectId) => `${BASE_URL}/api/interest/subjects/${subjectId}`, // 등록 (POST)
+        LIST: `${BASE_URL}/api/interest/me`, // 조회 (GET)
+        DELETE: (subjectId) => `${BASE_URL}/api/interest/subjects/${subjectId}`, // 삭제 (DELETE)
     },
 
     // 수강이력
@@ -33,9 +33,8 @@ const config = {
 
     // 졸업요건 / 진척도
     GRADUATION: {
-        LIST: `${BASE_URL}/api/graduation/requirements`, // 요건 리스트 가져오기 (GET)
-        REQUIRE: (id) => `${BASE_URL}/api/graduation/requirements/${id}`, // PUT, DELETE
-        PROGRESS: (studentId) => `${BASE_URL}/api/graduation/requirements/${studentId}`, // 요약 (GET)
+        LIST: `${BASE_URL}/api/graduation/requirements`, // 졸업 요건 전체 조회 (GET)
+        PROGRESS_ME: `${BASE_URL}/api/graduation/progress/me`, // 내 졸업 진행도 조회 (GET)
     },
 
     // 회원탈퇴
@@ -43,20 +42,39 @@ const config = {
         ME: `${BASE_URL}/api/users/me`, // DELETE(회원탈퇴), GET(내정보)
     },
 
+<<<<<<< HEAD
     SUBJECTS: {
         SEARCH: () => `${BASE_URL}/api/subjects/search`, // GET(과목 검색), params: { name, professor }
         DETAIL_BY_DBID: (id) => `${BASE_URL}/api/subjects/${encodeURIComponent(id)}`, // GET (과목 가져오기)
         DETAIL_BY_SUBJECT_ID: (subjectId) => `${BASE_URL}/api/subjects/id/${encodeURIComponent(subjectId)}`,
     },
 
+=======
+>>>>>>> origin/main
     // 게시글
     COMMUNITY: {
         CREATE: `${BASE_URL}/api/community/posts`, // (POST) 게시글 생성
         UPDATE: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}`, // (PUT) 게시글 수정
         DELETE: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}`, // (DELETE) 게시글 삭제
         LIST: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}` // (GET) 게시글 조회
-    }
-    
+    },
+
+    // 시간표 관리
+    TIMETABLE: {
+        CREATE: `${BASE_URL}/api/timetables`, // 시간표 생성 (POST)
+        LIST: `${BASE_URL}/api/timetables/me`, // 내 시간표 전체 조회 (GET)
+        UPDATE: (timetableId) => `${BASE_URL}/api/timetables/${timetableId}`, // 시간표 수정 (PUT)
+        DELETE: (timetableId) => `${BASE_URL}/api/timetables/${timetableId}`, // 시간표 삭제 (DELETE)
+    },
+
+    //과목 조회
+    SUBJECTS: {
+        SEARCH: () => `${BASE_URL}/api/subjects/search`, // GET(과목 검색), params: { name, professor }
+        DETAIL: (id) => `${BASE_URL}/api/subjects/${id}`, // GET (과목 가져오기)
+        LIST: `${BASE_URL}/api/subjects`,
+        BY_SUBJECT_ID: (subjectId) => `${BASE_URL}/api/subjects/id/${subjectId}`,
+    },
+
 };
 
 export default config;

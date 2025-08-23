@@ -1,29 +1,22 @@
-import React, { useState, useEffect } from "react";
-import FavoriteCourseModal from "./FavoriteCourseModal"; // FavoriteCourseModal 컴포넌트 import
+import React, { useState } from "react";
+import FavoriteCourseModal from "./FavoriteCourseModal"; 
 import "../../styles/MyPage.css";
 import "../../styles/CourseList.css";
-import dummyCourses from "../CourseList/dummyCourses";
 
-const InputConditionForm = ({ onGenerate }) => {
+const InputConditionForm = ({ onGenerate }) => { // courses props 제거 (API에서 직접 조회하므로 불필요)
     const [selectedSubjects, setSelectedSubjects] = useState([]);
     const [credit, setCredit] = useState("");
     const [preferredTimes, setPreferredTimes] = useState([]);
     const [avoidDays, setAvoidDays] = useState([]);
-    const [keywords, setKeywords] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tempSelectedCourses, setTempSelectedCourses] = useState([]);
 
-    const [favoriteIds, setFavoriteIds] = useState([]);
-
-    useEffect(() => {
-    const storedFavorites = JSON.parse(localStorage.getItem("favoriteIds") || "[]");
-    setFavoriteIds(storedFavorites);
-    }, []);
-
+    // 선택된 과목의 정보를 저장 (API에서 조회한 즐겨찾기 과목 정보 저장용)
+    const [selectedSubjectInfo, setSelectedSubjectInfo] = useState([]);
 
     const handleSubmit = () => {
-        const selectedSubjectNames = selectedSubjects
-            .map(id => dummyCourses.find(course => course.id === id)?.name)
+        const selectedSubjectNames = selectedSubjectInfo
+            .map(subject => subject.subjectName || subject.name)
             .filter(Boolean);
 
         const message = `
@@ -32,7 +25,6 @@ const InputConditionForm = ({ onGenerate }) => {
             ▪ 희망 학점: ${credit || "없음"}
             ▪ 선호 시간대: ${preferredTimes.length > 0 ? preferredTimes.join(", ") : "없음"}
             ▪ 피하고 싶은 요일: ${avoidDays.length > 0 ? avoidDays.join(", ") : "없음"}
-            ▪ 관심 키워드: ${keywords.length > 0 ? keywords.join(", ") : "없음"}
         `.trim();
 
         alert(message);
@@ -41,8 +33,7 @@ const InputConditionForm = ({ onGenerate }) => {
             selectedSubjects,
             credit,
             preferredTimes,
-            avoidDays,
-            keywords
+            avoidDays
         });
     };
 
@@ -62,8 +53,10 @@ const InputConditionForm = ({ onGenerate }) => {
         );
     };
 
-    const handleConfirmSelection = () => {
+    const handleConfirmSelection = (selectedCourseData) => {
+        // FavoriteCourseModal에서 선택된 과목 정보를 받아서 저장
         setSelectedSubjects(tempSelectedCourses);
+        setSelectedSubjectInfo(selectedCourseData || []); // 과목 정보도 함께 저장
         setIsModalOpen(false);
     };
 
@@ -77,13 +70,12 @@ const InputConditionForm = ({ onGenerate }) => {
         setIsModalOpen(true);
     };
 
-   const getSelectedSubjectNames = () => {
-    return selectedSubjects
-        .map(id => dummyCourses.find(course => course.id === id)?.name)
-        .filter(Boolean)
-        .join(", ");
+    const getSelectedSubjectNames = () => {
+        return selectedSubjectInfo
+            .map(subject => subject.subjectName || subject.name)
+            .filter(Boolean)
+            .join(", ");
     };
-
 
     return (
         <div className="inputCondition-container">
@@ -161,24 +153,6 @@ const InputConditionForm = ({ onGenerate }) => {
                         </label>
                     ))}
                 </div>
-
-                {/* 교양 관심 키워드 */}
-                <div className="form-group">
-                    <label>교양 관심 키워드</label>
-                    {["철학과 역사", "문학과 예술", "인간과 사회", "자연과 과학", "세계와 문학", "자기계발", "소양"].map((keyword) => (
-                        <label key={keyword}>
-                            <input
-                                type="checkbox"
-                                value={keyword}
-                                checked={keywords.includes(keyword)}
-                                onChange={() =>
-                                    handleCheckbox(keyword, setKeywords, keywords)
-                                }
-                            />
-                            {keyword}
-                        </label>
-                    ))}
-                </div>
             </div>
             <button className="button" onClick={handleSubmit}>
                 AI 시간표 생성
@@ -193,8 +167,6 @@ const InputConditionForm = ({ onGenerate }) => {
                         </div>
                         <div className="modal-content">
                             <FavoriteCourseModal
-                                courses={dummyCourses}
-                                favoriteCourseIds={favoriteIds}
                                 selectedCourses={tempSelectedCourses}
                                 onSelectCourse={handleSelectCourse}
                                 onConfirm={handleConfirmSelection}
@@ -204,7 +176,6 @@ const InputConditionForm = ({ onGenerate }) => {
                     </div>
                 </div>
             )}
-
         </div>
     );
 };

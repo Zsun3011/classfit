@@ -1,46 +1,54 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
-import ProgressDashboard from "../../components/ProgressDashboard";
 import "../../styles/Home.css";
-
+import { get } from "../../api";
+import config from "../../config";
 
 const ProgressBar = ( { progressItems = [] }) => {
-
     const navigate = useNavigate();
-
+    const [progress, setProgress] = useState(null);
     //수강 이력 입력하기 페이징
     const handleInput = () => {
-        navigate("/graduationDetail");
+        navigate("/mypage");
     }
+
+    useEffect(() => {
+        const fetchProgress = async () => {
+        try {
+            const res = await get(config.GRADUATION.PROGRESS_ME);
+            setProgress(res);
+        } catch (e) {
+            console.error("졸업 진행도 불러오기 실패", e);
+        }
+        };
+        fetchProgress();
+    }, []);
+
+    const { totalEarnedCredits, totalRequiredCredits } = progress || {};
+    const percent = Math.floor((totalEarnedCredits / totalRequiredCredits) * 100);
+    const remain = totalRequiredCredits - totalEarnedCredits;
 
     return (
         <div className="ProgressBar-container">
             <div className="ProgressBar-container-title">졸업 진척률</div>
-            {progressItems.every(item => item.percent === 0) && (
-                <p>아직 수강 이력이 입력되지 않았어요.</p>
-            )}
-            {progressItems.every(item => item.percent === 0) && (
-                <button className="CourseHistoryInput-button" onClick={handleInput}>
-                    +수강 이력 입력하기
-                </button>
-            )}
+            <p>정확한 계산을 위해 수강 이력을 모두 입력해 주세요!</p>
+            <button className="CourseHistoryInput-button" onClick={handleInput}>
+                +수강 이력 입력하기
+            </button>
             <div className="ProgressBar-section">
                 <div className="CourseInfoBox">
                     <div className="Box-title">총 이수 학점</div>
-                    <div className="Box-content">{progressItems[0].score.replace("학점", "")}</div>
+                    <div className="Box-content">{totalEarnedCredits}/{totalRequiredCredits}</div>
                 </div>
                 <div className="CourseInfoBox">
                     <div className="Box-title">진행률</div>
-                    <div className="Box-content">{progressItems[0].percent}%</div>
+                    <div className="Box-content">{percent}%</div>
                 </div>
                 <div className="CourseInfoBox">
                     <div className="Box-title">잔여 학점</div>
-                    <div className="Box-content">{120 - parseInt(progressItems[0].score.split("/")[0])}</div>
+                    <div className="Box-content">{remain}</div>
                 </div>
-            </div>
-            <div className="ProgressBar-section">
-                <ProgressDashboard progressItems={progressItems} />
-            </div>
+            </div>  
         </div>
     )
 }

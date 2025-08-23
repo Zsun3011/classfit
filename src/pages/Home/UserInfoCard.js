@@ -40,7 +40,6 @@ const UserInfoCard = () => {
     const navigate = useNavigate();
     const [cookies] = useCookies(["accessToken"]);
     const [profile, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
     const ranRef = useRef(false);
 
     // 토큰 없으면 로그인으로, 프로필은 있는대로 표시(비어 있으면 플레이스 홀더)
@@ -55,7 +54,6 @@ const UserInfoCard = () => {
         }
 
         setProfile(readProfile());
-        setLoading(false);
     
     }, [cookies.accessToken, navigate]);
 
@@ -84,7 +82,7 @@ const UserInfoCard = () => {
             window.removeEventListener("profile:update", onCustom);
             window.removeEventListener("storage", onStorage);
         };
-    },[]);
+    },[cookies.accessToken]);
 
     const university = profile?.university || "학교 정보";
     const userName = profile?.name || "사용자 이름";

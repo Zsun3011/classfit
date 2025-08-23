@@ -11,7 +11,7 @@ const TableCard = ({table, onClick}) => {
                 <div className="table-gbc">{table.gbc}</div>
             </div>
             <div className="table-preview">
-                <Timetable conditions={table.conditions} isMini={true} />
+                <Timetable data={table.data || []} isMini={true} />
             </div>
         </div>
     );
