@@ -3,7 +3,7 @@ import { load, subscribe, upsertByName, patchById, removeById, replaceAll } from
 import { readProfile, getUid } from "../Onboarding/commonutil";
 import { get, post, del } from "../../api";
 import config from "../../config";
-import { toServerPayload, fromServerItem } from "./CourseHistoryMapping";
+import { fromServerItem } from "./CourseHistoryMapping";
 import "../../styles/CourseManager.css";
 
 export default function CourseHistoryManager({
@@ -19,6 +19,12 @@ export default function CourseHistoryManager({
   const debounceRef = useRef(null);
   const abortRef = useRef(null);
   const fetchedRef = useRef(false);
+
+  const getSubjectIdForApi = (detail, summary) => {
+    const raw = detail?.id ?? summary?.id ?? null; // DB PK만 사용
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -44,7 +50,7 @@ export default function CourseHistoryManager({
     return unsub;
   }, [uidReady]);
 
-  // 서버 이력 불러오기
+  // 수강 이력 불러오기
   useEffect(() => {
     if (!syncServer || !authReady || !uidReady || fetchedRef.current) return;
     fetchedRef.current = true;
@@ -91,16 +97,13 @@ export default function CourseHistoryManager({
   const endYear = currentYear;
   const enrollment = typeof profile.enrollmentYear === "number" ? profile.enrollmentYear : endYear;
   const startYear = Math.min(enrollment, endYear - 2);
-
   const yearOptions = useMemo(
     () => Array.from({ length: endYear - startYear + 1 }, (_, i) => String(startYear + i)),
     [startYear, endYear]
   );
-
   const initialYear = useMemo(() => yearOptions.at(-1) || String(currentYear), [yearOptions, currentYear]);
   const [year, setYear] = useState(initialYear);
   useEffect(() => { if (!year) setYear(initialYear); }, [initialYear, year]);
-
   const [semester, setSemester] = useState("1학기");
 
   // 검색
@@ -114,7 +117,7 @@ export default function CourseHistoryManager({
     setOpen(true);
   };
 
-  // 서버 검색(useEffect)
+  // 과목 검색
   useEffect(() => {
     if (!open) return;
 
@@ -150,82 +153,89 @@ export default function CourseHistoryManager({
     };
   }, [query, open]);
 
-  const isValidCourseCode = (s) => /^[A-Za-z].*[0-9].{3,}$/.test(String(s || "").trim());
+  const mapSemester = (s) =>
+    s === "1학기" ? "FIRST" :
+    s === "2학기" ? "SECOND" :
+    s === "여름학기" ? "SUMMER" :
+    s === "겨울학기" ? "WINTER" : "FIRST";
 
-  const addCourseBySubject = async (subjectSummary) => {
-    // 진행 중 검색 중단 + 즉시 닫기
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (abortRef.current) abortRef.current.abort();
-    suppressOpenRef.current = true; 
+  const mapRetake = (r) => (r === "재수강" ? "RETAKE" : "ORIGINAL");
+
+  // 수강이력 추가
+  const addCourseBySubject = async (summary) => {
+
     setOpen(false);
-    setCandidates([]);
     setQuery("");
-
-    
-    const safeYear = year || yearOptions.at(-1) || String(new Date().getFullYear());
     const draft = {
-      name: subjectSummary.name || "(과목)",
-      category: subjectSummary.category || "교선",
-      credit: Number.isFinite(subjectSummary.credit) ? Number(subjectSummary.credit) : 3,
+      name: summary.name || "(과목)",
+      category: summary.category || "교선",
+      credit: Number.isFinite(summary.credit) ? Number(summary.credit) : 3,
       retake: "본수강",
-      year: safeYear,
+      year: year || yearOptions.at(-1),
       semester,
     };
     upsertByName(draft);
     setItems(load());
     onChangeRef.current?.(load());
-
-    // 상세 보강
+  
     try {
-      const url = config.SUBJECTS.DETAIL(subjectSummary.id);
-      const data = await get(url);
-      const detail = data?.result ?? data?.data ?? data ?? {};
+      // 항상 DB id로 상세 조회해서 subjectId를 확보
+      const detailRes = await get(config.SUBJECTS.DETAIL_BY_DBID(summary.id));
+      const detail = detailRes?.result ?? detailRes ?? {};
+
+      const subjectPk = getSubjectIdForApi(detail, summary);
+      if (!subjectPk) {
+        console.warn("[course-histories] subject PK 없음 → 전송 생략");
+        return;
+      }
+
+      // 화면 보강
       const patch = {
         name: detail.name || draft.name,
         category: detail.category || draft.category,
         credit: Number.isFinite(detail.credit) ? Number(detail.credit) : draft.credit,
       };
       const localId = load().find(
-        (it) => it.name === draft.name && it.year === draft.year && it.semester === draft.semester
+        it => it.name === draft.name && it.year === draft.year && it.semester === draft.semester
       )?.id;
       if (localId) {
         patchById(localId, patch);
         setItems(load());
         onChangeRef.current?.(load());
       }
-
-      // 서버 동기화
+  
+      // 서버 동기화: subjectId 없거나 숫자만이면 보내지 않음
       if (syncServer && authReady) {
-        const rawCode =
-          detail.courseCode ??
-          detail.subjectCode ??
-          detail.subjectId ??
-          subjectSummary.courseCode ??
-          subjectSummary.subjectCode ??
-          subjectSummary.subjectId ??
-          "";
-        if (!String(rawCode).trim() || !isValidCourseCode(rawCode)) {
-          if (localId) patchById(localId, { serverSync: "skip" });
-          console.warn("[course-histories] courseCode 없음. 서버 전송 생략");
-          return;
-        }
-        const payload = toServerPayload({
-          ...draft,
-          ...patch,
-          courseCode: String(rawCode).trim(),
-          courseTitle: (detail.name || draft.name || "").trim(),
-        });
+        const payload = {
+          year: Number(draft.year),
+          semester: mapSemester(draft.semester),
+          subjectId: Number(subjectPk),
+          courseTitle: String(detail.name || draft.name || "").trim(),
+          credit: Number(patch.credit),
+          category: String(patch.category ?? ""),
+          retake: mapRetake(draft.retake),
+        };
+  
+        console.log("POST /api/course-histories payload", payload);
+
         try {
           const created = await post(config.COURSE.CREATE, payload);
           const serverId = created?.result?.id ?? created?.id;
-          if (localId && serverId) patchById(localId, { serverId, serverSync: "ok" });
+          if(!serverId) throw new Error("서버 id 없음");
+          patchById(localId, {serverId, serverSync: "ok"}); 
         } catch (e) {
-          if (localId) patchById(localId, { serverSync: "error" });
-          console.error("수강이력 추가 실패:", e?.response?.data || e);
+          const status = e?.response?.status;
+
+          if (status === 409) {
+            console.warn("[course-histories] 중복 등록(409):", e?.response?.data || e);
+            alert("이미 해당 연도/학기에 등록된 과목입니다.");
+            return;
+          }
         }
+ 
       }
     } catch (e) {
-      console.warn("과목 상세 보강 실패(추가는 완료됨)", e);
+      console.error("과목 서버 동기화 실패:", e?.response?.data || e);
     }
   };
 
@@ -235,13 +245,14 @@ export default function CourseHistoryManager({
     }));
   };
 
+  // 수강 이력 삭제
   const remove = async (id) => {
     const target = items.find((x) => x.id === id);
     if (syncServer && target?.serverId) {
       try {
         await del(config.COURSE.DELETE(target.serverId));
       } catch (e) {
-        console.error("수강이력 삭제 실패:", e?.response?.data || e);
+        console.error("수강이력 삭제 실패:",e?.response?.data || e);
       }
     }
     removeById(id);

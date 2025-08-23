@@ -11,11 +11,11 @@ const config = {
     },
 
     PROFILE: {
-        UPDATE: `${BASE_URL}/api/profile`, // 전체 정보 한 번에 업데이트(수정) (PUT)
-        STEP1: `${BASE_URL}/api/profile/step1`, // 대학, 전공 선택 (POST)
-        STEP2: `${BASE_URL}/api/profile/step2`, // 입학년도 (POST)
-        STEP3: `${BASE_URL}/api/profile/step3`, // 졸업 유형 선택 (POST)
-        STEP4: `${BASE_URL}/api/profile/step4`, // 이전 수강 이력 입력 (POST)
+        UPDATE: `${BASE_URL}/api/profiles`, // 전체 정보 한 번에 업데이트(수정) (PUT)
+        STEP1: `${BASE_URL}/api/profiles/step1`, // 대학, 전공 선택 (POST)
+        STEP2: `${BASE_URL}/api/profiles/step2`, // 입학년도 (POST)
+        STEP3: `${BASE_URL}/api/profiles/step3`, // 졸업 유형 선택 (POST)
+        STEP4: `${BASE_URL}/api/profiles/step4`, // 이전 수강 이력 입력 (POST)
     },
 
     INTEREST: {
@@ -40,12 +40,13 @@ const config = {
 
     // 회원탈퇴
     USER: {
-        ME: `${BASE_URL}/api/users/me`, // GET(내 정보), DELETE(회원탈퇴)
+        ME: `${BASE_URL}/api/users/me`, // DELETE(회원탈퇴), GET(내정보)
     },
 
     SUBJECTS: {
         SEARCH: () => `${BASE_URL}/api/subjects/search`, // GET(과목 검색), params: { name, professor }
-        DETAIL: (id) => `${BASE_URL}/api/subjects/${id}`, // GET (과목 가져오기)
+        DETAIL_BY_DBID: (id) => `${BASE_URL}/api/subjects/${encodeURIComponent(id)}`, // GET (과목 가져오기)
+        DETAIL_BY_SUBJECT_ID: (subjectId) => `${BASE_URL}/api/subjects/id/${encodeURIComponent(subjectId)}`,
     },
 
     // 게시글

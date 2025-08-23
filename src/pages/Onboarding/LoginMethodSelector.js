@@ -6,7 +6,8 @@ import config from "../../config";
 import { useCookies } from "react-cookie";
 import {setUid, saveProfile, saveDisplayName, isProfileCompleted, 
         readPreloginName, clearPreloginName, wipeLegacyGlobalKeys,
-        chooseUidFromLogin} from "./commonutil.js";
+        chooseUidFromLogin,
+        markProfileCompleted} from "./commonutil.js";
 
 // 토큰에서 name 추출
 const getNameFromToken = (token = "") => {
@@ -30,8 +31,7 @@ const LoginMethodSelector = () => {
     const [password, setPassword] = useState("");
     const [passwordError, setPasswordError] = useState(false);
     const [loading, setLoading] = useState(false);
-
-    const [cookies, setCookie] = useCookies(["accessToken", "refreshToken"]);
+    const [, setCookie] = useCookies(["accessToken", "refreshToken"]);
     const navigate = useNavigate();
 
     
@@ -55,7 +55,6 @@ const LoginMethodSelector = () => {
             const res = await post(config.AUTH.LOGIN, data, 
                 {
                     headers: { "Content-Type": "application/json", Accept: "application/json"},
-                    //withCredentials: true,
                 }
             );
             console.log("로그인 성공:", res);
@@ -102,8 +101,25 @@ const LoginMethodSelector = () => {
             }
             if (preName) clearPreloginName(email); // 임시 저장 제거
 
+            // 서버가 내려준 완료 플래그 반영
+            const steps = result?.steps ?? {};
+            const completedFromServer = 
+                result?.allDone === true ||
+                steps?.allDone === true ||
+                result?.isCompleted === true ||
+                result?.profileCompleted === true ||
+                result?.isProfileCompleted === true ||
+                (steps && ["step1", "step2", "step3", "step4"].every(k => steps[k] === true));
+
+            console.log("[LOGIN] steps =", steps, "allDone = ", result?.allDone, "completed =", completedFromServer);
+
+            if(completedFromServer) {
+                markProfileCompleted();
+            }
+            
+            const completed = isProfileCompleted();
             // 토큰 저장 끝난 후, 온보딩 완료 여부에 따라 이동하는 곳 결정
-            navigate(isProfileCompleted() ? "/Home" : "/SchoolSelector", { replace: true});
+            navigate(completed ? "/Home" : "/SchoolSelector", { replace: true});
 
         } catch (error) {
             const status = error.response?.status;
