@@ -4,7 +4,6 @@ import "../../styles/Onboarding.css";
 import { post } from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
-import { buildProfilePayload } from "./payload";
 import CourseHistoryManager from "../MyPage/CourseHistoryManager";
 import { isProfileCompleted, readProfile, saveProfile, markProfileCompleted, readDisplayName } from "./commonutil";
 
@@ -44,19 +43,44 @@ const CourseHistoryUploader = () => {
         saveProfile({courseHistory: next});
     },[]);
 
+    const normalizeCourse = (item = {}) => {
+            const code =
+              item.courseCode ?? item.code ?? item.course_id ?? item.id ?? "";
+            const title =
+              item.courseTitle ?? item.title ?? item.course_name ?? item.name ?? "";
+            return { courseCode: String(code), courseTitle: String(title) };
+    };
+
     const submit = async (isSkip = false) => {
         if (loading) return;
         setLoading(true);
 
-        const payload = buildProfilePayload({
-            includeCourses: !isSkip,
-        });
+        const completedCourses = isSkip
+              ? []
+              : (Array.isArray(list) ? list : [])
+                  .map(normalizeCourse)
+                  .filter(c => c.courseCode && c.courseTitle);
+        const payload = { completedCourses };
 
         try {
-            await post(config.PROFILE.STEP4, payload);
+            const res = await post(config.PROFILE.STEP4, payload);
+            const body = res?.result ?? res ?? {};
+            console.log("[STEP4] flags =", {
+                  isCompleted: body.isCompleted,
+            });
+
+
+
+            if (body?.profile && typeof body.profile === "object") {
+                saveProfile(body.profile);
+            } else {
             const displayName = (readDisplayName() || readProfile().name || "").trim();
-            saveProfile({completedCourses: payload.completedCourses ?? [], name: displayName});
-            markProfileCompleted();
+            saveProfile({completedCourses, name: displayName});
+            }
+
+            if (body.isCompleted === true || body.profileCompleted === true || body.isProfileCompleted === true) {
+                markProfileCompleted("STEP4");   
+            }
             console.log("STEP4 성공");
             navigate("/Home", { replace: true });
         } catch(error) {

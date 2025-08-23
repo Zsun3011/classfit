@@ -28,64 +28,136 @@ const CommunityBoard = () => {
         setIsModalOpen(true);
     };
 
-    // 게시글 생성/수정 공용 핸들러
-    const handleAddPost = async (newPost) => {
-        try {
-            if (editingPost) {
-                const res = await put(config.COMMUNITY.UPDATE(editingPost.id),
-                {
+    // 게시글 등록/수정 공용 핸들러
+const handleAddPost = async (newPost) => {
+    const isEdit = Boolean(editingPost); // 등록/수정인지 알려주는 플래그 
+    try {
+      if (isEdit) {
+        const target = posts.find((p) => p.id === editingPost.id);
+        const isTemp =
+          String(editingPost.id).startsWith("temp-") || target?.__unsynced === true;
+  
+        if (isTemp) {
+          // 임시글: 로컬만 수정
+          setPosts((prev) =>
+            prev.map((p) =>
+              p.id === editingPost.id
+                ? {
+                    ...p,
                     title: newPost.title.trim(),
                     content: newPost.content.trim(),
-                    type: "GENERAL",
-                }
-            );
-
-            const updated = res.data;
-
-            setPosts((prev) =>
-                prev.map((p) =>
-                    p.id === editingPost.id
-                        ? {...p, title: updated.title, content: updated.content}
-                        : p
-                    )
-            );
-
-            if (selectedPost?.id === editingPost.id) {
-                setSelectedPost((prev) => ({ ...prev, title: updated.title, content: updated.content}));
+                  }
+                : p
+            )
+          );
+          if (selectedPost?.id === editingPost.id) {
+            setSelectedPost((prev) => ({
+              ...prev,
+              title: newPost.title.trim(),
+              content: newPost.content.trim(),
+            }));
+          }
+          setEditingPost(null);
+          setIsModalOpen(false);
+        } else {
+          // 서버 수정
+          const res = await put(
+            config.COMMUNITY.UPDATE(editingPost.id),
+            {
+              title: newPost.title.trim(),
+              content: newPost.content.trim(),
+              type: "GENERAL", // 필요 시 postType: "GENERAL"로 교체 테스트
             }
-            setEditingPost(null);
-            setIsModalOpen(false);
-            } else {
-            // 새로운 게시글 생성
-            const res = await post(config.COMMUNITY.CREATE, {
-                title: newPost.title.trim(),
-                content: newPost.content.trim(),
-                postType: "GENERAL",
-            });
-
-            const created = res.data;
-
-            const createPost = {
-                id: created.id,
-                title: created.title,
-                content: created.content,
-                createdAt: new Date(created.createdAt || Date.now()),
-                comments: [], 
-                commentCount: created.commentCount ?? 0,
-            };
-            setPosts(posts => [createPost, ...posts]);
-            console.log("게시글 등록 성공");
-            }
-        }catch(e) {
-            console.error("게시글 수정 실패:", e);
-            alert("게시글 수정에 실패했습니다.");
-            console.error("게시글 생성 실패:", e);
-            alert("게시글 등록에 실패했습니다."); 
+          );
+          const updated = res.data;
+  
+          setPosts((prev) =>
+            prev.map((p) =>
+              p.id === editingPost.id
+                ? { ...p, title: updated.title, content: updated.content }
+                : p
+            )
+          );
+          if (selectedPost?.id === editingPost.id) {
+            setSelectedPost((prev) => ({
+              ...prev,
+              title: updated.title,
+              content: updated.content,
+            }));
+          }
+          setEditingPost(null);
+          setIsModalOpen(false);
         }
-    };
+        return; // 수정 플로우 종료
+      }
+  
+      // 등록
+      const tempId = `temp-${Date.now()}`;
+      const tempPost = {
+        id: tempId,
+        title: newPost.title.trim(),
+        content: newPost.content.trim(),
+        createdAt: new Date(),
+        comments: [],
+        commentCount: 0,
+        __unsynced: true, // 임시글 플래그
+      };
+      setPosts((prev) => [tempPost, ...prev]);
+      setIsModalOpen(false); // UX: 일단 닫아줌
+  
+      // 서버 POST 시도
+      try {
+        const res = await post(config.COMMUNITY.CREATE, {
+          title: newPost.title.trim(),
+          content: newPost.content.trim(),
+          type: "GENERAL", // 서버 스펙에 맞춰 필요 시 type↔postType 확인
+        });
+        const created = res.data;
+  
+        // 임시글 → 실제로 치환
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === tempId
+              ? {
+                  id: created.id,
+                  title: created.title ?? tempPost.title,
+                  content: created.content ?? tempPost.content,
+                  createdAt: new Date(created.createdAt || tempPost.createdAt),
+                  comments: [],
+                  commentCount: created.commentCount ?? 0,
+                  __unsynced: false,
+                }
+              : p
+          )
+        );
+      } catch (err) {
+        console.error("서버 등록 실패(임시글 유지):", err);
+        alert("서버 등록은 실패했지만, 화면에는 임시로 추가해두었어요.");
+        // 임시글은 그대로 남아서 수정/삭제 테스트 가능
+      }
+    } catch (e) {
+      console.error(isEdit ? "게시글 수정 실패:" : "게시글 등록 실패:", e);
+      alert(isEdit ? "게시글 수정에 실패했습니다." : "게시글 등록에 실패했습니다.");
+    }
+  };
+  
+
 
     // 게시글 삭제
     const handleDeletePost = async (postId) => {
+        const target = posts.find(p => p.id === postId);
+        const isTemp = String(postId).startsWith("temp-") || target?.__unsynced;
+
+        if (isTemp) {
+            // 로컬만 삭제
+            setPosts(prev => prev.filter(p => p.id !== postId));
+            if (selectedPost?.id === postId) {
+              setIsDetailOpen(false);
+              setSelectedPost(null);
+            }
+            return;
+        }
+
         try { 
             await del(config.COMMUNITY.DELETE(postId));
             setPosts((prev) => prev.filter((p) => p.id !== postId));

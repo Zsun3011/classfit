@@ -7,7 +7,7 @@ import { useCookies } from "react-cookie";
 import { readProfile, purgeAllForUid,readDisplayName, getUid, clearUid, keyFor, wipeLegacyGlobalKeys } from "../Onboarding/commonutil";
 
 const graduationLabel = {
-    UNDERGRAD: "일반",
+    GENERAL: "일반",
     DOUBLE_MAJOR: "복수전공",
     MINOR: "부전공",
 };
