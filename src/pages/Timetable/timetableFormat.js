@@ -36,7 +36,9 @@ export const slotsToBlocks = (timeSlots = [], { withColor = false, colorMap = nu
 
 // blocks → slots
 export const blocksToSlots = (blocks = []) =>
-  (Array.isArray(blocks) ? blocks : []).map((b, i) => ({
+  (Array.isArray(blocks) ? blocks : [])
+    .filter(b => (b.dayNum && b.dayNum >= 1) || dayRev[b.day]) // ✅ 사이버/무스케줄 제거
+    .map((b, i) => ({
     subjectId: Number(b.id ?? i),
     subjectName: b.subject || "",
     professor: b.professor || "",

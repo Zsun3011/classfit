@@ -15,6 +15,11 @@ const InputConditionForm = ({ onGenerate }) => { // courses props 제거 (API에
     const [selectedSubjectInfo, setSelectedSubjectInfo] = useState([]);
 
     const handleSubmit = () => {
+        const v = Number(credit);
+        if (!Number.isFinite(v) || v <= 0) {
+            alert("희망 이수 학점을 입력해 주세요.");
+            return;
+        }
         const selectedSubjectNames = selectedSubjectInfo
             .map(subject => subject.subjectName || subject.name)
             .filter(Boolean);
@@ -160,7 +165,7 @@ const InputConditionForm = ({ onGenerate }) => { // courses props 제거 (API에
                 </div>
             </div>
             <button className="button" onClick={handleSubmit}>
-                AI 시간표 생성
+                시간표 생성
             </button>
 
             {isModalOpen && (

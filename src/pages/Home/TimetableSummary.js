@@ -111,11 +111,13 @@ const TimetableSummary = () => {
           </div>
           <div className="dashboard-section">
             <div className="dashboard-subtitle">교양</div>
-            <ul className="dashboard-list">
-              {info.general.map((item, index) => (
-                <li key={index}>• {item}</li>
-              ))}
-            </ul>
+            <div className="dashboard-listcontainer">
+              <ul className="dashboard-list">
+                {info.general.map((item, index) => (
+                  <li key={index}>• {item}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>

@@ -1,8 +1,12 @@
 import React, { useMemo } from "react";
 import "../../styles/Dashboard.css";
 import { getDashboardInfo } from "../../components/dashboardUtils";
-import { slotsToBlocks } from "./timetableFormat"; 
+import { slotsToBlocks } from "./timetableFormat"; // ✅ 공통 유틸로 변환
 
+/**
+ * data: blocks 또는 서버 timeSlots 아무거나 OK
+ * totalCredit: 안 넘기면 내부에서 blocks로 계산(과목 단위 dedupe)
+ */
 const Dashboard = ({ data = [], totalCredit }) => {
   // 1) 들어온 data가 slots인지 blocks인지 감지해서 blocks로 정규화
   const blocks = useMemo(() => {

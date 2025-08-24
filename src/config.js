@@ -78,6 +78,12 @@ const config = {
         CREATE: `${BASE_URL}/api/community/comments`, // (POST)댓글 생성
     },
 
+    
+    // AI 추천
+    AI: {
+        AUTO_RECOMMEND: `${BASE_URL}/ai/recommendation/auto`, // 자동 추천 (POST)
+    },
+
 };
 
 export default config;

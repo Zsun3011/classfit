@@ -21,6 +21,23 @@
     max-width: 1000px;
     gap: 20px;
     padding: 30px 80px 30px 80px;
+    max-height: 85vh;        /* 화면 높이 제한 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;  
+}
+
+
+.FavoriteCourseModal-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* 자식 스크롤 위해 필수 */
+}
+
+.FavoriteCourseModal-scroll {
+    flex: 1 1 auto;
+    min-height: 0;           /* 자  식이 스크롤 가질 수 있게 */
+    overflow-y: auto;        /* 내용만 스크롤 */
 }
 
 /* 모달 상단 헤더 */
@@ -72,10 +89,12 @@
 }
 
 /* 모달 하단 버튼 */
-.modal-buttons {
+.modal-container .modal-buttons {
     display: flex;
     justify-content: flex-end;
     padding: 12px 0;
+    background: #fff; 
+    margin: 0px;     
 }
 
 .modal-button-confirm {
