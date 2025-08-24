@@ -113,56 +113,57 @@ const FavoriteCourseModal = ({ selectedCourses, onSelectCourse, onConfirm, onCan
 
   return (
     <div className="FavoriteCourseModal-container">
-      <table className="Course-table">
-        <thead>
-          <tr>
-            <th>선택</th>
-            <th>즐겨찾기</th>
-            <th>과목명</th>
-            <th>영역</th>
-            <th>학점</th>
-            <th>담당교수</th>
-            <th>요일/시간</th>
-            <th>강좌유형</th>
-          </tr>
-        </thead>
-        <tbody>
-          {favoriteCourses.map((course) => {
-            const checked = selectedSet.has(String(course.id));
-            return (
-              <tr key={course.id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => onSelectCourse(course.id)}
-                    className="course-checkbox"
-                  />
-                </td>
-                <td>
-                  <img
-                    src="/icons/star-yellow.png"
-                    alt="즐겨찾기"
-                    className="Course-icon"
-                  />
-                </td>
-                <td>{course.name || "-"}</td>
-                <td>{course.category || "-"}</td>
-                <td>{course.credit ?? "-"}</td>
-                <td>{course.professor || "-"}</td>
-                <td>{buildSchedule(course)}</td>
-                <td>{course.courseType || "-"}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      <div className="modal-buttons">
-        <button className="modal-button-confirm" onClick={handleConfirm}>
-          추가하기
-        </button>
-      </div>
+        <div className="FavoriteCourseModal-scroll">
+            <table className="Course-table">
+                <thead>
+                <tr>
+                    <th>선택</th>
+                    <th>즐겨찾기</th>
+                    <th>과목명</th>
+                    <th>영역</th>
+                    <th>학점</th>
+                    <th>담당교수</th>
+                    <th>요일/시간</th>
+                    <th>강좌유형</th>
+                </tr>
+                </thead>
+                <tbody>
+                {favoriteCourses.map((course) => {
+                    const checked = selectedSet.has(String(course.id));
+                    return (
+                    <tr key={course.id}>
+                        <td>
+                        <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => onSelectCourse(course.id)}
+                            className="course-checkbox"
+                        />
+                        </td>
+                        <td>
+                        <img
+                            src="/icons/star-yellow.png"
+                            alt="즐겨찾기"
+                            className="Course-icon"
+                        />
+                        </td>
+                        <td>{course.name || "-"}</td>
+                        <td>{course.category || "-"}</td>
+                        <td>{course.credit ?? "-"}</td>
+                        <td>{course.professor || "-"}</td>
+                        <td>{buildSchedule(course)}</td>
+                        <td>{course.courseType || "-"}</td>
+                    </tr>
+                    );
+                })}
+                </tbody>
+            </table>
+        </div>
+        <div className="modal-buttons">
+            <button className="modal-button-confirm" onClick={handleConfirm}>
+            추가하기
+            </button>
+        </div>
     </div>
   );
 };

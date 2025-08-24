@@ -115,7 +115,7 @@
 .table-preview {
     transform: scale(0.5);  
     overflow: hidden;
-    z-index: 1000;
+    z-index: 10;
 }
 
 
@@ -269,9 +269,33 @@
 }
 
 .modal-content {
-   flex: none; /* 크기 자동 확장 막기 */
-  max-height: 85vh; /* 화면 높이의 85%까지만 허용 */
-  overflow-y: auto; /* 넘칠 경우에만 스크롤 */
+    flex: 1 1 auto;      /* 남은 공간을 차지 */
+    min-height: 0;       /* 내부 스크롤 허용에 필수 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;    /* 스크롤은 자식에게 위임 */
+    max-height: 80vh
+}
+
+/* 본문 스크롤 영역 */
+.modal-scroll {
+  flex: 1 1 auto;
+  min-height: 0;      /* 플렉스 컨텍스트 스크롤 필수 */
+  overflow-y:scroll;
+  box-sizing: border-box;
+}
+    
+/* 하단 고정 버튼 영역 */
+.modal-footer {
+  position: sticky;   /* 컨테이너 내부 하단 고정 */
+  bottom: 0;
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  z-index: 1;         /* 스크롤 본문 위에 */
 }
 
 /* 모달 내에서만 적용되도록! */
@@ -361,4 +385,3 @@
   line-height: 1.6;
   word-break: break-word;
 }
-
