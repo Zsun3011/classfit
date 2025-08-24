@@ -39,7 +39,16 @@ const config = {
 
     // 회원탈퇴
     USER: {
-         ME: `${BASE_URL}/api/users/me`, // DELETE(회원탈퇴), GET(내정보)
+        ME: `${BASE_URL}/api/users/me`, // GET(내 정보), DELETE(회원탈퇴)
+    },
+    
+     //과목 조회
+    SUBJECTS: {
+        SEARCH: () => `${BASE_URL}/api/subjects/search`, // GET(과목 검색), params: { name, professor }
+        DETAIL: (id) => `${BASE_URL}/api/subjects/${id}`, // GET (과목 가져오기)
+        LIST: `${BASE_URL}/api/subjects`,
+        DETAIL_BY_DBID: (id) => `${BASE_URL}/api/subjects/${encodeURIComponent(id)}`, // GET (과목 가져오기)
+        DETAIL_BY_SUBJECT_ID: (subjectId) => `${BASE_URL}/api/subjects/id/${encodeURIComponent(subjectId)}`,
     },
 
     // 게시글
@@ -58,15 +67,6 @@ const config = {
         SET_MAIN: (timetableId) => `${BASE_URL}/api/timetables/${timetableId}/main`, // 메인 시간표 설정 (PUT)
         MAIN: `${BASE_URL}/api/timetables/me/main`,          // 메인 시간표 조회 (GET)
 
-    },
-
-    //과목 조회
-    SUBJECTS: {
-        SEARCH: () => `${BASE_URL}/api/subjects/search`, // GET(과목 검색), params: { name, professor }
-        DETAIL: (id) => `${BASE_URL}/api/subjects/${id}`, // GET (과목 가져오기)
-        LIST: `${BASE_URL}/api/subjects`,
-        DETAIL_BY_DBID: (id) => `${BASE_URL}/api/subjects/${encodeURIComponent(id)}`, // GET (과목 가져오기)
-        DETAIL_BY_SUBJECT_ID: (subjectId) => `${BASE_URL}/api/subjects/id/${encodeURIComponent(subjectId)}`,
     },
 
 };

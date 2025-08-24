@@ -3,10 +3,10 @@ import { readProfile } from "./commonutil";
 // 한글 → 서버 ENUM
 export const toGradEnum = (ko) => {
   switch ((ko || "").trim()) {
-    case "일반 졸업": return "UNDERGRAD";
+    case "일반 졸업": return "GENERAL";
     case "복수 전공": return "DOUBLE_MAJOR";
     case "부전공":   return "MINOR";
-    default:         return "UNDERGRAD";
+    default:         return "GENERAL";
   }
 };
 
@@ -25,7 +25,7 @@ export const buildProfilePayload = (opts = {}) => {
   const base = { ...readProfile(), ...override };
 
   const gt = String(
-    graduationType || base.graduationType || "UNDERGRAD"
+    graduationType || base.graduationType || "GENERAL"
   );
 
   const rawList = Array.isArray(base.courseHistory)

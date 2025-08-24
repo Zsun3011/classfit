@@ -62,7 +62,7 @@ const SchoolSelector = () => {
 
         const payload = buildProfilePayload({
             includeCourses: false,
-            graduationType: "UNDERGRAD",
+            graduationType: "GENERAL",
             override,
         });
 

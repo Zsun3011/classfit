@@ -8,6 +8,14 @@ export const setUid = (uid) => {
 };
 export const clearUid = () => localStorage.removeItem(uidKey);
 
+const safeParse = (s, fallback) => {
+  try { return JSON.parse(s ?? "");} catch { return fallback; }
+};
+const STEP_FLAGS = "stepFalgs";
+const readStepFlags = (uid) => safeParse(localStorage.getItem(keyFor(STEP_FLAGS, uid)), {});
+const writeStepFlags = (uid, flags) => localStorage.setItem(keyFor(STEP_FLAGS, uid), JSON.stringify(flags || {}));
+const markStep = (uid, step) => { const f = readStepFlags(uid); f[step] = true; writeStepFlags(uid, f); };
+
 // 토큰에서 사용자 고유 id 가져오기
 export const getUidFromToken = (token = "") => {
     try {
@@ -25,16 +33,22 @@ export const getUidFromToken = (token = "") => {
 
 // 로그인 응답/토큰/이메일을 받아 항상 같은 uid를 고르는 함수
 export const chooseUidFromLogin = (result, accessToken, email) => {
-    const fromServer = (result?.userId ?? result?.id ?? result?.memberId);
-    const fromToken  = getUidFromToken(accessToken);
-    const fallback   = (email || "").toLowerCase();
-    return String(fromServer ?? fromToken ?? fallback);
+      const cands = [
+          result?.userId, result?.id, result?.memberId,
+          getUidFromToken(accessToken),
+          (email || "").toLowerCase(),
+        ].filter(Boolean).map(String);
+        const prev = getUid?.();
+        if (prev && cands.includes(prev)) return prev;
+        if (cands.length) return cands[0];
+        throw new Error("No stable UserId.");
+
 };
   
 // 레거시 전역 키 → 현재 uid namespaced 키로 복사
   export const migrateLegacyToNamespaced = (uid) => {
     if (!uid) return;
-    const bases = ["profileData", "profileCompleted", "displayName", "courseHistory"];
+    const bases = ["profileData", "profileCompleted", "displayName", "courseHistory", "stepFlags"]
     bases.forEach((b) => {
       const nsKey = keyFor(b, uid);
       if (localStorage.getItem(nsKey) == null) {
@@ -45,7 +59,7 @@ export const chooseUidFromLogin = (result, accessToken, email) => {
 };
 
 export const wipeLegacyGlobalKeys = () => {
-    ["profileData", "profileCompleted", "displayName", "courseHistory"]
+    ["profileData", "profileCompleted", "displayName", "courseHistory", "stepFlags"]
      .forEach((k) => localStorage.removeItem(k));
 };
 
@@ -55,26 +69,30 @@ export const saveProfile = (partial = {}) => {
   const uid = getUid(); 
   if (!uid) return;
   const cur = readProfile();
-  const next = {...cur, ...partial};
+  const next = { ...(cur || {}), ...(partial || {}) };
   localStorage.setItem(keyFor("profileData", uid), JSON.stringify(next));
   window.dispatchEvent(new CustomEvent("profile:update", { detail: next}));
 };
 export const readProfile = () => {
   const uid = getUid(); 
   if (!uid) return {};
-  try { return JSON.parse(localStorage.getItem(keyFor("profileData", uid)) || "{}"); }
-  catch { return {}; }
+  return safeParse(localStorage.getItem(keyFor("profileData", uid)), {});
 };
 
 export const isProfileCompleted = () => {
   const uid = getUid(); 
   if (!uid) return false;
-  return localStorage.getItem(keyFor("profileCompleted", uid)) === "1";
+   // 신규 플래그
+  if (localStorage.getItem(keyFor("profileCompleted", uid)) === "1") return true;
+  // 로직 호환: stepFlags.STEP4가 true면 완료로 간주
+  const flags = readStepFlags(uid);
+  return !!flags?.STEP4;
 };
 export const markProfileCompleted = () => {
     const uid = getUid();
     if (!uid) return;
     localStorage.setItem(keyFor("profileCompleted", uid), "1");
+    markStep(uid, "STEP4");
 };
 export const unmarkProfileCompleted = () => {
     const uid = getUid();
