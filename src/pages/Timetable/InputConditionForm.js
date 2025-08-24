@@ -101,10 +101,22 @@ const InputConditionForm = ({ onGenerate }) => { // courses props 제거 (API에
                         즐겨찾기에서 선택 {selectedSubjects.length > 0 && `(${selectedSubjects.length}개 선택됨)`}
                     </button>
                     {selectedSubjects.length > 0 && (
-                        <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
-                            선택된 과목: {getSelectedSubjectNames()}
+                        <div className="selected-subjects-list">
+                            <div className="selected-subjects-label">선택된 과목</div>
+                            <ul>
+                            {selectedSubjectInfo.map((subject, idx) => {
+                                const name = subject.subjectName || subject.name;
+                                if (!name) return null;
+                                return (
+                                <li key={subject.id || subject.subjectId || idx}>
+                                    {name}
+                                </li>
+                                );
+                            })}
+                            </ul>
                         </div>
-                    )}
+                        )}
+
                 </div>
 
                 {/* 희망 이수 학점 */}
@@ -114,6 +126,7 @@ const InputConditionForm = ({ onGenerate }) => { // courses props 제거 (API에
                         type="number"
                         placeholder="예: 15"
                         value={credit}
+                        min={1} 
                         onChange={(e) => setCredit(e.target.value)}
                     />
                 </div>

@@ -1,12 +1,8 @@
 import React, { useMemo } from "react";
 import "../../styles/Dashboard.css";
 import { getDashboardInfo } from "../../components/dashboardUtils";
-import { slotsToBlocks } from "./timetableFormat"; // ✅ 공통 유틸로 변환
+import { slotsToBlocks } from "./timetableFormat"; 
 
-/**
-* data: blocks 또는 서버 timeSlots 아무거나 OK
-* totalCredit: 안 넘기면 내부에서 blocks로 계산
-*/
 const Dashboard = ({ data = [], totalCredit }) => {
   // 1) 들어온 data가 slots인지 blocks인지 감지해서 blocks로 정규화
   const blocks = useMemo(() => {
@@ -17,27 +13,36 @@ const Dashboard = ({ data = [], totalCredit }) => {
     return looksLikeSlots ? slotsToBlocks(data) : data;
   }, [data]);
 
-  // 2) 요약 정보 계산
+  // 2) 요약 정보 계산(오전 포함/공강 등은 블록 기준 유지)
   const { hasMorning, freeDays, majors, generals } = useMemo(
     () => getDashboardInfo(blocks),
     [blocks]
   );
 
-   // 3) 학점 자동 계산 (prop 우선, 없으면 계산)
-   const credit = useMemo(() => {
-     if (typeof totalCredit === "number") return totalCredit;
-     return blocks.reduce((s, b) => s + (Number(b.credit) || 0), 0);
-   }, [blocks, totalCredit]);
+  // 3) 학점 자동 계산 (prop 우선, 없으면 과목 단위 dedupe 합산)
+  const credit = useMemo(() => {
+    if (typeof totalCredit === "number") return totalCredit;
+    // key: id 우선, 없으면 subject
+    return Array.from(
+      new Map(
+        (blocks || []).map((b) => [String(b?.id ?? b?.subject ?? ""), Number(b?.credit ?? 0)])
+      ).values()
+    ).reduce((s, c) => s + c, 0);
+  }, [blocks, totalCredit]);
+
+  // 4) 렌더링 시점에 리스트 중복 제거(과목 단위)
   const renderList = (list) =>
-    list.length ? (
-      list.map((c, i) => (
-        <li key={i}>
-          • {c.subject} ({c.kind}, {c.credit}학점)
-        </li>
-      ))
-    ) : (
-      <li>• -</li>
-    );
+    (list && list.length
+      ? Array.from(
+          new Map(
+            list.map((c) => [String(c?.id ?? c?.subject ?? ""), c])
+          ).values()
+        ).map((c) => (
+          <li key={c.id ?? c.subject}>
+            • {c.subject} ({c.kind}, {c.credit}학점)
+          </li>
+        ))
+      : [<li key="empty">• -</li>]);
 
   return (
     <div className="dashboard-container">

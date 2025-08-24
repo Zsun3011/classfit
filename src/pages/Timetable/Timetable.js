@@ -13,112 +13,160 @@ const dayRev = { "월":1, "화":2, "수":3, "목":4, "금":5, "토":6, "일":7 }
 
 const toMin = (t) => (t ? t.split(":").map(Number)[0] * 60 + t.split(":").map(Number)[1] : null);
 const overlap = (a, b) => a.day === b.day && Math.max(toMin(a.start), toMin(b.start)) < Math.min(toMin(a.end), toMin(b.end));
+const palette = ["#8ecae6","#ffb703","#90be6d","#f94144","#f8961e","#43aa8b","#577590","#a05195"];
 
-/** DETAIL 한 건 조회(학점/교수용) */
+/** 과목 한 개 → 1~2개의 미팅 블록 배열로 변환 */
+const extractMeetings = (s) => {
+  const m = [];
+  const add = (dayNum, start, end) => {
+    if (!dayNum || !start || !end) return;
+    m.push({
+      dayNum,
+      day: dayMap[dayNum] || null,
+      start: (start || "").slice(0,5),
+      end: (end || "").slice(0,5),
+    });
+  };
+  add(s.dayOfWeek, s.start, s.end);
+  add(s.dayOfWeek2nd, s.start2nd, s.end2nd);
+  return m.filter(x => x.day);
+};
+
+/** DETAIL 한 건 조회(학점/교수/카테고리 보정용) */
 async function fetchDetail(id) {
   const res = await get(config.SUBJECTS.DETAIL(id));
   return res?.result ?? {};
 }
 
-/** 조건 → 시간표 블록 생성 */
+/** 조건 → 시간표 블록 생성 (두 요일 지원) */
 async function buildSchedule(conditions) {
   const { selectedSubjects = [], credit: targetRaw, preferredTimes = [], avoidDays = [] } = conditions || {};
   const target = Number(targetRaw) || 0;
 
-  // 1) LIST 로드(이제 dayOfWeek/start/end/카테고리 포함됨)
+  // 1) 전체 과목 목록 로드
   const listRes = await get(config.SUBJECTS.LIST, { sortBy: "id", direction: "asc" });
   const list = Array.isArray(listRes?.result) ? listRes.result : [];
 
-  // 2) 후보 정리
+  // 2) 회피 요일, 선호 시간 준비
   const avoidSet = new Set(avoidDays.map((d) => d.replace("요일", "").trim())); // "월요일" -> "월"
-  const base = list
-    .map((s) => ({
+  const preferMorning = preferredTimes.includes("오전");
+  const preferAfternoon = preferredTimes.includes("오후");
+
+  // 3) 후보 과목 정리(과목 단위; 과목마다 meetings=1~2개)
+  const allCourses = list.map((s) => {
+    const meetings = extractMeetings(s).filter(m => !avoidSet.has(m.day)); // 회피 요일 제거
+    return {
       id: s.id,
       name: s.name,
-      day: dayMap[s.dayOfWeek] || null,
-      start: (s.start || "").slice(0, 5),
-      end: (s.end || "").slice(0, 5),
+      category: s.category || s.courseType || s.discipline || "",
       courseType: s.courseType || "",
-      category: s.category || s.discipline || "",
-    }))
-    .filter((s) => s.day && !avoidSet.has(s.day)); // 요일 없음/회피 요일 제외
+      meetings, // [{day,dayNum,start,end}, ...]
+    };
+  }).filter(c => c.meetings.length > 0); // 미팅이 하나도 없으면 제외
 
-  const requiredIds = new Set(selectedSubjects.map((x) => Number(x)));
-  const required = base.filter((s) => requiredIds.has(Number(s.id)));
-  const optional = base.filter((s) => !requiredIds.has(Number(s.id)));
+  const requiredSet = new Set((selectedSubjects || []).map(Number));
+  const requiredCourses = allCourses.filter(c => requiredSet.has(Number(c.id)));
+  const optionalCourses = allCourses.filter(c => !requiredSet.has(Number(c.id)));
 
-  // 3) 필수 선배치(충돌 검사)
-  const chosen = [];
-  for (const r of required) {
-    if (chosen.some((c) => overlap(c, r))) throw new Error(`필수 과목 시간 충돌: ${r.name}`);
-    chosen.push(r);
-  }
+  // 4) 충돌 검사 헬퍼(과목 단위로 미팅 전체 확인)
+  const hasConflict = (course, chosenMeetings) => {
+    for (const m of course.meetings) {
+      for (const cm of chosenMeetings) {
+        if (overlap(
+          { day: m.day, start: m.start, end: m.end },
+          { day: cm.day, start: cm.start, end: cm.end }
+        )) return true;
+      }
+    }
+    return false;
+  };
 
-  // 4) 필수/선택 학점 합산(필수 먼저 DETAIL로 신뢰 학점 확보)
+  // 5) 선택 결과(과목 단위) 및 학점 집계
+  const chosenCourses = [];
+  const chosenMeetings = []; // 모든 선택 과목의 meeting들을 평탄화해서 보관
   let totalCredit = 0;
-  const creditMap = new Map();
-  for (const r of chosen) {
-    const d = await fetchDetail(r.id);
+
+  // 학점을 캐시해 불필요한 DETAIL 호출 줄이기
+  const creditCache = new Map();
+  const getCredit = async (courseId) => {
+    if (creditCache.has(courseId)) return creditCache.get(courseId);
+    const d = await fetchDetail(courseId);
     const cr = Number(d.credit || 0);
-    creditMap.set(r.id, cr);
+    creditCache.set(courseId, cr);
+    return cr;
+  };
+
+  // 6) 필수 과목부터 배치
+  for (const c of requiredCourses) {
+    if (hasConflict(c, chosenMeetings)) {
+      throw new Error(`필수 과목 시간 충돌: ${c.name}`);
+    }
+    const cr = await getCredit(c.id);
+    chosenCourses.push({ ...c, required: true, credit: cr });
+    chosenMeetings.push(...c.meetings);
     totalCredit += cr;
   }
   if (target && totalCredit > target) throw new Error(`필수 과목 학점(${totalCredit})이 희망 학점(${target}) 초과`);
 
-  // 5) 가점 정렬(오전/오후 선호)
-  const preferMorning = preferredTimes.includes("오전");
-  const preferAfternoon = preferredTimes.includes("오후");
-  const scored = optional
-    .map((s) => {
-      let score = 0;
-      const sm = toMin(s.start);
-      if (sm != null) {
-        if (preferMorning && sm < 12 * 60) score += 2;
-        if (preferAfternoon && sm >= 12 * 60) score += 2;
-      }
-      return { ...s, score, startMin: sm };
-    })
-    .sort((a, b) => b.score - a.score || (a.startMin ?? 0) - (b.startMin ?? 0));
-
-  // 6) 충돌 없이 채우기(필요할 때만 DETAIL로 학점 조회)
-  for (const s of scored) {
-    if (target && totalCredit >= target) break;
-    if (chosen.some((c) => overlap(c, s))) continue;
-
-    let cr = creditMap.get(s.id);
-    if (cr == null) {
-      const d = await fetchDetail(s.id);
-      cr = Number(d.credit || 0);
-      creditMap.set(s.id, cr);
+  // 7) 선택 과목 스코어링(오전/오후 선호)
+  const scoredOptional = optionalCourses.map(c => {
+    // 과목의 '대표' 시작시간(가장 이른 미팅의 시작)을 기준으로 가점
+    const starts = c.meetings.map(m => toMin(m.start)).filter(x => x != null);
+    const first = starts.length ? Math.min(...starts) : null;
+    let score = 0;
+    if (first != null) {
+      if (preferMorning && first < 12 * 60) score += 2;
+      if (preferAfternoon && first >= 12 * 60) score += 2;
     }
-    if (target && totalCredit + cr > target) continue;
+    return { ...c, score, first };
+  }).sort((a,b)=> b.score - a.score || (a.first ?? 0) - (b.first ?? 0));
 
-    chosen.push(s);
+  // 8) 충돌 없이 채우기(+ 목표 학점 고려)
+  for (const c of scoredOptional) {
+    if (target && totalCredit >= target) break;
+    if (hasConflict(c, chosenMeetings)) continue;
+    const cr = await getCredit(c.id);
+    if (target && totalCredit + cr > target) continue;
+    chosenCourses.push({ ...c, required: false, credit: cr });
+    chosenMeetings.push(...c.meetings);
     totalCredit += cr;
   }
 
-  const palette = ["#8ecae6", "#ffb703", "#90be6d", "#f94144", "#f8961e", "#43aa8b", "#577590", "#a05195"];
-  let idx = 0;
-  
-  // 7) 블록 변환
-  const blocks = chosen.map((c) => ({
-    id: c.id,
-    subject: c.name + (requiredIds.has(Number(c.id)) ? "(필수)" : ""),
-    day: c.day,
-    dayNum: dayRev[c.day] || 1,
-    start: c.start,
-    end: c.end,
-    type: c.category,
-    category: c.category, 
-    credit: creditMap.get(c.id) ?? 0,
-    color: requiredIds.has(Number(c.id)) ? "#8ecae6" : palette[idx++ % palette.length],
-  }));
+  // 9) 색상: 과목 단위로 하나의 색을 배정(두 블록도 동일 색)
+  const colorMap = new Map();
+  let colorIdx = 0;
+  const pickColor = (cid) => {
+    if (!colorMap.has(cid)) colorMap.set(cid, palette[colorIdx++ % palette.length]);
+    return colorMap.get(cid);
+  };
 
-  return { blocks, totalCredit, count: chosen.length };
+  // 10) 화면용 블록으로 변환(과목→1~2 블록)
+  const blocks = [];
+  for (const c of chosenCourses) {
+    const color = pickColor(c.id);
+    for (const m of c.meetings) {
+      blocks.push({
+        id: c.id,
+        subject: c.name,           // ✅ 제목에 "(필수)" 붙이지 않음
+        day: m.day,
+        dayNum: m.dayNum || dayRev[m.day] || 1,
+        start: m.start,
+        end: m.end,
+        category: c.category,
+        type: c.category,
+        credit: c.credit ?? 0,
+        professor: "",             // 필요 시 DETAIL에서 추가 가능
+        color,
+        required: !!c.required,    // ✅ 필수 여부는 별도 플래그로 관리
+      });
+    }
+  }
+
+  return { blocks, totalCredit, count: chosenCourses.length };
 }
 
 const Timetable = ({ conditions, data: dataProp, onGenerated, isModal = false, isMini = false }) => {
-  const [data, setData] = useState([]); // ✅ 누락된 상태 추가
+  const [data, setData] = useState([]);
   const [, setSummary] = useState({ totalCredit: 0, count: 0 });
   const [loading, setLoading] = useState(false);
   const displayOnly = Array.isArray(dataProp);
@@ -137,14 +185,10 @@ const Timetable = ({ conditions, data: dataProp, onGenerated, isModal = false, i
     return ((h - hourStart) * 60 + m) * (rowHeight / 60);
   };
 
-  // 최신 onGenerated를 보관하는 ref (의존성에서 제외)
   const onGeneratedRef = React.useRef(onGenerated);
-  useEffect(() => {
-    onGeneratedRef.current = onGenerated;
-  }, [onGenerated]);
+  useEffect(() => { onGeneratedRef.current = onGenerated; }, [onGenerated]);
 
   useEffect(() => {
-    // ✅ 표시 전용: 저장된 data로 즉시 세팅하고 종료
     if (displayOnly) {
       setLoading(false);
       setData(dataProp);
@@ -212,21 +256,14 @@ const Timetable = ({ conditions, data: dataProp, onGenerated, isModal = false, i
         {data.map((course, idx) => {
           const dayIndex = days.indexOf(course.day);
           if (dayIndex === -1) return null;
-
           const x = labelWidth + dayIndex * colWidth;
           const y = labelHeight + timeToY(course.start);
           const h = timeToY(course.end) - timeToY(course.start);
 
-          // 과목명 분리
-          const m = course.subject.match(/^(.+?)(\(.+\))?$/);
-          const main = m?.[1] || course.subject;
-          const tail = m?.[2] || "";
-
-          // ✅ 간단 줄바꿈
+          // 줄바꿈 처리
+          const main = course.subject;
           const maxChars = Math.max(4, Math.floor(colWidth / (timeFontSize * 0.8)));
           const lines = main.match(new RegExp(`.{1,${maxChars}}`, "g")) || [main];
-          if (tail) lines.push(tail);
-
           const lineGap = isMini ? 12 : 18;
           const startY = y + h / 2 - ((lines.length - 1) * lineGap) / 2;
 
@@ -241,7 +278,6 @@ const Timetable = ({ conditions, data: dataProp, onGenerated, isModal = false, i
             </g>
           );
         })}
-
       </svg>
     </div>
   );

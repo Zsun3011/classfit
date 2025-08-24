@@ -172,12 +172,10 @@ export const get = async (endpoint, params = {}, options = {}) => {
 export const post = async (endpoint, data, options = {}) => {
   try {
     const response = await api.post(endpoint, data, options);
-
+    if (response.status === 204) return { ok: true };
     const contentType = response.headers["content-type"] || "";
-    if (!contentType.includes("application/json")) {
-      throw new Error("서버 응답이 올바르지 않습니다.");
-  }
-  return response.data;
+    if (contentType.includes("application/json")) return response.data;
+    return response.data ?? { ok: true }; // 바디 없어도 성공 처리
   } catch (error) {
     throw error;
   }
@@ -203,13 +201,10 @@ export const put = async (endpoint, data = {}, options = {}) => {
 export const del = async (endpoint, options = {}) => {
   try {
     const response = await api.delete(endpoint, options);
-
+    if (response.status === 204) return { ok: true };
     const contentType = response.headers["content-type"] || "";
-    if (!contentType.includes("application/json")) {
-      throw new Error("서버 응답이 올바르지 않습니다.");
-    }
-
-    return response.data;
+    if (contentType.includes("application/json")) return response.data;
+    return response.data ?? { ok: true };
   } catch (error) {
     throw error;
   }

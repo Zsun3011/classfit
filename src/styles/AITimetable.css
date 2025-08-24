@@ -308,3 +308,56 @@
 .AiTimetable-section .ProgressDashboard-container{
     width: 368px;
 }
+
+.inputCondition-container 
+.Course-table th:nth-child(1), .Course-table td:nth-child(1) {
+    width: 5%;
+}
+
+.inputCondition-container 
+.Course-table th:nth-child(2), .Course-table td:nth-child(2),
+.Course-table th:nth-child(4), .Course-table td:nth-child(4),  
+.Course-table th:nth-child(5), .Course-table td:nth-child(5)  {
+    width: 9%;
+}
+
+.inputCondition-container 
+.Course-table th:nth-child(6), .Course-table td:nth-child(6) {
+    width: 10%;
+}
+
+.inputCondition-container 
+.Course-table th:nth-child(3), .Course-table td:nth-child(3) {
+    width: 15%;
+}
+
+.inputCondition-container 
+.Course-table th:nth-child(7), .Course-table td:nth-child(7) {
+    width: 17%;
+}
+
+.selected-subjects-list {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+  max-width: 100%;
+}
+
+.selected-subjects-label {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.selected-subjects-list ul {
+  margin: 0;
+  padding-left: 18px;   /* 목록 들여쓰기 */
+  /* 많아질 때를 대비해 스크롤을 원하면 아래 두 줄 주석 해제
+  max-height: 160px;
+  overflow-y: auto;
+  */
+}
+
+.selected-subjects-list li {
+  line-height: 1.6;
+  word-break: break-word;
+}

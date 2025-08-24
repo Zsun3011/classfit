@@ -22,7 +22,7 @@ const QuickLinkButton = () => {
         <div className="QuickLinkButton-container">
             <div className="QuickLinkButton-container-title">바로가기</div>
                 <button className="QuickLinkButton" onClick={handleAiTimetable}>
-                    AI시간표 생성
+                    시간표 생성
                 </button>
                 <button className="QuickLinkButton" onClick={handleSavedTimetable}>
                     나의 저장된 시간표

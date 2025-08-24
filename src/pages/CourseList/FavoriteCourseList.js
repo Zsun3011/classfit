@@ -1,41 +1,36 @@
-import React from "react";
-import CourseRow from "./CourseRow";
+// src/pages/Courses/FavoriteCourseList.jsx
+import React, { useMemo } from "react";
+import CourseTable from "./CourseTable";
 
-//courses: 보여줄 과목 리스트, 
-// favoriteCourseIds: 즐겨찾기된 과목 id 배열, onToggleFavorite: 별 클릭 시 호출할 함수, 
-const FavoriteCourseList = ({courses, favoriteCourseIds, onToggleFavorite}) => {
+const keyOf = (c) => c?.subjectId ?? c?.id;
 
-    const favoriteCourses = courses.filter(course => favoriteCourseIds.includes(course.id));
+const FavoriteCourseList = ({
+    courses = [],
+    favoriteCourseIds = [],
+    onToggleFavorite = () => {},
+    selectable = false,
+    selectedIds = [],
+    onToggleSelect = () => {},
+}) => {
+    const favSet = useMemo(() => new Set((favoriteCourseIds || []).map(String)), [favoriteCourseIds]);
+
+    const favoriteCourses = useMemo(
+        () => courses.filter((c) => favSet.has(String(keyOf(c)))),
+        [courses, favSet]
+    );
 
     return (
         <div className="FavoriteCourseList-container">
             <h1 className="FavoriteCourseList-title">즐겨찾기</h1>
-            <table className="Course-table">
-                <thead>
-                    <tr>
-                        <th>즐겨찾기</th>
-                        <th>과목명</th>
-                        <th>영역</th>
-                        <th>학점</th>
-                        <th>담당교수</th>
-                        <th>요일/시간</th>
-                        <th>강좌유형</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {favoriteCourses.map((course) => (
-                        <CourseRow
-                        key={course.id}
-                        course={course}
-                        isFavorite={true}
-                        onToggleFavorite={onToggleFavorite}
-                        />  
-                    ))}
-                </tbody>
-            </table>
-
+            <CourseTable
+                courses={favoriteCourses}
+                favoriteCourseIds={favoriteCourseIds}
+                onToggleFavorite={onToggleFavorite}
+                selectable={selectable}
+                selectedIds={selectedIds}
+                onToggleSelect={onToggleSelect}
+            />
         </div>
-
     );
 };
 

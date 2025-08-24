@@ -69,6 +69,11 @@ const config = {
 
     },
 
+    // 과목별 진척도
+    SUBJECT_PROGRESS: {
+        ME: `${BASE_URL}/api/subject-progress/me`, // 내 과목별 진척도 조회 (GET)
+    },
+
 };
 
 export default config;

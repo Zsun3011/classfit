@@ -226,7 +226,8 @@ body {
     box-shadow: 
         -2px -2px 4px 0px rgba(0, 0, 0, 0.25) inset,
         1px 1px 10px 5px rgba(0, 0, 0, 0.25) inset;
-    width: 400px;
+    width: 100%;
+    max-width: 510px;
     margin-right: -10px;
 }
 
@@ -308,6 +309,7 @@ body {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    margin-bottom: 30px;
 }
 
 .CourseHistoryInput-button:hover {
@@ -317,7 +319,7 @@ body {
 
 .CourseInfoBox {
     background-color: white;
-    padding: 20px 50px 40px 10px;
+    padding: 20px 40px 40px 10px;
     width: 200px;
     height: 120px;
     border-radius: 5px;

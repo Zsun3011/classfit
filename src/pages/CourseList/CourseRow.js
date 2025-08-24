@@ -1,7 +1,10 @@
 // src/pages/Courses/CourseRow.jsx
 import React from "react";
+import { scheduleFromCourse } from "../Timetable/timetableFormat";
 
 const CourseRow = ({ course, isFavorite, onToggleFavorite }) => {
+  const schedule = scheduleFromCourse(course);
+
   return (
     <tr>
       <td onClick={() => onToggleFavorite(course.id)} style={{ cursor: "pointer" }}>
@@ -15,8 +18,11 @@ const CourseRow = ({ course, isFavorite, onToggleFavorite }) => {
       <td>{course.category || "-"}</td>
       <td>{course.credit || "-"}</td>
       <td>{course.professor || "-"}</td>
-      <td>{`${course.dayOfWeek || "-"} / ${course.start}~${course.end}`}</td> {/* 요일/시간 */}
-      <td title={course.description || ""} style={{ maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+      <td>{schedule}</td>
+      <td
+        title={course.description || ""}
+        style={{ maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+      >
         {course.description || "-"}
       </td>
     </tr>

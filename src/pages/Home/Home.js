@@ -25,14 +25,11 @@ const Home = () => {
                     <div className="Home-left">
                         <UserInfoCard />
                         <ProgressBar progressItems={progressDataBefore} />
+                        <QuickLinkButton />                    
                     </div>
                     <div className="Home-right">
                         <TimetableSummary />
                     </div>
-                </div>
-                <div className="Home-bottom"> 
-                    <ScheduleList />
-                    <QuickLinkButton />
                 </div>
             </div>
         </div>

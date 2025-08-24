@@ -1,13 +1,25 @@
-import React from "react";
+// src/pages/Courses/CourseTable.jsx
+import React, { useMemo } from "react";
 import CourseRow from "./CourseRow";
 
-//courses: 보여줄 과목 리스트, 
-// favoriteCourseIds: 즐겨찾기된 과목 id 배열, onToggleFavorite: 별 클릭 시 호출할 함수, 
-const CourseTable = ( {courses, favoriteCourseIds, onToggleFavorite}) => {
+const keyOf = (c) => c?.subjectId ?? c?.id;
+
+const CourseTable = ({
+  courses = [],
+  favoriteCourseIds = [],
+  onToggleFavorite = () => {},
+  selectable = false,
+  selectedIds = [],
+  onToggleSelect = () => {},
+}) => {
+  const favSet = useMemo(() => new Set((favoriteCourseIds || []).map(String)), [favoriteCourseIds]);
+  const selSet = useMemo(() => new Set((selectedIds || []).map(String)), [selectedIds]);
+
     return (
         <table className="Course-table">
             <thead>
                 <tr>
+                    {selectable && <th>선택</th>}
                     <th>즐겨찾기</th>
                     <th>과목명</th>
                     <th>영역</th>
@@ -18,17 +30,32 @@ const CourseTable = ( {courses, favoriteCourseIds, onToggleFavorite}) => {
                 </tr>
             </thead>
             <tbody>
-                {courses.map((course) => (
+                {courses.map((course) => {
+                    const k = String(keyOf(course));
+                    const leadingCell = selectable ? (
+                    <td>
+                        <input
+                        type="checkbox"
+                        className="course-checkbox"
+                        checked={selSet.has(k)}
+                        onChange={() => onToggleSelect(k)}
+                        />
+                    </td>
+                    ) : null;
+
+                    return (
                     <CourseRow
-                    key={course.id}
-                    course={course}
-                    isFavorite={favoriteCourseIds.includes(course.id)}
-                    onToggleFavorite={onToggleFavorite}
+                        key={k}
+                        course={course}
+                        isFavorite={favSet.has(k)}
+                        onToggleFavorite={onToggleFavorite}
+                        leadingCell={leadingCell}
                     />
-                ))}
+                );
+            })}
             </tbody>
         </table>
-    )
-}
+    );
+};
 
 export default CourseTable;

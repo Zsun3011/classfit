@@ -18,12 +18,24 @@ const TimetableRecommendation = () => {
   const [conditions, setConditions] = useState(null);
   const [latestBlocks, setLatestBlocks] = useState([]);
   const [latestSummary, setLatestSummary] = useState({ totalCredit: 0, count: 0 });
+  const [mainTimetableId, setMainTimetableId] = useState(null);
 
   const itemsPerPage = 2;
   const savedTableRef = useRef(null);
   const navigate = useNavigate();
 
   // API 함수들
+  const fetchMainTimetable = async () => {
+    try {
+      const res = await get(config.TIMETABLE.MAIN);
+      const main = res?.result ?? res;
+      setMainTimetableId(main?.timetableId ?? null);
+    } catch (e) {
+      console.error("Failed to get main timetable", e);
+      setMainTimetableId(null);
+    }
+  };
+
   const refreshTimetables = async () => {
     try {
       const res = await get(config.TIMETABLE.LIST);
@@ -37,6 +49,7 @@ const TimetableRecommendation = () => {
 
   useEffect(() => {
     refreshTimetables();
+    fetchMainTimetable();
   }, []);
 
   const handleGenerated = useCallback(({ blocks, totalCredit, count }) => {
@@ -45,59 +58,68 @@ const TimetableRecommendation = () => {
   }, []);
 
   // 저장
-  const handleSaveTable = async () => {
-    if (!latestBlocks?.length || !conditions) return;
-    try {
-      const preferCredit = Number(conditions.credit || 0);
-      const pt = conditions.preferredTimes || [];
-      const preferTime = pt.length ? pt.join(",") : "오전,오후";
+const handleSaveTable = async () => {
+  if (!latestBlocks?.length || !conditions) return;
+  try {
+    const preferCredit = Number(conditions.credit || 0);
+    const pt = conditions.preferredTimes || [];
+    const preferTime = pt.length ? pt.join(",") : "오전,오후";
 
-      const morningClassNum = latestBlocks.filter((b) => {
-        const [h] = (b.start || "00:00").split(":").map(Number);
-        return h < 12;
-      }).length;
+    const morningClassNum = latestBlocks.filter((b) => {
+      const [h] = (b.start || "00:00").split(":").map(Number);
+      return h < 12;
+    }).length;
 
-      const DAYS = ["월", "화", "수", "목", "금"];
-      const occupied = new Set(latestBlocks.map((b) => b.day));
-      const freePeriodNum = DAYS.filter((d) => !occupied.has(d)).length;
+    const DAYS = ["월", "화", "수", "목", "금"];
+    const occupied = new Set(latestBlocks.map((b) => b.day));
+    const freePeriodNum = DAYS.filter((d) => !occupied.has(d)).length;
 
-      const essentialCourse = latestBlocks
-        .filter((b) => /\(필수\)$/.test(b.subject))
-        .map((b) => b.subject.replace(/\(필수\)$/, ""))
-        .join(",");
+    // ✅ required 플래그로 필수 과목 추출
+    const essentialCourse = Array.from(
+      new Set(
+        latestBlocks
+          .filter((b) => b.required)
+          .map((b) => b.subject)
+      )
+    ).join(",");
 
-      const payload = {
-        preferCredit,
-        preferTime,
-        morningClassNum,
-        freePeriodNum,
-        essentialCourse,
-        graduationRate: 0,
-        timeSlots: blocksToSlots(latestBlocks),
-      };
+    const payload = {
+      preferCredit,
+      preferTime,
+      morningClassNum,
+      freePeriodNum,
+      essentialCourse,
+      graduationRate: 0,
+      timeSlots: blocksToSlots(latestBlocks),
+    };
 
-      const created = await post(config.TIMETABLE.CREATE, payload);
-      const newId = created?.timetableId ?? created?.result?.timetableId;
+    const created = await post(config.TIMETABLE.CREATE, payload);
+    const newId = created?.timetableId ?? created?.result?.timetableId;
 
-      if (newId) {
-        const colorMap = Object.fromEntries(
-          latestBlocks.filter(b => b?.id != null && b?.color)
-            .map(b => [String(b.id), b.color])
-        );
-        localStorage.setItem(`timetableColors:${newId}`, JSON.stringify(colorMap));
-      }
-
-      await refreshTimetables();
-      alert("시간표가 저장되었습니다.");
-    } catch (e) {
-      console.error("Failed to create timetable", e);
-      alert("시간표 저장 중 오류가 발생했습니다.");
+    if (newId) {
+      const colorMap = Object.fromEntries(
+        latestBlocks.filter(b => b?.id != null && b?.color)
+          .map(b => [String(b.id), b.color])
+      );
+      localStorage.setItem(`timetableColors:${newId}`, JSON.stringify(colorMap));
     }
-  };
+
+    await refreshTimetables();
+    alert("시간표가 저장되었습니다.");
+  } catch (e) {
+    console.error("Failed to create timetable", e);
+    alert("시간표 저장 중 오류가 발생했습니다.");
+  }
+};
+
 
   // 삭제
   const handleDeleteTable = async (timetableId) => {
     try {
+      if (mainTimetableId && timetableId === mainTimetableId) {
+        alert("메인 시간표는 삭제할 수 없습니다. 다른 시간표를 메인으로 설정한 뒤 삭제해 주세요.");
+        return;
+      }
       await api.delete(config.TIMETABLE.DELETE(timetableId));
       await refreshTimetables();
       setSelectedTable(null);
@@ -118,8 +140,17 @@ const TimetableRecommendation = () => {
       alert("메인으로 설정할 저장된 시간표가 없습니다.");
       return;
     }
+    if (mainTimetableId && targetId === mainTimetableId) {
+      // 이미 메인인 경우: 서버 호출 없이 그대로 유지
+      alert("이미 메인으로 설정된 시간표입니다.");
+      return;
+    }
     try {
       await api.put(config.TIMETABLE.SET_MAIN(targetId));
+      setMainTimetableId(targetId);        // 로컬 상태 갱신
+      await refreshTimetables();           // 목록 최신화
+      // 메인도 다시 한 번 안전하게 동기화
+      await fetchMainTimetable();
       alert("메인 시간표로 설정되었습니다.");
       navigate("/home");
     } catch (e) {
@@ -148,7 +179,7 @@ const TimetableRecommendation = () => {
 
     return {
       id: t.timetableId,
-      name: `시간표 ${t.timetableId}`,
+      name: `${mainTimetableId === t.timetableId ? "⭐ " : ""}시간표 ${t.timetableId}`,
       point: `학점: ${totalCredit}`,
       morning: `오전 수업 포함 여부: ${hasMorning ? "O" : "X"}`,
       gbc: `공강: ${freeDays.join(", ") || "없음"}`,

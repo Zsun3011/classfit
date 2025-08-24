@@ -7,8 +7,7 @@ import CourseFilter from "./CourseFilter";
 import "../../styles/CourseList.css";
 import { get, post, del } from "../../api";
 import config from "../../config";
-
-const dayMap = { 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "토", 7: "일",};
+import { dayMap } from "../Timetable/timetableFormat";
 
 const CourseList = () => {
   const [allCourses, setAllCourses] = useState([]);          // 전체 과목 (상세 합친 결과)
@@ -45,9 +44,12 @@ const CourseList = () => {
             description: c.description || "-",
             credit: detail?.credit ?? "-",
             professor: detail?.professor ?? "-",
-            dayOfWeek: detail?.dayOfWeek ? dayMap[detail.dayOfWeek] : "-",
+            dayOfWeek:  dayMap[detail?.dayOfWeek] ?? "-",
+            dayOfWeek2nd: dayMap[detail?.dayOfWeek2nd] ?? null,
             start: detail?.start ?? "-",
             end: detail?.end ?? "-",
+            start2nd: detail?.start2nd ?? null,
+            end2nd: detail?.end2nd ?? null,
           };
         });
 

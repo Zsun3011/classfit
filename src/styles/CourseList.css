@@ -90,7 +90,7 @@
 
 .Course-table th:nth-child(6),
 .Course-table td:nth-child(6) {
-    width: 25%; /* 시간 */
+    width: 35%; /* 시간 */
 }
 
 .Course-table th:nth-child(7),
