@@ -109,6 +109,7 @@ async function buildSchedule(conditions) {
     start: c.start,
     end: c.end,
     type: c.category,
+    category: c.category, 
     credit: creditMap.get(c.id) ?? 0,
     color: requiredIds.has(Number(c.id)) ? "#8ecae6" : palette[idx++ % palette.length],
   }));

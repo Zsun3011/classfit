@@ -7,12 +7,13 @@ import Timetable from "./Timetable";
 import Dashboard from "./Dashboard";
 import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
-import api, { get, post } from "../../api";   
-import config from "../../config";   
+import api, { get, post } from "../../api";
+import config from "../../config";
+import { slotsToBlocks, blocksToSlots } from "./timetableFormat";
 
 const TimetableRecommendation = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [tables, setTables] = useState([]);      
+  const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState(null);
   const [conditions, setConditions] = useState(null);
   const [latestBlocks, setLatestBlocks] = useState([]);
@@ -22,38 +23,11 @@ const TimetableRecommendation = () => {
   const savedTableRef = useRef(null);
   const navigate = useNavigate();
 
-  // 유틸리티 함수들
-  const dayMap = { 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "토", 7: "일" };
-  const dayRev = { "월": 1, "화": 2, "수": 3, "목": 4, "금": 5, "토": 6, "일": 7 };
-  
-  const slotsToBlocks = (timeSlots = []) => {
-    const palette = ["#8ecae6", "#ffb703", "#90be6d", "#f94144", "#f8961e", "#43aa8b", "#577590", "#a05195"];
-    return timeSlots.map((s, i) => ({
-      id: s.subjectId,
-      subject: s.subjectName || "-",
-      day: dayMap[s.day] || "-",
-      start: (s.startTime || "").slice(0, 5),
-      end: (s.endTime || "").slice(0, 5),
-      category: s.category ?? s.courseType ?? s.discipline ?? s.type ?? "",
-      credit: Number(s.credit ?? 0),
-      color: palette[i % palette.length],
-    }));
-  };
-
-  const blocksToSlots = (blocks = []) =>
-    blocks.map((b) => ({
-      subjectId: Number(b.id),
-      startTime: b.start,
-      endTime: b.end,
-      day: b.dayNum ?? dayRev[b.day] ?? 1,
-    }));
-
   // API 함수들
   const refreshTimetables = async () => {
     try {
       const res = await get(config.TIMETABLE.LIST);
       const list = Array.isArray(res) ? res : (res?.result || []);
-      // 최신순 정렬 (timetableId 기준 내림차순)
       const sortedList = list.sort((a, b) => (b.timetableId || 0) - (a.timetableId || 0));
       setTables(sortedList);
     } catch (e) {
@@ -61,12 +35,10 @@ const TimetableRecommendation = () => {
     }
   };
 
-  // 초기 로드
   useEffect(() => {
     refreshTimetables();
   }, []);
 
-  // 생성 완료 콜백
   const handleGenerated = useCallback(({ blocks, totalCredit, count }) => {
     setLatestBlocks(blocks);
     setLatestSummary({ totalCredit, count });
@@ -75,11 +47,10 @@ const TimetableRecommendation = () => {
   // 저장
   const handleSaveTable = async () => {
     if (!latestBlocks?.length || !conditions) return;
-    
     try {
       const preferCredit = Number(conditions.credit || 0);
       const pt = conditions.preferredTimes || [];
-      const preferTime = pt.includes("오전") && pt.includes("오후");
+      const preferTime = pt.length ? pt.join(",") : "오전,오후";
 
       const morningClassNum = latestBlocks.filter((b) => {
         const [h] = (b.start || "00:00").split(":").map(Number);
@@ -105,7 +76,17 @@ const TimetableRecommendation = () => {
         timeSlots: blocksToSlots(latestBlocks),
       };
 
-      await post(config.TIMETABLE.CREATE, payload);
+      const created = await post(config.TIMETABLE.CREATE, payload);
+      const newId = created?.timetableId ?? created?.result?.timetableId;
+
+      if (newId) {
+        const colorMap = Object.fromEntries(
+          latestBlocks.filter(b => b?.id != null && b?.color)
+            .map(b => [String(b.id), b.color])
+        );
+        localStorage.setItem(`timetableColors:${newId}`, JSON.stringify(colorMap));
+      }
+
       await refreshTimetables();
       alert("시간표가 저장되었습니다.");
     } catch (e) {
@@ -127,41 +108,41 @@ const TimetableRecommendation = () => {
     }
   };
 
-  //확정
-  const handleConfirmTable = async () => {
-    if (!latestBlocks?.length || !conditions) return alert("확정할 시간표가 없습니다.");
-    const latest = tables[0];
-    if (!latest) return alert("저장된 시간표가 없습니다.");
-
-    const pt = conditions.preferredTimes || [];
-    const preferTime = pt.length ? pt.join(",") : "오전,오후"; // 선택 없으면 기본값
-    const payload = {
-      preferCredit: Number(conditions.credit || 0),
-      preferTime,
-      morningClassNum: latestBlocks.filter(b => +((b.start||"00:00").split(":")[0]) < 12).length,
-      freePeriodNum: ["월","화","수","목","금"].filter(d => !latestBlocks.some(b => b.day === d)).length,
-      essentialCourse: latestBlocks.filter(b=>/\(필수\)$/.test(b.subject)).map(b=>b.subject.replace(/\(필수\)$/,"")).join(","),
-      graduationRate: 0,
-      timeSlots: blocksToSlots(latestBlocks),
-    };
-
-    await api.put(config.TIMETABLE.UPDATE(latest.timetableId), payload); // ✅ 서버에도 확정 반영
-    sessionStorage.setItem("confirmedTable", JSON.stringify(payload));   // 로컬에서도 유지
-    alert("시간표가 확정되었습니다.");
-    navigate("/home");
+  // 확정
+  const handleConfirmTable = async (timetableIdOverride) => {
+    const targetId =
+      timetableIdOverride ??
+      selectedTable?.timetableId ??
+      tables[0]?.timetableId;
+    if (!targetId) {
+      alert("메인으로 설정할 저장된 시간표가 없습니다.");
+      return;
+    }
+    try {
+      await api.put(config.TIMETABLE.SET_MAIN(targetId));
+      alert("메인 시간표로 설정되었습니다.");
+      navigate("/home");
+    } catch (e) {
+      console.error("Failed to set main timetable", e);
+      alert("메인 설정 중 오류가 발생했습니다.");
+    }
   };
 
-
-  // 페이지네이션 계산
+  // 페이지네이션
   const totalPages = Math.ceil(tables.length / itemsPerPage);
   const startIdx = (currentPage - 1) * itemsPerPage;
   const currentProducts = tables.slice(startIdx, startIdx + itemsPerPage);
 
-  // 시간표 뷰모델 생성
+  // 뷰모델 생성
   const createTableViewModel = (t) => {
-    const blocks = slotsToBlocks(t.timeSlots || []);
+    const key = `timetableColors:${t.timetableId}`;
+    const stored = localStorage.getItem(key);
+    const colorMap = stored ? JSON.parse(stored) : null;
+
+    const blocks = slotsToBlocks(t.timeSlots || [], { withColor: !colorMap, colorMap });
     const totalCredit = blocks.reduce((sum, b) => sum + (Number(b.credit) || 0), 0);
     const hasMorning = blocks.some((b) => Number((b.start || "00:00").slice(0, 2)) < 12);
+
     const occupiedDays = new Set(blocks.map((b) => b.day));
     const freeDays = ["월", "화", "수", "목", "금"].filter((d) => !occupiedDays.has(d));
 
@@ -172,9 +153,9 @@ const TimetableRecommendation = () => {
       morning: `오전 수업 포함 여부: ${hasMorning ? "O" : "X"}`,
       gbc: `공강: ${freeDays.join(", ") || "없음"}`,
       data: blocks,
-      conditions: { 
-        preferredTimes: (t.preferTime || "").split(",").filter(Boolean), 
-        avoidDays: [] 
+      conditions: {
+        preferredTimes: (t.preferTime || "").split(",").filter(Boolean),
+        avoidDays: [],
       },
     };
   };
@@ -188,7 +169,6 @@ const TimetableRecommendation = () => {
         buttonText="저장된 시간표"
         onButtonClick={() => savedTableRef.current?.scrollIntoView({ behavior: "smooth" })}
       />
-
       <InputConditionForm onGenerate={setConditions} />
 
       {conditions && (
@@ -205,7 +185,7 @@ const TimetableRecommendation = () => {
           </div>
           <div className="AiTimetable-button">
             <button className="button" onClick={handleSaveTable}>저장하기</button>
-            <button className="button" onClick={handleConfirmTable}>확정하기</button>
+            <button className="button" onClick={() => handleConfirmTable(selectedTable?.timetableId)}>확정하기</button>
           </div>
           <div className="AiTimetable-buttonText">*저장하지 않으면 해당 시간표는 삭제됩니다.</div>
         </div>
@@ -222,7 +202,13 @@ const TimetableRecommendation = () => {
                 <TableCard
                   key={table.timetableId}
                   table={viewModel}
-                  onClick={() => setSelectedTable({ ...table, __blocks: viewModel.data, __vm: viewModel })}
+                  onClick={() =>
+                    setSelectedTable({
+                      ...table,
+                      __blocks: viewModel.data,
+                      __vm: viewModel,
+                    })
+                  }
                 />
               );
             })}
@@ -270,7 +256,7 @@ const TimetableRecommendation = () => {
                     </div>
                     <div className="AiTimetable-button">
                       <button className="button-remove" onClick={() => handleDeleteTable(selectedTable.timetableId)}>삭제하기</button>
-                      <button className="button" onClick={handleConfirmTable}>확정하기</button>
+                      <button className="button" onClick={() => handleConfirmTable(selectedTable?.timetableId)}>확정하기</button>
                     </div>
                   </div>
                 </div>
