@@ -399,6 +399,10 @@ body {
 .TimetableSummary-section-bottom .dashboard-section{
     width: 370px;
     height: 170px;
+     display: flex;            /* ✅ 추가 */
+  flex-direction: column;   /* ✅ 추가 */
+  padding: 12px 16px;       /* 가독성용(선택) */
+  box-sizing: border-box;   /* 패딩 포함 높이 계산 */
 }
 
 .TimetableSummary-section-bottom .dashboard-section1{
@@ -417,12 +421,24 @@ body {
     color: #444;
 }
 
+.TimetableSummary-section-bottom .dashboard-listcontainer{
+    flex: 1;                  /* ✅ 리스트 영역 확장 */
+  min-height: 0;            /* ✅ 플렉스 컨테이너 스크롤 필수 */
+  overflow-y: auto;         /* ✅ 세로 스크롤 */        
+}
+
 .TimetableSummary-section-bottom .dashboardsection-container{
+    display: flex; 
     flex-direction: row;
     width: 640px;
     gap: 20px;
 }   
 
+/* 리스트 기본 여백 정리(선택) */
+.TimetableSummary-section-bottom .dashboard-list{
+  margin: 0;
+  padding-left: 16px;       /* 불릿 들여쓰기 */
+}
 .TimetableSummary-wrapper {
     display: flex;
     flex-direction: column;

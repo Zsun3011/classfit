@@ -57,67 +57,76 @@ const TimetableRecommendation = () => {
     setLatestSummary({ totalCredit, count });
   }, []);
 
+  const indexMap = React.useMemo(() => {
+  const asc = [...tables].sort((a, b) => (a.timetableId || 0) - (b.timetableId || 0));
+  const map = new Map();
+  asc.forEach((t, i) => map.set(t.timetableId, i + 1)); // 오래된=1
+  return map;
+}, [tables]);
+
   // 저장
-const handleSaveTable = async () => {
-  if (!latestBlocks?.length || !conditions) return;
-  try {
-    const preferCredit = Number(conditions.credit || 0);
-    const pt = conditions.preferredTimes || [];
-    const preferTime = pt.length ? pt.join(",") : "오전,오후";
-
-    const morningClassNum = latestBlocks.filter((b) => {
-      const [h] = (b.start || "00:00").split(":").map(Number);
-      return h < 12;
-    }).length;
-
-    const DAYS = ["월", "화", "수", "목", "금"];
-    const occupied = new Set(latestBlocks.map((b) => b.day));
-    const freePeriodNum = DAYS.filter((d) => !occupied.has(d)).length;
-
-    // ✅ required 플래그로 필수 과목 추출
-    const essentialCourse = Array.from(
-      new Set(
-        latestBlocks
-          .filter((b) => b.required)
-          .map((b) => b.subject)
-      )
-    ).join(",");
-
-    const payload = {
-      preferCredit,
-      preferTime,
-      morningClassNum,
-      freePeriodNum,
-      essentialCourse,
-      graduationRate: 0,
-      timeSlots: blocksToSlots(latestBlocks),
-    };
-
-    const created = await post(config.TIMETABLE.CREATE, payload);
-    const newId = created?.timetableId ?? created?.result?.timetableId;
-
-    if (newId) {
-      const colorMap = Object.fromEntries(
-        latestBlocks.filter(b => b?.id != null && b?.color)
-          .map(b => [String(b.id), b.color])
-      );
-      localStorage.setItem(`timetableColors:${newId}`, JSON.stringify(colorMap));
+  const handleSaveTable = async ({ silent = false } = {}) => {
+    if (!latestBlocks?.length || !conditions) {
+      if (!silent) alert("먼저 시간표를 생성해 주세요.");
+      return null;
     }
+    try {
+      const preferCredit = Number(conditions.credit || 0);
+      const pt = conditions.preferredTimes || [];
+      const preferTime = pt.length ? pt.join(",") : "오전,오후";
 
-    await refreshTimetables();
-    alert("시간표가 저장되었습니다.");
-  } catch (e) {
-    console.error("Failed to create timetable", e);
-    alert("시간표 저장 중 오류가 발생했습니다.");
-  }
-};
+      const morningClassNum = latestBlocks.filter((b) => {
+        const [h] = (b.start || "00:00").split(":").map(Number);
+        return h < 12;
+      }).length;
+
+      const DAYS = ["월", "화", "수", "목", "금"];
+      const occupied = new Set(latestBlocks.map((b) => b.day));
+      const freePeriodNum = DAYS.filter((d) => !occupied.has(d)).length;
+
+      const essentialCourse = Array.from(
+        new Set(latestBlocks.filter((b) => b.required).map((b) => b.subject))
+      ).join(",");
+
+      const payload = {
+        preferCredit,
+        preferTime,
+        morningClassNum,
+        freePeriodNum,
+        essentialCourse,
+        graduationRate: 0,
+        timeSlots: blocksToSlots(latestBlocks),
+      };
+
+      const created = await post(config.TIMETABLE.CREATE, payload);
+      const newId = created?.timetableId ?? created?.result?.timetableId;
+
+      if (newId) {
+        const colorMap = Object.fromEntries(
+          latestBlocks
+            .filter((b) => b?.id != null && b?.color)
+            .map((b) => [String(b.id), b.color])
+        );
+        localStorage.setItem(`timetableColors:${newId}`, JSON.stringify(colorMap));
+      }
+
+      await refreshTimetables();
+      if (!silent) alert("시간표가 저장되었습니다.");
+      return newId || null;
+    } catch (e) {
+      console.error("Failed to create timetable", e);
+      if (!silent) alert("시간표 저장 중 오류가 발생했습니다.");
+      return null;
+    }
+  };
+
 
 
   // 삭제
   const handleDeleteTable = async (timetableId) => {
     try {
       if (mainTimetableId && timetableId === mainTimetableId) {
-        alert("메인 시간표는 삭제할 수 없습니다. 다른 시간표를 메인으로 설정한 뒤 삭제해 주세요.");
+        alert("확정된 시간표는 삭제할 수 없습니다.");
         return;
       }
       await api.delete(config.TIMETABLE.DELETE(timetableId));
@@ -132,32 +141,36 @@ const handleSaveTable = async () => {
 
   // 확정
   const handleConfirmTable = async (timetableIdOverride) => {
-    const targetId =
-      timetableIdOverride ??
-      selectedTable?.timetableId ??
-      tables[0]?.timetableId;
+    let targetId = timetableIdOverride ?? selectedTable?.timetableId;
+
+    // 아직 저장된 시간표가 없으면 자동 저장 시도
     if (!targetId) {
-      alert("메인으로 설정할 저장된 시간표가 없습니다.");
-      return;
+      const newId = await handleSaveTable({ silent: true });
+      if (!newId) {
+        alert("시간표가 없습니다. 조건 입력 후 생성해 주세요.");
+        return;
+      }
+      targetId = newId;
     }
+
     if (mainTimetableId && targetId === mainTimetableId) {
-      // 이미 메인인 경우: 서버 호출 없이 그대로 유지
-      alert("이미 메인으로 설정된 시간표입니다.");
+      alert("이미 확정된 시간표입니다.");
       return;
     }
+
     try {
       await api.put(config.TIMETABLE.SET_MAIN(targetId));
-      setMainTimetableId(targetId);        // 로컬 상태 갱신
-      await refreshTimetables();           // 목록 최신화
-      // 메인도 다시 한 번 안전하게 동기화
+      setMainTimetableId(targetId);
+      await refreshTimetables();
       await fetchMainTimetable();
-      alert("메인 시간표로 설정되었습니다.");
+      alert("시간표를 저장 및 확정했습니다.");
       navigate("/home");
     } catch (e) {
       console.error("Failed to set main timetable", e);
-      alert("메인 설정 중 오류가 발생했습니다.");
+      alert("확정 설정 중 오류가 발생했습니다.");
     }
   };
+
 
   // 페이지네이션
   const totalPages = Math.ceil(tables.length / itemsPerPage);
@@ -165,7 +178,7 @@ const handleSaveTable = async () => {
   const currentProducts = tables.slice(startIdx, startIdx + itemsPerPage);
 
   // 뷰모델 생성
-  const createTableViewModel = (t) => {
+  const createTableViewModel = (t, displayIndex) => {
     const key = `timetableColors:${t.timetableId}`;
     const stored = localStorage.getItem(key);
     const colorMap = stored ? JSON.parse(stored) : null;
@@ -179,7 +192,8 @@ const handleSaveTable = async () => {
 
     return {
       id: t.timetableId,
-      name: `${mainTimetableId === t.timetableId ? "⭐ " : ""}시간표 ${t.timetableId}`,
+      // ✅ 여기만 인덱스로 표시
+      name: `${mainTimetableId === t.timetableId ? "⭐ " : ""}시간표 ${displayIndex}`,
       point: `학점: ${totalCredit}`,
       morning: `오전 수업 포함 여부: ${hasMorning ? "O" : "X"}`,
       gbc: `공강: ${freeDays.join(", ") || "없음"}`,
@@ -228,7 +242,8 @@ const handleSaveTable = async () => {
         <div className="table-container">
           <div className="table-grid">
             {currentProducts.map((table) => {
-              const viewModel = createTableViewModel(table);
+              const displayIndex = indexMap.get(table.timetableId) ?? "-";
+              const viewModel = createTableViewModel(table, displayIndex);
               return (
                 <TableCard
                   key={table.timetableId}
@@ -268,13 +283,14 @@ const handleSaveTable = async () => {
 
           {/* 모달 */}
           {selectedTable && (
-            <div className="modal-overlay" onClick={() => setSelectedTable(null)}>
-              <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                  <h2>{selectedTable.__vm?.name}</h2>
-                  <button className="modal-close" onClick={() => setSelectedTable(null)}>×</button>
-                </div>
-                <div className="modal-content">
+          <div className="modal-overlay" onClick={() => setSelectedTable(null)}>
+            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>{selectedTable.__vm?.name}</h2>
+                <button className="modal-close" onClick={() => setSelectedTable(null)}>×</button>
+              </div>
+              <div className="modal-content">
+                <div className="modal-scroll">
                   <div className="AiTimetable-section-wrapper">
                     <div className="AiTimetable-section">
                       <Timetable data={selectedTable.__blocks || []} isModal={true} />
@@ -285,15 +301,27 @@ const handleSaveTable = async () => {
                         avoidDays={[]}
                       />
                     </div>
-                    <div className="AiTimetable-button">
-                      <button className="button-remove" onClick={() => handleDeleteTable(selectedTable.timetableId)}>삭제하기</button>
-                      <button className="button" onClick={() => handleConfirmTable(selectedTable?.timetableId)}>확정하기</button>
-                    </div>
                   </div>
+                </div>
+
+                <div className="modal-footer">
+                  <button
+                    className="button-remove"
+                    onClick={() => handleDeleteTable(selectedTable.timetableId)}
+                  >
+                    삭제하기
+                  </button>
+                  <button
+                    className="button"
+                    onClick={() => handleConfirmTable(selectedTable?.timetableId)}
+                  >
+                    확정하기
+                  </button>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
         </div>
       </div>
     </div>

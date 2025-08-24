@@ -74,6 +74,12 @@ const config = {
         ME: `${BASE_URL}/api/subject-progress/me`, // 내 과목별 진척도 조회 (GET)
     },
 
+    
+    // AI 추천
+    AI: {
+        AUTO_RECOMMEND: `${BASE_URL}/ai/recommendation/auto`, // 자동 추천 (POST)
+    },
+
 };
 
 export default config;
