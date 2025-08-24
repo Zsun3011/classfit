@@ -1,7 +1,6 @@
 import React from "react";
 import Header from "../../components/Header";
 import UserInfoCard from "./UserInfoCard";
-import ScheduleList from "./ScheduleList";
 import QuickLinkButton from "./QuickLinkButton";
 import ProgressBar from "./ProgressBar";
 import TimetableSummary from "./TimetableSummary";

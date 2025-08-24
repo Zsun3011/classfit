@@ -70,13 +70,6 @@ const InputConditionForm = ({ onGenerate }) => { // courses props 제거 (API에
         setIsModalOpen(true);
     };
 
-    const getSelectedSubjectNames = () => {
-        return selectedSubjectInfo
-            .map(subject => subject.subjectName || subject.name)
-            .filter(Boolean)
-            .join(", ");
-    };
-
     return (
         <div className="inputCondition-container">
             <div className="inputCondition-title">시간표 조건 입력</div>
@@ -116,7 +109,6 @@ const InputConditionForm = ({ onGenerate }) => { // courses props 제거 (API에
                             </ul>
                         </div>
                         )}
-
                 </div>
 
                 {/* 희망 이수 학점 */}
