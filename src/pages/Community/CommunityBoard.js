@@ -5,12 +5,14 @@ import "../../styles/CommunityBoard.css";
 import NewPost from "./NewPost";
 import PostDetail from "./PostDetail";
 import RecommendationBanner from "./RecommendationBanner";
-import { post, put, del } from "../../api";
+import { get, post, put, del } from "../../api";
 import config from "../../config";
 
 const CommunityBoard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [posts, setPosts] = useState([]);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
     const [selectedPost, setSelectedPost] = useState(null); 
     const [isDetailOpen, setIsDetailOpen] = useState(false); 
     const [editingPost, setEditingPost] = useState(null);
@@ -24,8 +26,47 @@ const CommunityBoard = () => {
         }
     }, [location]);
 
+    useEffect(() => {
+      loadPosts(0, true);
+    }, []);
+
     const handleRecommendationButtonClick = () => {
         setIsModalOpen(true);
+    };
+
+
+    // 서버에서 게시글 페이지 로드
+    const loadPosts = async(nextPage = 0, reset = false) => {
+      try {
+        const res = await get(config.COMMUNITY.LIST, {
+          page: nextPage,
+          size: 20,
+          sort: "createdAt,desc",
+          type: "ALL",
+        });
+
+        const pagePayload = res?.result ?? res;
+        const rows = pagePayload?.content ?? [];
+
+        const mapped = rows.map((it) => ({
+          id: it.id,
+          title: it.title,
+          content: it.content,
+          createdAt: new Date(it.createdAt),
+          commentCount: it.commentCount ?? 0,
+          type: it.postType ?? "GENERAL",
+          comments: [],
+          __unsynced: false,
+        }));
+
+        setPosts((prev) => (reset ? mapped : [...prev, ...mapped]));
+        setPage(pagePayload?.number ?? nextPage);
+        const last = pagePayload?.last;
+        const totalPages = pagePayload?.totalPages;
+        setHasMore(last === false || (typeof totalPages === "number" && nextPage + 1 < totalPages));
+      } catch (e) {
+        console.error("게시글 목록 불러오기 실패:", e);
+      }
     };
 
     // 게시글 등록/수정 공용 핸들러
@@ -66,7 +107,7 @@ const handleAddPost = async (newPost) => {
             {
               title: newPost.title.trim(),
               content: newPost.content.trim(),
-              type: "GENERAL", // 필요 시 postType: "GENERAL"로 교체 테스트
+              type: "GENERAL", 
             }
           );
           const updated = res.data;
@@ -110,28 +151,14 @@ const handleAddPost = async (newPost) => {
         const res = await post(config.COMMUNITY.CREATE, {
           title: newPost.title.trim(),
           content: newPost.content.trim(),
-          type: "GENERAL", // 서버 스펙에 맞춰 필요 시 type↔postType 확인
+          type: "GENERAL", 
         });
-        const created = res.data;
-  
-        // 임시글 → 실제로 치환
-        setPosts((prev) =>
-          prev.map((p) =>
-            p.id === tempId
-              ? {
-                  id: created.id,
-                  title: created.title ?? tempPost.title,
-                  content: created.content ?? tempPost.content,
-                  createdAt: new Date(created.createdAt || tempPost.createdAt),
-                  comments: [],
-                  commentCount: created.commentCount ?? 0,
-                  __unsynced: false,
-                }
-              : p
-          )
-        );
+        const created = res?.result ?? res;
+
+        // 서버 저장 성공 시 서버 기준으로 새로고침
+        await loadPosts(0, true);
       } catch (err) {
-        console.error("서버 등록 실패(임시글 유지):", err);
+        console.error("서버 등록 실패(임시글 유지):", err.response?.data || err);
         alert("서버 등록은 실패했지만, 화면에는 임시로 추가해두었어요.");
         // 임시글은 그대로 남아서 수정/삭제 테스트 가능
       }
@@ -198,7 +225,9 @@ const handleAddPost = async (newPost) => {
       setPosts(prev =>
         prev.map(p =>
           p.id === postId
-            ? {...p, comments: [...(p.comments || []), tempComment]}
+            ? {...p, comments: [...(p.comments || []), tempComment],
+              commentCount: (p.commentCount ?? p.comments?.length ?? 0) +1,
+            }
             : p
         )
       );
@@ -207,6 +236,7 @@ const handleAddPost = async (newPost) => {
             setSelectedPost(prev => ({
               ...prev,
               comments: [...(prev.comments || []), tempComment],
+              commentCount: (prev.commentCount ?? prev.comments?.length ?? 0) +1,
         }));
     };
 
@@ -332,7 +362,7 @@ const handleAddPost = async (newPost) => {
                                     <span className="post-time">{getTimeAgo(post.createdAt)}</span>
                                     <span className="post-comments">
                                         <img src="/icons/message.png" alt="댓글" className="comment-icon" />
-                                        {(post.comments || []).length}개
+                                        {(post.commentCount ?? (post.comments?.length || 0))}개
                                     </span>
                                 </div>
                             </div>

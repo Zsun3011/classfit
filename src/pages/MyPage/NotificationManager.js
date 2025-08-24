@@ -6,13 +6,13 @@ import CourseHistoryManager from "./CourseHistoryManager";
 import { readProfile, saveProfile } from "../Onboarding/commonutil";
 
 const graduationLabel = {
-    UNDERGRAD: "일반 졸업", 
+    GENERAL: "일반 졸업", 
     DOUBLE_MAJOR: "복수 전공",
     MINOR: "부전공",
 };
 
 const enumByLabel = {
-    "일반 졸업": "UNDERGRAD",
+    "일반 졸업": "GENERAL",
     "복수 전공": "DOUBLE_MAJOR",
     "부전공": "MINOR",
 };
@@ -44,6 +44,16 @@ const NotificationManager = () => {
         saveProfile(buildProfile());      
         alert("수정사항이 저장되었습니다.");
     };
+
+    // 복수전공 입력값이 생기면 졸업유형 자동으로 변환
+    useEffect(() => {
+        const v = (doubleMajor || "").trim();
+        if(v && graduationtype !== "복수 전공") {
+            setGraduationtype("복수 전공");
+        } else if (!v && graduationtype === "복수 전공") {
+            setGraduationtype("일반 졸업");
+        }
+    }, [doubleMajor]);
     
     // 온보딩 결과 가져오기
     useEffect(() => {
@@ -117,7 +127,10 @@ const NotificationManager = () => {
                         type="button"
                         key={type}
                         className={`graduationtype-button ${graduationtype === type ? "active" : ""}`}
-                        onClick={() => setGraduationtype(type)}
+                        onClick={() =>{
+                            setGraduationtype(type);
+                            if(type !== "복수 전공") setDoubleMajor("");
+                        }}
                     >
                         {type}
                     </button>

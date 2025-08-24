@@ -11,7 +11,7 @@ export const clearUid = () => localStorage.removeItem(uidKey);
 const safeParse = (s, fallback) => {
   try { return JSON.parse(s ?? "");} catch { return fallback; }
 };
-const STEP_FLAGS = "stepFalgs";
+const STEP_FLAGS = "stepFlags";
 const readStepFlags = (uid) => safeParse(localStorage.getItem(keyFor(STEP_FLAGS, uid)), {});
 const writeStepFlags = (uid, flags) => localStorage.setItem(keyFor(STEP_FLAGS, uid), JSON.stringify(flags || {}));
 const markStep = (uid, step) => { const f = readStepFlags(uid); f[step] = true; writeStepFlags(uid, f); };
