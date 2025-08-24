@@ -145,6 +145,7 @@ const handleAddPost = async (newPost) => {
 
     // 게시글 삭제
     const handleDeletePost = async (postId) => {
+    
         const target = posts.find(p => p.id === postId);
         const isTemp = String(postId).startsWith("temp-") || target?.__unsynced;
 
@@ -172,17 +173,99 @@ const handleAddPost = async (newPost) => {
     };
 
     // 댓글 생성
-    const handleCommentAdd = (postId, newComment) => {
-        const updatedPosts = posts.map(post => 
-            post.id === postId 
-                ? { ...post, comments: [...(post.comments || []), newComment] }
-                : post
-        );
-        setPosts(updatedPosts);
-        
-        if (selectedPost && selectedPost.id === postId) {
-            setSelectedPost({ ...selectedPost, comments: [...(selectedPost.comments || []), newComment] });
-        }
+    const handleCommentAdd =  async (postId, raw) => {
+
+      const content = (typeof raw === "string" ? raw : raw?.content || "").trim();
+      if (!content) return;
+
+      const target = posts.find(p => p.id === postId ); 
+      if(!target) return;
+    
+      const isTempPost = 
+        String(postId).startsWith("temp-") || target.__unsynced === true;
+
+      // 임시 댓글 추가
+      const tempCommentId = 
+        `ctemp-${postId}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+      const tempComment = {
+        id: tempCommentId,
+        nickname: `익명${(target.comments?.length || 0) + 1}`,
+        content,
+        timestamp: new Date(),
+        __unsynced: isTempPost,
+      };
+
+      setPosts(prev =>
+        prev.map(p =>
+          p.id === postId
+            ? {...p, comments: [...(p.comments || []), tempComment]}
+            : p
+        )
+      );
+      
+      if (selectedPost?.id === postId) {
+            setSelectedPost(prev => ({
+              ...prev,
+              comments: [...(prev.comments || []), tempComment],
+        }));
+    };
+
+    // 임시 글이면 서버 호출 X
+    if (isTempPost) return;
+
+    // API 호출 후 임시 댓글을 서버 댓글로 치환
+    try {
+      const created = await post(config.COMMENT.CREATE, {postId, content});
+
+      const serverComment = {
+        id: created.id,
+        nickname: tempComment.nickname,
+        content: created.content ?? tempComment.content,
+        timestamp: new Date(created.createdAt || tempComment.timestamp),
+        __unsynced: false,
+      };
+
+      setPosts(prev => 
+        prev.map(p => 
+          p.id === postId
+          ? {
+            ...p,
+            comments: (p.comments || []).map(c =>
+              c.id === tempCommentId ? serverComment : c
+            ),
+          }
+          : p
+        )
+      );
+      if (selectedPost?.id === postId) {
+        setSelectedPost(prev => ({
+          ...prev,
+          comments: (prev.comments || []).map(c =>
+            c.id === tempCommentId ? serverComment : c
+          ),
+        }));
+      }
+    } catch (e) {
+      console.error("댓글 등록 실패:", e);
+      setPosts(prev =>
+        prev.map(p => 
+          p.id === postId
+            ? {
+              ...p, 
+              comments: (p.comments || []).filter(c => c.id !== tempCommentId)
+            }
+            : p
+        )
+      );
+      if(selectedPost?.id === postId) {
+        setSelectedPost(prev => ({
+          ...prev,
+          comments: (prev.comments || []).filter(c => c.id !== tempCommentId),
+        }));
+      }
+      const s = e.response?.status;
+      alert(s === 401 ? "로그인이 필요합니다." : "댓글 등록에 실패했습니다.");
+    }
     };
 
     const handlePostClick = (post) => {

@@ -42,7 +42,7 @@ const config = {
         ME: `${BASE_URL}/api/users/me`, // GET(내 정보), DELETE(회원탈퇴)
     },
     
-     //과목 조회
+    //과목 조회
     SUBJECTS: {
         SEARCH: () => `${BASE_URL}/api/subjects/search`, // GET(과목 검색), params: { name, professor }
         DETAIL: (id) => `${BASE_URL}/api/subjects/${id}`, // GET (과목 가져오기)
@@ -56,7 +56,7 @@ const config = {
         CREATE: `${BASE_URL}/api/community/posts`, // (POST) 게시글 생성
         UPDATE: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}`, // (PUT) 게시글 수정
         DELETE: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}`, // (DELETE) 게시글 삭제
-        LIST: (id) => `${BASE_URL}/api/community/posts/${encodeURIComponent(id)}` // (GET) 게시글 조회
+        LIST: `${BASE_URL}/api/community/posts` // (GET) 게시글 조회
     },
 
     // 시간표 관리
@@ -72,6 +72,10 @@ const config = {
     // 과목별 진척도
     SUBJECT_PROGRESS: {
         ME: `${BASE_URL}/api/subject-progress/me`, // 내 과목별 진척도 조회 (GET)
+    },
+    
+    COMMENT: {
+        CREATE: `${BASE_URL}/api/community/comments`, // (POST)댓글 생성
     },
 
 };

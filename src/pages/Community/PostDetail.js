@@ -8,16 +8,9 @@ const PostDetail = ({ post, onClose, onDelete, onEdit, onCommentAdd   }) => {
 
    
     const handleCommentSubmit = () => {
-        if (commentInput.trim() === "") return;
-        
-        const newComment = {
-            id: Date.now(),
-            nickname: `익명${(post.comments?.length || 0) + 1}`,
-            content: commentInput.trim(),
-            timestamp: new Date()
-        };
-        
-        onCommentAdd(post.id, newComment);
+        const content = commentInput.trim();
+        if(!content) return;    
+        onCommentAdd(post.id, content);
         setCommentInput("");
     };
 

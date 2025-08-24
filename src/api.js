@@ -97,37 +97,36 @@ api.interceptors.response.use(
         window.location.href = "/";
         return Promise.reject(error);
     }
-
-    // 동시 401 방지: 갱신 중이면 큐에 등록해 둠
-    if (isRefreshing) {
-      return new Promise((resolve) => {
-          pendingRequests.push((newToken) => {
-            originalRequest.headers = originalRequest.headers || {};
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            resolve(api(originalRequest));
-          });
+// 동시 401 방지: 갱신 중이면 큐에 등록해 둠
+if (isRefreshing) {
+  return new Promise((resolve) => {
+      pendingRequests.push((newToken) => {
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        resolve(api(originalRequest));
       });
-   }
+  });
+}
 
-    // 재발급 시도
-    originalRequest._retry = true;
-    isRefreshing = true;
+// 재발급 시도
+originalRequest._retry = true;
+isRefreshing = true;
 
-    try {
-      // refreshToken은 쿠키 또는 로컬스토리지에 보관 중이어야 함
-    const refreshToken = 
-        cookies.get("refreshToken") || localStorage.getItem("refreshToken");
+try {
+  // refreshToken은 쿠키 또는 로컬스토리지에 보관 중이어야 함
+const refreshToken = 
+    cookies.get("refreshToken") || localStorage.getItem("refreshToken");
 
-     const reissueRes = await axios.post(
-        appconfig.AUTH.REISSUE_TOKEN,
-        refreshToken ? { refreshToken } : {},
-        {
-             withCredentials: true,
-             headers: { "Content-Type": "application/json", Accept: "application/json" }
-        }
-     );
-      
-      const body = reissueRes.data;
+ const reissueRes = await axios.post(
+    appconfig.AUTH.REISSUE_TOKEN,
+    refreshToken ? { refreshToken } : {},
+    {
+         withCredentials: true,
+         headers: { "Content-Type": "application/json", Accept: "application/json" }
+    }
+ );
+
+ const body = reissueRes.data;
       const ok = body?.isSuccess ?? true;
       const newAccessToken = body?.result?.accessToken ?? body?.accessToken;
       if(!ok || !newAccessToken) throw new Error("REISSUE_FAILED");

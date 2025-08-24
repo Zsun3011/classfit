@@ -26,16 +26,16 @@ const getNameFromToken = (token = "") => {
 
 const LoginMethodSelector = () => {
 
-    //입력값을 상태로 저장
+    // 입력값을 상태로 저장
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordError, setPasswordError] = useState(false);
     const [loading, setLoading] = useState(false);
   
+    // 쿠키/라우팅
     const [, setCookie] = useCookies(["accessToken", "refreshToken"]);
     const navigate = useNavigate();
 
-    
     // 로그인
     const handleLogin = async () => {
 
