@@ -34,8 +34,8 @@ export const getUidFromToken = (token = "") => {
 // 로그인 응답/토큰/이메일을 받아 항상 같은 uid를 고르는 함수
 export const chooseUidFromLogin = (result, accessToken, email) => {
       const cands = [
-          result?.userId, result?.id, result?.memberId,
           getUidFromToken(accessToken),
+          result?.userId, result?.id, result?.memberId,
           (email || "").toLowerCase(),
         ].filter(Boolean).map(String);
         const prev = getUid?.();
@@ -61,6 +61,23 @@ export const chooseUidFromLogin = (result, accessToken, email) => {
 export const wipeLegacyGlobalKeys = () => {
     ["profileData", "profileCompleted", "displayName", "courseHistory", "stepFlags"]
      .forEach((k) => localStorage.removeItem(k));
+};
+
+// 서버가 온보딩 완료라고 말하는 모든 경우를 묶어 처리
+export const saysDone = (o = {}) => {
+  try {
+    const x = o.result ?? o;
+    const steps = x.steps ?? {};
+    return (
+      x.isCompleted === true ||
+      x.profileCompleted === true ||
+      x.isProfileCompleted === true ||
+      x.completed === true ||         // 백엔드가 completed로 주는 경우
+      x.allDone === true ||           // allDone 키
+      steps.allDone === true ||       // steps.allDone
+      ["step1", "step2", "step3", "step4"].every(k => steps?.[k] === true)
+    );
+  } catch { return false};
 };
 
 

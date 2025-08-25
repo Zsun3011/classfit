@@ -7,7 +7,9 @@ import { useCookies } from "react-cookie";
 import {setUid, saveProfile, saveDisplayName, isProfileCompleted, 
         readPreloginName, clearPreloginName, wipeLegacyGlobalKeys,
         chooseUidFromLogin,
-        markProfileCompleted} from "./commonutil.js";
+        markProfileCompleted,
+        saysDone,
+        migrateLegacyToNamespaced,} from "./commonutil";
 
 // 토큰에서 name 추출
 const getNameFromToken = (token = "") => {
@@ -72,10 +74,12 @@ const LoginMethodSelector = () => {
                 return;
             }
 
-            wipeLegacyGlobalKeys();
+            /*wipeLegacyGlobalKeys();*/
 
             const userUid = chooseUidFromLogin(result, accessToken, email);
             setUid(userUid);
+            migrateLegacyToNamespaced(userUid);
+            wipeLegacyGlobalKeys();
 
             // 인터셉터가 쿠키에서 access/refresh 읽게 했으므로 쿠키에 저장
             setCookie("accessToken", accessToken, {
@@ -102,8 +106,10 @@ const LoginMethodSelector = () => {
             }
             if (preName) clearPreloginName(email); // 임시 저장 제거
 
+
+
             // 서버가 내려준 완료 플래그 반영
-            const steps = result?.steps ?? {};
+            /*const steps = result?.steps ?? {};
             const completedFromServer = 
                 result?.allDone === true ||
                 steps?.allDone === true ||
@@ -111,8 +117,10 @@ const LoginMethodSelector = () => {
                 result?.profileCompleted === true ||
                 result?.isProfileCompleted === true ||
                 (steps && ["step1", "step2", "step3", "step4"].every(k => steps[k] === true));
+            */
+            const completedFromServer = saysDone(res) || saysDone(result);
 
-            console.log("[LOGIN] steps =", steps, "allDone = ", result?.allDone, "completed =", completedFromServer);
+            /*console.log("[LOGIN] steps =", steps, "allDone = ", result?.allDone, "completed =", completedFromServer);*/
 
             if(completedFromServer) {
                 markProfileCompleted();
