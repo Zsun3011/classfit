@@ -60,9 +60,10 @@ async function buildSchedule(conditions) {
       name: s.name,
       category: s.category || s.courseType || s.discipline || "",
       courseType: s.courseType || "",
+      listCredit: Number(s.credit ?? 0),
       meetings, // [{day,dayNum,start,end}, ...]
     };
-  }).filter(c => c.meetings.length > 0); // 미팅이 하나도 없으면 제외
+  });
 
   const requiredSet = new Set((selectedSubjects || []).map(Number));
   const requiredCourses = allCourses.filter(c => requiredSet.has(Number(c.id)));
@@ -88,22 +89,35 @@ async function buildSchedule(conditions) {
 
   // 학점을 캐시해 불필요한 DETAIL 호출 줄이기
   const creditCache = new Map();
-  const getCredit = async (courseId) => {
+  const getCredit = async (courseId, listCredit = 0) => {
     if (creditCache.has(courseId)) return creditCache.get(courseId);
     const d = await fetchDetail(courseId);
-    const cr = Number(d.credit || 0);
+    let cr = Number(d.credit ?? 0);
+    if (!cr && listCredit) cr = Number(listCredit);
     creditCache.set(courseId, cr);
     return cr;
   };
 
   // 6) 필수 과목부터 배치
   for (const c of requiredCourses) {
-    if (hasConflict(c, chosenMeetings)) {
-      throw new Error(`필수 과목 시간 충돌: ${c.name}`);
+    const d = await fetchDetail(c.id);
+    const desc = d?.description || "";
+    const hasAnyTime =
+      !!(c.meetings?.length) ||
+      !!(d?.dayOfWeek && d?.start && d?.end) ||
+      !!(d?.dayOfWeek2nd && d?.start2nd && d?.end2nd);
+    const isCyberNoTime = (desc === "사이버") && !hasAnyTime;
+
+    if (!isCyberNoTime) {
+      if (hasConflict(c, chosenMeetings)) {
+        throw new Error(`필수 과목 시간 충돌: ${c.name}`);
+      }
     }
-    const cr = await getCredit(c.id);
-    chosenCourses.push({ ...c, required: true, credit: cr });
-    chosenMeetings.push(...c.meetings);
+    const cr = await getCredit(c.id, c.listCredit);
+    chosenCourses.push({ ...c, required: true, credit: cr, description: desc });
+     if (!isCyberNoTime) {
+      chosenMeetings.push(...c.meetings);
+    }
     totalCredit += cr;
   }
   if (target && totalCredit > target) throw new Error(`필수 과목 학점(${totalCredit})이 희망 학점(${target}) 초과`);
@@ -124,8 +138,9 @@ async function buildSchedule(conditions) {
   // 8) 충돌 없이 채우기(+ 목표 학점 고려)
   for (const c of scoredOptional) {
     if (target && totalCredit >= target) break;
+    if (c.meetings.length === 0) continue;
     if (hasConflict(c, chosenMeetings)) continue;
-    const cr = await getCredit(c.id);
+    const cr = await getCredit(c.id, c.listCredit);
     if (target && totalCredit + cr > target) continue;
     chosenCourses.push({ ...c, required: false, credit: cr });
     chosenMeetings.push(...c.meetings);
@@ -144,24 +159,45 @@ async function buildSchedule(conditions) {
   const blocks = [];
   for (const c of chosenCourses) {
     const color = pickColor(c.id);
-    c.meetings.forEach((m, idx) => {
-      const isPrimary = idx === 0; // 같은 과목의 첫 블록만 학점 부여
-      blocks.push({
-        id: c.id,                  // 과목 ID (블록 여러 개여도 동일)
-        subject: c.name,
-        day: m.day,
-        dayNum: m.dayNum || dayRev[m.day] || 1,
-        start: m.start,
-        end: m.end,
+    if (c.meetings.length === 0) {
+        blocks.push({
+        id: c.id,
+        subject: (c.description === "사이버" ? "사이버) " : "") + c.name,
+        day: undefined,      
+        dayNum: undefined,
+        start: "",
+        end: "",
         category: c.category,
         type: c.category,
-        credit: isPrimary ? (c.credit ?? 0) : 0,  // ✅ 이 줄이 핵심
+        credit: Number(c.credit ?? 0),
         professor: "",
         color,
         required: !!c.required,
-        isPrimaryBlock: isPrimary,  // ✅ 표시용/추가 로직용 플래그
+        isPrimaryBlock: true,
+        noSchedule: true,   
+        description: c.description || "",  
       });
-    });
+    } else {
+      c.meetings.forEach((m, idx) => {
+        const isPrimary = idx === 0;
+        blocks.push({
+          id: c.id,
+          subject: (c.description === "사이버" ? "사이버) " : "") + c.name,
+          day: m.day,
+          dayNum: m.dayNum || dayRev[m.day] || 1,
+          start: m.start,
+          end: m.end,
+          category: c.category,
+          type: c.category,
+          credit: isPrimary ? Number(c.credit ?? 0) : 0,
+          professor: "",
+          color,
+          required: !!c.required,
+          isPrimaryBlock: isPrimary,
+          description: c.description || "", 
+        });
+      });
+    }
   }
 
   return { blocks, totalCredit, count: chosenCourses.length };
