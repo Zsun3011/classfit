@@ -91,22 +91,34 @@ export default function CourseHistoryManager({
       }
     })();
   }, [syncServer, authReady, uidReady]);
-
-  // 연도/학기
-  const profile = readProfile();
-  const currentYear = new Date().getFullYear();
-  const endYear = currentYear;
-  const enrollment = typeof profile.enrollmentYear === "number" ? profile.enrollmentYear : endYear;
-  const startYear = Math.min(enrollment, endYear);   // 입학년도부터 현재년도까지만
   
-  const yearOptions = useMemo(
-    () => Array.from({ length: endYear - startYear + 1 }, (_, i) => String(startYear + i)),
-    [startYear, endYear]
-  );
-  const initialYear = useMemo(() => yearOptions.at(-1) || String(currentYear), [yearOptions, currentYear]);
-  const [year, setYear] = useState(initialYear);
-  useEffect(() => { if (!year) setYear(initialYear); }, [initialYear, year]);
-  const [semester, setSemester] = useState("1학기");
+    // 연도/학기
+    const profile = readProfile();
+    const currentYear = new Date().getFullYear();
+    const endYear = currentYear;
+    const enrollment =
+      typeof profile.enrollmentYear === "number" ? profile.enrollmentYear : endYear;
+    const startYear = Math.min(enrollment, endYear); // 입학년도부터 현재년도까지만
+  
+    const yearOptions = useMemo(
+      () =>
+        Array.from({ length: endYear - startYear + 1 }, (_, i) =>
+          String(startYear + i)
+        ),
+      [startYear, endYear]
+    );
+  
+    const initialYear = useMemo(
+      () => yearOptions.at(-1) || String(currentYear),
+      [yearOptions, currentYear]
+    );
+  
+    const [year, setYear] = useState(initialYear);
+    useEffect(() => {
+      if (!year) setYear(initialYear);
+    }, [initialYear, year]);
+  
+    const [semester, setSemester] = useState("1학기");  
 
   // 검색
   const [query, setQuery] = useState("");
@@ -124,7 +136,7 @@ export default function CourseHistoryManager({
     if (!open) return;
 
     const q = query.trim();
-    if (!q) {
+    if (!q || q.length < 2) {
       setCandidates([]);
       return; 
     }

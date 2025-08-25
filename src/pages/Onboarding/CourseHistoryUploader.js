@@ -134,7 +134,12 @@ const CourseHistoryUploader = () => {
             <div className="CourseHistoryUploader-right">
                 <div className="CourseHistoryUploader-title">이전 수강 이력</div>
                 {/* 마이페이지의 컴포넌트 재사용 */}
-                <CourseHistoryManager onChange={handleHistoryChange} onStats={setStats} />
+                <CourseHistoryManager 
+                syncServer
+                authReady={Boolean(cookies.accessToken)}
+                onChange={handleHistoryChange} 
+                onStats={setStats} 
+                />
                 {/*이전 수강 이력 입력*/}
                 <div className="button-container">
                     <button className="previous-button" onClick={handlePrevious}>이전</button>
