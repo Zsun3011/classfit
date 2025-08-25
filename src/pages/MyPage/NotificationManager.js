@@ -48,11 +48,11 @@ const NotificationManager = () => {
     // 복수전공 입력값이 생기면 졸업유형 자동으로 변환
     useEffect(() => {
         const v = (doubleMajor || "").trim();
-        if(v && graduationtype !== "복수 전공") {
-            setGraduationtype("복수 전공");
-        } else if (!v && graduationtype === "복수 전공") {
-            setGraduationtype("일반 졸업");
-        }
+        setGraduationtype((prev) => {
+        if (v && prev !== "복수 전공") return "복수 전공";
+        if (!v && prev === "복수 전공") return "일반 졸업";
+        return prev;
+        });
     }, [doubleMajor]);
     
     // 온보딩 결과 가져오기
