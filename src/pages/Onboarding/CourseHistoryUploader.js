@@ -5,7 +5,7 @@ import { post } from "../../api";
 import config from "../../config";
 import { useCookies } from "react-cookie";
 import CourseHistoryManager from "../MyPage/CourseHistoryManager";
-import { isProfileCompleted, readProfile, saveProfile, markProfileCompleted, readDisplayName } from "./commonutil";
+import { isProfileCompleted, readProfile, saveProfile, markProfileCompleted, readDisplayName, saysDone } from "./commonutil";
 
 
 const CourseHistoryUploader = () => {
@@ -69,8 +69,6 @@ const CourseHistoryUploader = () => {
                   isCompleted: body.isCompleted,
             });
 
-
-
             if (body?.profile && typeof body.profile === "object") {
                 saveProfile(body.profile);
             } else {
@@ -78,9 +76,16 @@ const CourseHistoryUploader = () => {
             saveProfile({completedCourses, name: displayName});
             }
 
-            if (body.isCompleted === true || body.profileCompleted === true || body.isProfileCompleted === true) {
+            /*if (body.isCompleted === true || body.profileCompleted === true || body.isProfileCompleted === true) {
                 markProfileCompleted("STEP4");   
-            }
+            }*/
+
+            if (saysDone(res) || saysDone(body)) {
+                markProfileCompleted("STEP4");
+                } else {
+                    markProfileCompleted("STEP4");
+                }
+            
             console.log("STEP4 성공");
             navigate("/Home", { replace: true });
         } catch(error) {

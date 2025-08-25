@@ -8,6 +8,7 @@ import RecommendationBanner from "./RecommendationBanner";
 import { get, post, put, del } from "../../api";
 import config from "../../config";
 
+// 서버 날짜 설정
 export const parseServerDate = (v) => {
   if (!v) return null;
 
@@ -28,7 +29,7 @@ export const parseServerDate = (v) => {
   return new Date(v);
 };
 
-// ✅ 컴포넌트 밖으로 빼서 안정화
+// 컴포넌트 밖으로 빼서 안정화 (게시글)
 const normalizePost = (it) => {
   if (!it || typeof it !== "object") return null;
 
@@ -56,11 +57,43 @@ const normalizePost = (it) => {
   };
 };
 
+// 컴포넌트 밖으로 빼서 안정화 (댓글)
+const normalizeComment = (it) => {
+  if (!it || typeof it !== "object") return null;
+  const id = it.id ?? it.commentId ?? it.seq ?? it.id ?? null;
+  if (!id) return null; 
+
+  return {
+    id,
+    nickname: asAnon(it.author ?? it.nickname ?? it.writer),
+    content: it.content ?? "",
+    timestamp: parseServerDate(it.createdAt ??it.createAt ?? it.timestamp) || new Date(),
+  };
+};
+
+// 댓글 생성 무조건 익명으로 (익명1~)
+const asAnon = (name) => {
+  if(!name || typeof name !== "string") return "익명";
+  return name.includes("@") ? "익명" : name;
+};
+
+// 익명 번호 매기기
+const numberAnonymous = (comments) => {
+  const sorted = [...comments].sort((a, b) => a.timestamp - b.timestamp);
+  let n = 1;
+  return sorted.map((c) => {
+    if (!c.nickname || c.nickname === "익명" || /^익명\d+$/.test(c.nickname)) {
+      return { ...c, nickname: `익명${n++}` };
+    }
+    return c
+  });
+};
+
 const CommunityBoard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [posts, setPosts] = useState([]);
-  const [, setPage] = useState(0); // ✅ unused warning 제거
-  const [, setHasMore] = useState(true); // ✅ unused warning 제거
+  const [, setPage] = useState(0); // unused warning 제거
+  const [, setHasMore] = useState(true); // unused warning 제거
   const [selectedPost, setSelectedPost] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
@@ -102,7 +135,7 @@ const CommunityBoard = () => {
     }
   }, [location]);
 
-  // 목록 조회
+  // 게시글 목록 조회
   const loadPosts = useCallback(
     async (nextPage = 0, reset = false) => {
       const query = {
@@ -144,6 +177,36 @@ const CommunityBoard = () => {
           data: e.response?.data,
           error: e,
         });
+      }
+    },
+    [unwrap]
+  );
+
+  // 댓글 목록 조회
+  const loadComments = useCallback(
+    async (postId) => {
+      try {
+        const res = await get(config.COMMENT.LIST(postId));
+        const arr = unwrap(res);
+        const rows = Array.isArray(arr) ? arr : [];
+        const comments = rows.map(normalizeComment).filter(Boolean);
+
+        const numbered = numberAnonymous(comments);
+
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === postId
+              ? { ...p, comments: numbered, commentCount: numbered.length }
+              : p
+          )
+        );
+        setSelectedPost((prev) =>
+          prev && prev.id === postId
+            ? { ...prev, comments: numbered, commentCount: numbered.length }
+            : prev
+        );
+      } catch (e) {
+        console.error("댓글 목록 불러오기 실패:", e.response?.data || e);
       }
     },
     [unwrap]
@@ -194,7 +257,7 @@ const CommunityBoard = () => {
         return;
       }
 
-      // 등록
+      // 게시글 등록
       const res = await post(config.COMMUNITY.CREATE, {
         title: newPost.title.trim(),
         content: newPost.content.trim(),
@@ -293,9 +356,15 @@ const CommunityBoard = () => {
       const created = await post(config.COMMENT.CREATE, { postId, content });
       console.log("댓글 등록 성공", created);
 
+      const serverAuthor = created?.author;
+      const anonFromServer = asAnon(serverAuthor);
+      const finalNickname =
+        anonFromServer === "익명" ? tempComment.nickname : anonFromServer;
+
+
       const serverComment = {
         id: created.id,
-        nickname: tempComment.nickname,
+        nickname: finalNickname,
         content: created.content ?? tempComment.content,
         timestamp:
           parseServerDate(created.createdAt) || tempComment.timestamp,
@@ -360,6 +429,7 @@ const CommunityBoard = () => {
   const handlePostClick = (post) => {
     setSelectedPost(post);
     setIsDetailOpen(true);
+    loadComments(post.id); // 서버 댓글 가져옴
   };
 
   const handleCloseDetail = () => {

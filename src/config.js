@@ -76,6 +76,7 @@ const config = {
     
     COMMENT: {
         CREATE: `${BASE_URL}/api/community/comments`, // (POST)댓글 생성
+        LIST: (postId) => `${BASE_URL}/api/community/comments/posts/${encodeURIComponent(postId)}/comments`, // (GET) 댓글 목록 조회
     },
 
     
