@@ -144,22 +144,24 @@ async function buildSchedule(conditions) {
   const blocks = [];
   for (const c of chosenCourses) {
     const color = pickColor(c.id);
-    for (const m of c.meetings) {
+    c.meetings.forEach((m, idx) => {
+      const isPrimary = idx === 0; // 같은 과목의 첫 블록만 학점 부여
       blocks.push({
-        id: c.id,
-        subject: c.name,           // ✅ 제목에 "(필수)" 붙이지 않음
+        id: c.id,                  // 과목 ID (블록 여러 개여도 동일)
+        subject: c.name,
         day: m.day,
         dayNum: m.dayNum || dayRev[m.day] || 1,
         start: m.start,
         end: m.end,
         category: c.category,
         type: c.category,
-        credit: c.credit ?? 0,
-        professor: "",             // 필요 시 DETAIL에서 추가 가능
+        credit: isPrimary ? (c.credit ?? 0) : 0,  // ✅ 이 줄이 핵심
+        professor: "",
         color,
-        required: !!c.required,    // ✅ 필수 여부는 별도 플래그로 관리
+        required: !!c.required,
+        isPrimaryBlock: isPrimary,  // ✅ 표시용/추가 로직용 플래그
       });
-    }
+    });
   }
 
   return { blocks, totalCredit, count: chosenCourses.length };
