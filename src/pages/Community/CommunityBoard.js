@@ -32,8 +32,8 @@ export const parseServerDate = (v) => {
 const CommunityBoard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const [, setPage] = useState(0);
+  const [, setHasMore] = useState(true);
   const [selectedPost, setSelectedPost] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
@@ -62,7 +62,6 @@ const CommunityBoard = () => {
     };
 };
   
-
   // 내 정보
   useEffect(() => {
     (async () => {
