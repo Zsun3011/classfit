@@ -8,7 +8,6 @@ import RecommendationBanner from "./RecommendationBanner";
 import { get, post, put, del } from "../../api";
 import config from "../../config";
 
-
 export const parseServerDate = (v) => {
   if (!v) return null;
 
@@ -29,39 +28,50 @@ export const parseServerDate = (v) => {
   return new Date(v);
 };
 
+// ✅ 컴포넌트 밖으로 빼서 안정화
+const normalizePost = (it) => {
+  if (!it || typeof it !== "object") return null;
+
+  const id =
+    it.id ?? it.postId ?? it.postID ?? it.seq ?? it.uuid ?? it._id ?? null;
+  if (!id) return null;
+
+  return {
+    id,
+    title: it.title ?? it.subject ?? "(제목 없음)",
+    content: it.content ?? it.body ?? "",
+    createdAt:
+      parseServerDate(
+        it.createdAt ??
+          it.createAt ??
+          it.created_at ??
+          it.createdDate ??
+          it.timestamp
+      ) || new Date(),
+    commentCount: it.commentCount ?? it.commentsCount ?? 0,
+    type: it.postType ?? it.type ?? "GENERAL",
+    authorId:
+      it.authorId ?? it.userId ?? it.writerId ?? it.author?.id ?? null,
+    comments: [],
+  };
+};
+
 const CommunityBoard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [posts, setPosts] = useState([]);
-  const [, setPage] = useState(0);
-  const [, setHasMore] = useState(true);
+  const [, setPage] = useState(0); // ✅ unused warning 제거
+  const [, setHasMore] = useState(true); // ✅ unused warning 제거
   const [selectedPost, setSelectedPost] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
   const [me, setMe] = useState(null);
   const location = useLocation();
-  const unwrap = (r) => r?.data?.result ?? r?.result ?? r?.data ?? r;
 
-  const normalizePost = (it) => {
-    if (!it || typeof it !== "object") return null;
-  
-    const id =
-      it.id ?? it.postId ?? it.postID ?? it.seq ?? it.uuid ?? it._id ?? null;
-    if (!id) return null;
-  
-    return {
-      id: id,
-      title: it.title ?? it.subject ?? "(제목 없음)",
-      content: it.content ?? it.body ?? "",
-      createdAt: parseServerDate(
-        it.createdAt ?? it.createAt ?? it.created_at ?? it.createdDate ?? it.timestamp
-      ) || new Date(),
-      commentCount: it.commentCount ?? it.commentsCount ?? 0,
-      type: it.postType ?? it.type ?? "GENERAL",
-      authorId: it.authorId ?? it.userId ?? it.writerId ?? it.author?.id ?? null,
-      comments: [],
-    };
-};
-  
+  const unwrap = useCallback(
+    (r) => r?.data?.result ?? r?.result ?? r?.data ?? r,
+    []
+  );
+
   // 내 정보
   useEffect(() => {
     (async () => {
@@ -92,65 +102,58 @@ const CommunityBoard = () => {
     }
   }, [location]);
 
+  // 목록 조회
+  const loadPosts = useCallback(
+    async (nextPage = 0, reset = false) => {
+      const query = {
+        page: nextPage,
+        size: 20,
+        sort: "createdAt,desc",
+        type: "EVENT",
+      };
+      try {
+        const res = await get(config.COMMUNITY.LIST, query);
+        console.log("전체 게시글 조회 성공", { query, res });
+
+        const pagePayload = unwrap(res);
+        const rawRows = Array.isArray(pagePayload?.content)
+          ? pagePayload.content
+          : [];
+        const mapped = rawRows.map(normalizePost).filter(Boolean);
+        if (mapped.length !== rawRows.length) {
+          console.warn("malformed post rows skipped", {
+            total: rawRows.length,
+            skipped: rawRows.length - mapped.length,
+            samples: rawRows.filter((x) => !x || !x.id).slice(0, 3),
+          });
+        }
+
+        setPosts((prev) => (reset ? mapped : [...prev, ...mapped]));
+        setPage(pagePayload?.number ?? nextPage);
+
+        const last = pagePayload?.last;
+        const totalPages = pagePayload?.totalPages;
+        setHasMore(
+          last === false ||
+            (typeof totalPages === "number" && nextPage + 1 < totalPages)
+        );
+      } catch (e) {
+        console.error("게시글 목록 불러오기 실패:", {
+          query,
+          status: e.response?.status,
+          data: e.response?.data,
+          error: e,
+        });
+      }
+    },
+    [unwrap]
+  );
+
   useEffect(() => {
     loadPosts(0, true);
-  }, []);
-
+  }, [loadPosts]);
 
   const handleRecommendationButtonClick = () => setIsModalOpen(true);
-
-  // 목록 조회
-  const loadPosts = async (nextPage = 0, reset = false) => {
-    const query = {
-      page: nextPage,
-      size: 20,
-      sort: "createdAt,desc", 
-      type: "EVENT",
-    };
-    try {
-      const res = await get(config.COMMUNITY.LIST, query);
-      console.log("전체 게시글 조회 성공", { query, res });
-
-      /*const pagePayload = res?.result ?? res;
-      const rows = pagePayload?.content ?? [];
-
-      const mapped = rows.map((it) => ({
-        id: it.id,
-        title: it.title,
-        content: it.content,
-        createdAt: parseServerDate(it.createdAt),
-        commentCount: it.commentCount ?? 0,
-        type: it.postType ?? it.type ?? "GENERAL",
-        authorId: it.authorId,
-        comments: [],
-      })); */
-
-      const pagePayload = unwrap(res);
-      const rawRows = Array.isArray(pagePayload?.content) ? pagePayload.content : [];
-      const mapped = rawRows.map(normalizePost).filter(Boolean);
-      if (mapped.length !== rawRows.length) {
-       console.warn("malformed post rows skipped", {
-         total: rawRows.length,
-         skipped: rawRows.length - mapped.length,
-         samples: rawRows.filter((x) => !x || !x.id).slice(0, 3),
-       });
-     }
-
-      setPosts((prev) => (reset ? mapped : [...prev, ...mapped]));
-      setPage(pagePayload?.number ?? nextPage);
-
-      const last = pagePayload?.last;
-      const totalPages = pagePayload?.totalPages;
-      setHasMore(last === false || (typeof totalPages === "number" && nextPage + 1 < totalPages));
-    } catch (e) {
-      console.error("게시글 목록 불러오기 실패:", {
-        query,
-        status: e.response?.status,
-        data: e.response?.data,
-        error: e,
-      });
-    }
-  };
 
   // 게시글 등록 / 수정 공통
   const handleAddPost = async (newPost) => {
@@ -208,7 +211,10 @@ const CommunityBoard = () => {
         console.error("게시글 수정 실패(권한없음):", err.response?.data || err);
         alert("게시글 수정 권한이 없습니다.");
       } else {
-        console.error(isEdit ? "게시글 수정 실패:" : "게시글 등록 실패:", err.response?.data || err);
+        console.error(
+          isEdit ? "게시글 수정 실패:" : "게시글 등록 실패:",
+          err.response?.data || err
+        );
         alert(isEdit ? "게시글 수정에 실패했습니다." : "게시글 등록에 실패했습니다.");
       }
     }
@@ -244,13 +250,16 @@ const CommunityBoard = () => {
 
   // 댓글 생성
   const handleCommentAdd = async (postId, raw) => {
-    const content = (typeof raw === "string" ? raw : raw?.content || "").trim();
+    const content =
+      (typeof raw === "string" ? raw : raw?.content || "").trim();
     if (!content) return;
 
     const target = posts.find((p) => p.id === postId);
     if (!target) return;
 
-    const tempCommentId = `ctemp-${postId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const tempCommentId = `ctemp-${postId}-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 6)}`;
     const tempComment = {
       id: tempCommentId,
       nickname: `익명${(target.comments?.length || 0) + 1}`,
@@ -265,7 +274,8 @@ const CommunityBoard = () => {
           ? {
               ...p,
               comments: [...(p.comments || []), tempComment],
-              commentCount: (p.commentCount ?? p.comments?.length ?? 0) + 1,
+              commentCount:
+                (p.commentCount ?? p.comments?.length ?? 0) + 1,
             }
           : p
       )
@@ -274,7 +284,8 @@ const CommunityBoard = () => {
       setSelectedPost((prev) => ({
         ...prev,
         comments: [...(prev.comments || []), tempComment],
-        commentCount: (prev.commentCount ?? prev.comments?.length ?? 0) + 1,
+        commentCount:
+          (prev.commentCount ?? prev.comments?.length ?? 0) + 1,
       }));
     }
 
@@ -286,7 +297,8 @@ const CommunityBoard = () => {
         id: created.id,
         nickname: tempComment.nickname,
         content: created.content ?? tempComment.content,
-        timestamp: parseServerDate(created.createdAt) || tempComment.timestamp,
+        timestamp:
+          parseServerDate(created.createdAt) || tempComment.timestamp,
       };
 
       setPosts((prev) =>
@@ -317,7 +329,9 @@ const CommunityBoard = () => {
           p.id === postId
             ? {
                 ...p,
-                comments: (p.comments || []).filter((c) => c.id !== tempCommentId),
+                comments: (p.comments || []).filter(
+                  (c) => c.id !== tempCommentId
+                ),
                 commentCount: Math.max(
                   0,
                   (p.commentCount ?? p.comments?.length ?? 1) - 1
@@ -329,7 +343,9 @@ const CommunityBoard = () => {
       if (selectedPost?.id === postId) {
         setSelectedPost((prev) => ({
           ...prev,
-          comments: (prev.comments || []).filter((c) => c.id !== tempCommentId),
+          comments: (prev.comments || []).filter(
+            (c) => c.id !== tempCommentId
+          ),
           commentCount: Math.max(
             0,
             (prev.commentCount ?? prev.comments?.length ?? 1) - 1
@@ -388,7 +404,10 @@ const CommunityBoard = () => {
             <div className="CommunityBoard-ButtonText">
               택시 · 카페 · 식당 등, 함께할 친구를 찾아보세요!
             </div>
-            <button className="CommunityBoard-Button" onClick={() => setIsModalOpen(true)}>
+            <button
+              className="CommunityBoard-Button"
+              onClick={() => setIsModalOpen(true)}
+            >
               <img src={"/icons/plus.png"} alt="추가" className="Plus-icon" />
             </button>
           </div>
@@ -397,23 +416,31 @@ const CommunityBoard = () => {
         <div className="CommunityBoard-posts">
           {posts.filter(Boolean).map((post) => (
             <div
-              key={post.id ?? `post-${Math.random().toString(36).slice(2,8)}`}
+              key={post.id ?? `post-${Math.random().toString(36).slice(2, 8)}`}
               className="CommunityBoard-post-item"
               onClick={() => handlePostClick(post)}
             >
               <div className="post-content">
                 <div className="post-title">{post.title}</div>
                 <div className="post-meta">
-                  <span className="post-time">{getTimeAgo(post.createdAt)}</span>
+                  <span className="post-time">
+                    {getTimeAgo(post.createdAt)}
+                  </span>
                   <span className="post-comments">
-                    <img src="/icons/message.png" alt="댓글" className="comment-icon" />
-                    {(post.commentCount ?? (post.comments?.length || 0))}개
+                    <img
+                      src="/icons/message.png"
+                      alt="댓글"
+                      className="comment-icon"
+                    />
+                    {post.commentCount ?? post.comments?.length ?? 0}개
                   </span>
                 </div>
               </div>
             </div>
           ))}
-          {posts.length === 0 && <div className="no-posts">아직 작성된 게시글이 없습니다.</div>}
+          {posts.length === 0 && (
+            <div className="no-posts">아직 작성된 게시글이 없습니다.</div>
+          )}
         </div>
       </div>
 
