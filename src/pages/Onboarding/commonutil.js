@@ -67,17 +67,38 @@ export const wipeLegacyGlobalKeys = () => {
 export const saysDone = (o = {}) => {
   try {
     const x = o.result ?? o;
-    const steps = x.steps ?? {};
-    return (
+    const stepsRaw = x?.steps ?? {};
+    // 소문자 키 맵
+    const s = Object.fromEntries(
+      Object.entries(stepsRaw).map(([k, v]) => [String(k).toLowerCase(), v])
+    );
+
+    const topCompleted =
       x.isCompleted === true ||
       x.profileCompleted === true ||
       x.isProfileCompleted === true ||
-      x.completed === true ||         // 백엔드가 completed로 주는 경우
-      x.allDone === true ||           // allDone 키
-      steps.allDone === true ||       // steps.allDone
-      ["step1", "step2", "step3", "step4"].every(k => steps?.[k] === true)
-    );
-  } catch { return false};
+      x.completed === true ||
+      x.allDone === true;
+
+    const nestedCompleted = s.completed === true || s.alldone === true;
+
+    const allFourNew =
+      s.step1done === true &&
+      s.step2done === true &&
+      s.step3done === true &&
+      s.step4done === true;
+
+    // 구버전 호환
+    const allFourLegacy =
+      stepsRaw?.step1 === true &&
+      stepsRaw?.step2 === true &&
+      stepsRaw?.step3 === true &&
+      stepsRaw?.step4 === true;
+
+    return topCompleted || nestedCompleted || allFourNew || allFourLegacy;
+  } catch {
+    return false;
+  }
 };
 
 

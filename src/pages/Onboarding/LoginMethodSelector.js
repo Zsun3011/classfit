@@ -74,8 +74,6 @@ const LoginMethodSelector = () => {
                 return;
             }
 
-            /*wipeLegacyGlobalKeys();*/
-
             const userUid = chooseUidFromLogin(result, accessToken, email);
             setUid(userUid);
             migrateLegacyToNamespaced(userUid);
@@ -105,23 +103,8 @@ const LoginMethodSelector = () => {
                 saveProfile({ name: finalName }); // 프로필에도 동기화
             }
             if (preName) clearPreloginName(email); // 임시 저장 제거
-
-
-
-            // 서버가 내려준 완료 플래그 반영
-            /*const steps = result?.steps ?? {};
-            const completedFromServer = 
-                result?.allDone === true ||
-                steps?.allDone === true ||
-                result?.isCompleted === true ||
-                result?.profileCompleted === true ||
-                result?.isProfileCompleted === true ||
-                (steps && ["step1", "step2", "step3", "step4"].every(k => steps[k] === true));
-            */
+            
             const completedFromServer = saysDone(res) || saysDone(result);
-
-            /*console.log("[LOGIN] steps =", steps, "allDone = ", result?.allDone, "completed =", completedFromServer);*/
-
             if(completedFromServer) {
                 markProfileCompleted();
             }

@@ -76,12 +76,8 @@ const CourseHistoryUploader = () => {
             saveProfile({completedCourses, name: displayName});
             }
 
-            /*if (body.isCompleted === true || body.profileCompleted === true || body.isProfileCompleted === true) {
-                markProfileCompleted("STEP4");   
-            }*/
-
             if (saysDone(res) || saysDone(body)) {
-                markProfileCompleted("STEP4");
+                    markProfileCompleted("STEP4");
                 } else {
                     markProfileCompleted("STEP4");
                 }
