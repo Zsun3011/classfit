@@ -38,12 +38,14 @@ const TimetableSummary = () => {
 
   const handleGenerated = useCallback(({ blocks, totalCredit }) => {
     const { hasMorning, freeDays, majors, generals } = getDashboardInfo(blocks);
+    const majorsUniq = uniqBySubjectKind(majors);
+    const generalsUniq = uniqBySubjectKind(generals);
     setInfo({
       totalCredits: totalCredit ?? 0,
       hasMorning,
       freeDay: freeDays.length ? freeDays.join(", ") : "-",
-      major: majors.map((m) => `${m.subject} (${m.kind}, ${m.credit}학점)`),
-      general: generals.map((g) => `${g.subject} (${g.kind}, ${g.credit}학점)`),
+      major: majorsUniq.map((m) => `${m.subject} (${m.kind}, ${m.credit}학점)`),
+      general: generalsUniq.map((g) => `${g.subject} (${g.kind}, ${g.credit}학점)`),
     });
   }, []);
 
@@ -56,9 +58,28 @@ const TimetableSummary = () => {
 
   useEffect(() => {
     if (!blocks.length) return;
-    const totalCredit = blocks.reduce((s, b) => s + (Number(b.credit) || 0), 0);
+    const totalCredit = sumCreditsByCourse(blocks);
     handleGenerated({ blocks, totalCredit });
   }, [blocks, handleGenerated]);
+
+  // 과목(id) 기준으로 학점 1회만 합산
+  const sumCreditsByCourse = (blocks = []) => {
+    const seen = new Set();
+    let sum = 0;
+    for (const b of blocks) {
+      if (b?.id == null) continue;
+      if (!seen.has(b.id)) {
+        sum += Number(b.credit || 0);
+        seen.add(b.id);
+      }
+    }
+    return sum;
+  };
+
+  // subject+kind 기준으로 중복 제거
+  const uniqBySubjectKind = (items = []) => {
+    return Array.from(new Map(items.map(x => [`${x.subject}|${x.kind}`, x])).values());
+  };
 
   return (
     <div className="TimetableSummary-container">

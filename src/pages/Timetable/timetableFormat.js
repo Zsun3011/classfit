@@ -15,10 +15,12 @@ export const slotsToBlocks = (timeSlots = [], { withColor = false, colorMap = nu
 
     const category = (s.category ?? s.courseType ?? s.discipline ?? "") || "";
     const kind = KIND_BY_CATEGORY[category] || "";
-
+    const isCyber = (s.description === "사이버") || Number(s.day) === 0; // ✅ day=0도 사이버로 취급
+    const subjectRaw = s.subjectName || s.name || "-";
+    const subject = (isCyber ? "사이버) " : "") + subjectRaw;
     const base = {
       id,
-      subject: s.subjectName || s.name || "-",
+      subject,
       day: dayMap[s.day] || "-",
       start: toHHMM(s.startTime),
       end: toHHMM(s.endTime),
@@ -27,6 +29,7 @@ export const slotsToBlocks = (timeSlots = [], { withColor = false, colorMap = nu
       type: kind,      // 하위 호환
       credit: Number(s.credit ?? 0),
       professor: s.professor || "",
+      description: s.description || "", 
     };
 
     if (colorMap && id != null && colorMap[String(id)]) return { ...base, color: colorMap[String(id)] };
@@ -36,19 +39,22 @@ export const slotsToBlocks = (timeSlots = [], { withColor = false, colorMap = nu
 
 // blocks → slots
 export const blocksToSlots = (blocks = []) =>
-  (Array.isArray(blocks) ? blocks : [])
-    .filter(b => (b.dayNum && b.dayNum >= 1) || dayRev[b.day]) // ✅ 사이버/무스케줄 제거
-    .map((b, i) => ({
+  (Array.isArray(blocks) ? blocks : []).map((b, i) => {
+    const dayNum = b.dayNum ?? dayRev[b.day] ?? 0;       // ✅ 무스케줄은 day=0로 저장
+    const isCyber = b.noSchedule || b.description === "사이버" || (typeof b.subject === "string" && b.subject.startsWith("사이버) "));
+    return {
     subjectId: Number(b.id ?? i),
     subjectName: b.subject || "",
     professor: b.professor || "",
     credit: Number(b.credit ?? 0),
     category: b.category || b.type || "",
     courseType: b.category || b.type || "",
-    startTime: b.start || "00:00",
-    endTime: b.end || "00:00",
-    day: b.dayNum ?? dayRev[b.day] ?? 1,
-  }));
+    startTime: toHHMM(b.start) || "00:00",
+    endTime: toHHMM(b.end) || "00:00",
+    day: dayNum,                                          // 0이면 서버에도 0으로 저장
+    description: isCyber ? "사이버" : (b.description || ""), // 사이버 마킹
+  };
+});
 
 /* -------------------- 코스 → 블록 / 스케줄 문자열 -------------------- */
 

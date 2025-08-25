@@ -24,6 +24,19 @@ const TimetableRecommendation = () => {
   const savedTableRef = useRef(null);
   const navigate = useNavigate();
 
+  const sumCreditsByCourse = (blocks = []) => {
+    const seen = new Set();
+    let sum = 0;
+    for (const b of blocks) {
+      if (b?.id == null) continue;
+      if (!seen.has(b.id)) {
+        sum += Number(b.credit || 0);
+        seen.add(b.id);
+      }
+    }
+    return sum;
+  };
+
   // API 함수들
   const fetchMainTimetable = async () => {
     try {
@@ -184,7 +197,7 @@ const TimetableRecommendation = () => {
     const colorMap = stored ? JSON.parse(stored) : null;
 
     const blocks = slotsToBlocks(t.timeSlots || [], { withColor: !colorMap, colorMap });
-    const totalCredit = blocks.reduce((sum, b) => sum + (Number(b.credit) || 0), 0);
+    const totalCredit = sumCreditsByCourse(blocks);
     const hasMorning = blocks.some((b) => Number((b.start || "00:00").slice(0, 2)) < 12);
 
     const occupiedDays = new Set(blocks.map((b) => b.day));
@@ -296,7 +309,7 @@ const TimetableRecommendation = () => {
                       <Timetable data={selectedTable.__blocks || []} isModal={true} />
                       <Dashboard
                         data={selectedTable.__blocks || []}
-                        totalCredit={(selectedTable.__blocks || []).reduce((s, b) => s + (Number(b.credit) || 0), 0)}
+                        totalCredit={sumCreditsByCourse(selectedTable.__blocks || [])}
                         preferredTimes={(selectedTable?.preferTime || "").split(",").filter(Boolean)}
                         avoidDays={[]}
                       />
