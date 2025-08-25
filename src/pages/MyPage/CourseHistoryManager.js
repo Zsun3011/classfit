@@ -136,7 +136,7 @@ export default function CourseHistoryManager({
     if (!open) return;
 
     const q = query.trim();
-    if (!q) {
+    if (!q || q.length < 2) {
       setCandidates([]);
       return; 
     }

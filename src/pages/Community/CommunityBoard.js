@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "../../components/Header";
 import "../../styles/CommunityBoard.css";
@@ -8,398 +8,445 @@ import RecommendationBanner from "./RecommendationBanner";
 import { get, post, put, del } from "../../api";
 import config from "../../config";
 
+
+export const parseServerDate = (v) => {
+  if (!v) return null;
+
+  // 숫자면 epoch (초/밀리초) 모두 처리
+  if (typeof v === "number") {
+    return new Date(v > 1e12 ? v : v * 1000);
+  }
+
+  if (typeof v === "string") {
+    // "YYYY-MM-DDTHH:mm:ss" 또는 ".SSS"까지 있고 Z/오프셋이 없는 경우 → UTC로 간주해 Z 붙임
+    const noZone = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(v);
+    return new Date(noZone ? v + "Z" : v);
+  }
+
+  // 이미 Date면 그대로
+  if (v instanceof Date) return v;
+
+  return new Date(v);
+};
+
 const CommunityBoard = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [posts, setPosts] = useState([]);
-    const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const [selectedPost, setSelectedPost] = useState(null); 
-    const [isDetailOpen, setIsDetailOpen] = useState(false); 
-    const [editingPost, setEditingPost] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
+  const [me, setMe] = useState(null);
+  const location = useLocation();
+  const unwrap = (r) => r?.data?.result ?? r?.result ?? r?.data ?? r;
 
-    const location = useLocation();
-    
-    useEffect(() => {
-        if (location.state?.openModal) {
-            setIsModalOpen(true);
-            window.history.replaceState({}, document.title);
-        }
-    }, [location]);
-
-    useEffect(() => {
-      loadPosts(0, true);
-    }, []);
-
-    const handleRecommendationButtonClick = () => {
-        setIsModalOpen(true);
+  const normalizePost = (it) => {
+    if (!it || typeof it !== "object") return null;
+  
+    const id =
+      it.id ?? it.postId ?? it.postID ?? it.seq ?? it.uuid ?? it._id ?? null;
+    if (!id) return null;
+  
+    return {
+      id: id,
+      title: it.title ?? it.subject ?? "(제목 없음)",
+      content: it.content ?? it.body ?? "",
+      createdAt: parseServerDate(
+        it.createdAt ?? it.createAt ?? it.created_at ?? it.createdDate ?? it.timestamp
+      ) || new Date(),
+      commentCount: it.commentCount ?? it.commentsCount ?? 0,
+      type: it.postType ?? it.type ?? "GENERAL",
+      authorId: it.authorId ?? it.userId ?? it.writerId ?? it.author?.id ?? null,
+      comments: [],
     };
+};
+  
 
-
-    // 서버에서 게시글 페이지 로드
-    const loadPosts = async(nextPage = 0, reset = false) => {
+  // 내 정보
+  useEffect(() => {
+    (async () => {
       try {
-        const res = await get(config.COMMUNITY.LIST, {
-          page: nextPage,
-          size: 20,
-          sort: "createdAt,desc",
-          type: "ALL",
-        });
-
-        const pagePayload = res?.result ?? res;
-        const rows = pagePayload?.content ?? [];
-
-        const mapped = rows.map((it) => ({
-          id: it.id,
-          title: it.title,
-          content: it.content,
-          createdAt: new Date(it.createdAt),
-          commentCount: it.commentCount ?? 0,
-          type: it.postType ?? "GENERAL",
-          comments: [],
-          __unsynced: false,
-        }));
-
-        setPosts((prev) => (reset ? mapped : [...prev, ...mapped]));
-        setPage(pagePayload?.number ?? nextPage);
-        const last = pagePayload?.last;
-        const totalPages = pagePayload?.totalPages;
-        setHasMore(last === false || (typeof totalPages === "number" && nextPage + 1 < totalPages));
+        const res = await get(config.USER.ME);
+        const mePayload = res?.result ?? res;
+        setMe(mePayload);
+        console.log("내 정보", mePayload);
       } catch (e) {
-        console.error("게시글 목록 불러오기 실패:", e);
+        console.warn("내 정보 조회 실패", e);
+        setMe(null);
       }
+    })();
+  }, []);
+
+  // 내 id / 내가 쓴 글인지 확인
+  const myId = useMemo(() => me?.id ?? me?.userId ?? me?.user?.id, [me]);
+  const isMine = useCallback(
+    (p) => !!(p && p.authorId && myId && p.authorId === myId),
+    [myId]
+  );
+
+  // 라우팅으로 모달 열기
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setIsModalOpen(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    loadPosts(0, true);
+  }, []);
+
+
+  const handleRecommendationButtonClick = () => setIsModalOpen(true);
+
+  // 목록 조회
+  const loadPosts = async (nextPage = 0, reset = false) => {
+    const query = {
+      page: nextPage,
+      size: 20,
+      sort: "createdAt,desc", 
+      type: "EVENT",
     };
-
-    // 게시글 등록/수정 공용 핸들러
-const handleAddPost = async (newPost) => {
-    const isEdit = Boolean(editingPost); // 등록/수정인지 알려주는 플래그 
     try {
-      if (isEdit) {
-        const target = posts.find((p) => p.id === editingPost.id);
-        const isTemp =
-          String(editingPost.id).startsWith("temp-") || target?.__unsynced === true;
-  
-        if (isTemp) {
-          // 임시글: 로컬만 수정
-          setPosts((prev) =>
-            prev.map((p) =>
-              p.id === editingPost.id
-                ? {
-                    ...p,
-                    title: newPost.title.trim(),
-                    content: newPost.content.trim(),
-                  }
-                : p
-            )
-          );
-          if (selectedPost?.id === editingPost.id) {
-            setSelectedPost((prev) => ({
-              ...prev,
-              title: newPost.title.trim(),
-              content: newPost.content.trim(),
-            }));
-          }
-          setEditingPost(null);
-          setIsModalOpen(false);
-        } else {
-          // 서버 수정
-          const res = await put(
-            config.COMMUNITY.UPDATE(editingPost.id),
-            {
-              title: newPost.title.trim(),
-              content: newPost.content.trim(),
-              type: "GENERAL", 
-            }
-          );
-          const updated = res.data;
-  
-          setPosts((prev) =>
-            prev.map((p) =>
-              p.id === editingPost.id
-                ? { ...p, title: updated.title, content: updated.content }
-                : p
-            )
-          );
-          if (selectedPost?.id === editingPost.id) {
-            setSelectedPost((prev) => ({
-              ...prev,
-              title: updated.title,
-              content: updated.content,
-            }));
-          }
-          setEditingPost(null);
-          setIsModalOpen(false);
-        }
-        return; // 수정 플로우 종료
-      }
-  
-      // 등록
-      const tempId = `temp-${Date.now()}`;
-      const tempPost = {
-        id: tempId,
-        title: newPost.title.trim(),
-        content: newPost.content.trim(),
-        createdAt: new Date(),
-        comments: [],
-        commentCount: 0,
-        __unsynced: true, // 임시글 플래그
-      };
-      setPosts((prev) => [tempPost, ...prev]);
-      setIsModalOpen(false); // UX: 일단 닫아줌
-  
-      // 서버 POST 시도
-      try {
-        const res = await post(config.COMMUNITY.CREATE, {
-          title: newPost.title.trim(),
-          content: newPost.content.trim(),
-          type: "GENERAL", 
-        });
-        const created = res?.result ?? res;
+      const res = await get(config.COMMUNITY.LIST, query);
+      console.log("전체 게시글 조회 성공", { query, res });
 
-        // 서버 저장 성공 시 서버 기준으로 새로고침
-        await loadPosts(0, true);
-      } catch (err) {
-        console.error("서버 등록 실패(임시글 유지):", err.response?.data || err);
-        alert("서버 등록은 실패했지만, 화면에는 임시로 추가해두었어요.");
-        // 임시글은 그대로 남아서 수정/삭제 테스트 가능
-      }
+      /*const pagePayload = res?.result ?? res;
+      const rows = pagePayload?.content ?? [];
+
+      const mapped = rows.map((it) => ({
+        id: it.id,
+        title: it.title,
+        content: it.content,
+        createdAt: parseServerDate(it.createdAt),
+        commentCount: it.commentCount ?? 0,
+        type: it.postType ?? it.type ?? "GENERAL",
+        authorId: it.authorId,
+        comments: [],
+      })); */
+
+      const pagePayload = unwrap(res);
+      const rawRows = Array.isArray(pagePayload?.content) ? pagePayload.content : [];
+      const mapped = rawRows.map(normalizePost).filter(Boolean);
+      if (mapped.length !== rawRows.length) {
+       console.warn("malformed post rows skipped", {
+         total: rawRows.length,
+         skipped: rawRows.length - mapped.length,
+         samples: rawRows.filter((x) => !x || !x.id).slice(0, 3),
+       });
+     }
+
+      setPosts((prev) => (reset ? mapped : [...prev, ...mapped]));
+      setPage(pagePayload?.number ?? nextPage);
+
+      const last = pagePayload?.last;
+      const totalPages = pagePayload?.totalPages;
+      setHasMore(last === false || (typeof totalPages === "number" && nextPage + 1 < totalPages));
     } catch (e) {
-      console.error(isEdit ? "게시글 수정 실패:" : "게시글 등록 실패:", e);
-      alert(isEdit ? "게시글 수정에 실패했습니다." : "게시글 등록에 실패했습니다.");
+      console.error("게시글 목록 불러오기 실패:", {
+        query,
+        status: e.response?.status,
+        data: e.response?.data,
+        error: e,
+      });
     }
   };
-  
 
+  // 게시글 등록 / 수정 공통
+  const handleAddPost = async (newPost) => {
+    const isEdit = !!editingPost;
 
-    // 게시글 삭제
-    const handleDeletePost = async (postId) => {
-    
-        const target = posts.find(p => p.id === postId);
-        const isTemp = String(postId).startsWith("temp-") || target?.__unsynced;
-
-        if (isTemp) {
-            // 로컬만 삭제
-            setPosts(prev => prev.filter(p => p.id !== postId));
-            if (selectedPost?.id === postId) {
-              setIsDetailOpen(false);
-              setSelectedPost(null);
-            }
-            return;
-        }
-
-        try { 
-            await del(config.COMMUNITY.DELETE(postId));
-            setPosts((prev) => prev.filter((p) => p.id !== postId));
-            if(selectedPost?.id === postId) {
-                setIsDetailOpen(false);
-                setSelectedPost(null);
-            }
-        } catch(e) {
-            console.error("게시글 삭제 실패:", e);
-            alert("게시글 삭제에 실패했습니다.");
-        }
-    };
-
-    // 댓글 생성
-    const handleCommentAdd =  async (postId, raw) => {
-
-      const content = (typeof raw === "string" ? raw : raw?.content || "").trim();
-      if (!content) return;
-
-      const target = posts.find(p => p.id === postId ); 
-      if(!target) return;
-    
-      const isTempPost = 
-        String(postId).startsWith("temp-") || target.__unsynced === true;
-
-      // 임시 댓글 추가
-      const tempCommentId = 
-        `ctemp-${postId}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
-      const tempComment = {
-        id: tempCommentId,
-        nickname: `익명${(target.comments?.length || 0) + 1}`,
-        content,
-        timestamp: new Date(),
-        __unsynced: isTempPost,
-      };
-
-      setPosts(prev =>
-        prev.map(p =>
-          p.id === postId
-            ? {...p, comments: [...(p.comments || []), tempComment],
-              commentCount: (p.commentCount ?? p.comments?.length ?? 0) +1,
-            }
-            : p
-        )
-      );
-      
-      if (selectedPost?.id === postId) {
-            setSelectedPost(prev => ({
-              ...prev,
-              comments: [...(prev.comments || []), tempComment],
-              commentCount: (prev.commentCount ?? prev.comments?.length ?? 0) +1,
-        }));
-    };
-
-    // 임시 글이면 서버 호출 X
-    if (isTempPost) return;
-
-    // API 호출 후 임시 댓글을 서버 댓글로 치환
     try {
-      const created = await post(config.COMMENT.CREATE, {postId, content});
+      if (isEdit) {
+        if (!isMine(editingPost)) {
+          alert("본인이 작성한 글만 수정할 수 있습니다.");
+          return;
+        }
+
+        const res = await put(config.COMMUNITY.UPDATE(editingPost.id), {
+          title: newPost.title.trim(),
+          content: newPost.content.trim(),
+          type: "EVENT",
+        });
+        const updated = res?.data ?? res;
+        console.log("게시글 수정 성공", updated);
+
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === editingPost.id
+              ? { ...p, title: updated.title, content: updated.content }
+              : p
+          )
+        );
+        if (selectedPost?.id === editingPost.id) {
+          setSelectedPost((prev) => ({
+            ...prev,
+            title: updated.title,
+            content: updated.content,
+          }));
+        }
+
+        setEditingPost(null);
+        setIsModalOpen(false);
+        return;
+      }
+
+      // 등록
+      const res = await post(config.COMMUNITY.CREATE, {
+        title: newPost.title.trim(),
+        content: newPost.content.trim(),
+        type: "EVENT",
+      });
+      const created = res?.result ?? res;
+      console.log("게시글 등록 성공", created);
+
+      await loadPosts(0, true);
+      setIsModalOpen(false);
+    } catch (err) {
+      const s = err.response?.status;
+      if (isEdit && s === 403) {
+        console.error("게시글 수정 실패(권한없음):", err.response?.data || err);
+        alert("게시글 수정 권한이 없습니다.");
+      } else {
+        console.error(isEdit ? "게시글 수정 실패:" : "게시글 등록 실패:", err.response?.data || err);
+        alert(isEdit ? "게시글 수정에 실패했습니다." : "게시글 등록에 실패했습니다.");
+      }
+    }
+  };
+
+  // 게시글 삭제
+  const handleDeletePost = async (postId) => {
+    const target = posts.find((p) => p.id === postId);
+    if (!isMine(target)) {
+      alert("본인이 작성한 글만 삭제할 수 있습니다.");
+      return;
+    }
+
+    try {
+      await del(config.COMMUNITY.DELETE(postId));
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      if (selectedPost?.id === postId) {
+        setIsDetailOpen(false);
+        setSelectedPost(null);
+      }
+      console.log("게시글 삭제 성공");
+    } catch (e) {
+      const s = e.response?.status;
+      if (s === 403) {
+        console.error("게시글 삭제 실패(권한없음):", e.response?.data || e);
+        alert("삭제 권한이 없습니다.");
+        return;
+      }
+      console.error("게시글 삭제 실패:", e);
+      alert("게시글 삭제에 실패했습니다.");
+    }
+  };
+
+  // 댓글 생성
+  const handleCommentAdd = async (postId, raw) => {
+    const content = (typeof raw === "string" ? raw : raw?.content || "").trim();
+    if (!content) return;
+
+    const target = posts.find((p) => p.id === postId);
+    if (!target) return;
+
+    const tempCommentId = `ctemp-${postId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const tempComment = {
+      id: tempCommentId,
+      nickname: `익명${(target.comments?.length || 0) + 1}`,
+      content,
+      timestamp: new Date(),
+    };
+
+    // 임시 추가
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              comments: [...(p.comments || []), tempComment],
+              commentCount: (p.commentCount ?? p.comments?.length ?? 0) + 1,
+            }
+          : p
+      )
+    );
+    if (selectedPost?.id === postId) {
+      setSelectedPost((prev) => ({
+        ...prev,
+        comments: [...(prev.comments || []), tempComment],
+        commentCount: (prev.commentCount ?? prev.comments?.length ?? 0) + 1,
+      }));
+    }
+
+    try {
+      const created = await post(config.COMMENT.CREATE, { postId, content });
+      console.log("댓글 등록 성공", created);
 
       const serverComment = {
         id: created.id,
         nickname: tempComment.nickname,
         content: created.content ?? tempComment.content,
-        timestamp: new Date(created.createdAt || tempComment.timestamp),
-        __unsynced: false,
+        timestamp: parseServerDate(created.createdAt) || tempComment.timestamp,
       };
 
-      setPosts(prev => 
-        prev.map(p => 
+      setPosts((prev) =>
+        prev.map((p) =>
           p.id === postId
-          ? {
-            ...p,
-            comments: (p.comments || []).map(c =>
-              c.id === tempCommentId ? serverComment : c
-            ),
-          }
-          : p
+            ? {
+                ...p,
+                comments: (p.comments || []).map((c) =>
+                  c.id === tempCommentId ? serverComment : c
+                ),
+              }
+            : p
         )
       );
       if (selectedPost?.id === postId) {
-        setSelectedPost(prev => ({
+        setSelectedPost((prev) => ({
           ...prev,
-          comments: (prev.comments || []).map(c =>
+          comments: (prev.comments || []).map((c) =>
             c.id === tempCommentId ? serverComment : c
           ),
         }));
       }
     } catch (e) {
-      console.error("댓글 등록 실패:", e);
-      setPosts(prev =>
-        prev.map(p => 
+      console.error("댓글 등록 실패:", e.response?.data || e);
+      // 롤백
+      setPosts((prev) =>
+        prev.map((p) =>
           p.id === postId
             ? {
-              ...p, 
-              comments: (p.comments || []).filter(c => c.id !== tempCommentId)
-            }
+                ...p,
+                comments: (p.comments || []).filter((c) => c.id !== tempCommentId),
+                commentCount: Math.max(
+                  0,
+                  (p.commentCount ?? p.comments?.length ?? 1) - 1
+                ),
+              }
             : p
         )
       );
-      if(selectedPost?.id === postId) {
-        setSelectedPost(prev => ({
+      if (selectedPost?.id === postId) {
+        setSelectedPost((prev) => ({
           ...prev,
-          comments: (prev.comments || []).filter(c => c.id !== tempCommentId),
+          comments: (prev.comments || []).filter((c) => c.id !== tempCommentId),
+          commentCount: Math.max(
+            0,
+            (prev.commentCount ?? prev.comments?.length ?? 1) - 1
+          ),
         }));
       }
       const s = e.response?.status;
       alert(s === 401 ? "로그인이 필요합니다." : "댓글 등록에 실패했습니다.");
     }
-    };
+  };
 
-    const handlePostClick = (post) => {
-        setSelectedPost(post);
-        setIsDetailOpen(true);
-    };
+  const handlePostClick = (post) => {
+    setSelectedPost(post);
+    setIsDetailOpen(true);
+  };
 
-    const handleCloseDetail = () => {
-        setIsDetailOpen(false);
-        setSelectedPost(null);
-    };
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setSelectedPost(null);
+  };
 
-    const handleEditPost = (post) => {
-        setEditingPost(post);
-        setIsModalOpen(true);
-    };
+  const handleEditPost = (post) => {
+    if (!isMine(post)) {
+      alert("본인이 작성한 글만 수정할 수 있습니다.");
+      return;
+    }
+    setEditingPost(post);
+    setIsModalOpen(true);
+  };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingPost(null);
-    };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingPost(null);
+  };
 
-    const getTimeAgo = (createdAt) => {
-        const now = new Date();
-        const diffInMinutes = Math.floor((now - createdAt) / (1000 * 60));
-        
-        if (diffInMinutes < 1) return "방금 전";
-        if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
-        if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}시간 전`;
-        return `${Math.floor(diffInMinutes / 1440)}일 전`;
-    };
+  const getTimeAgo = (createdAt) => {
+    const now = new Date();
+    const diffInMinutes = Math.max(0, Math.floor((now - createdAt) / 60000));
+    if (diffInMinutes < 1) return "방금 전";
+    if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}시간 전`;
+    return `${Math.floor(diffInMinutes / 1440)}일 전`;
+  };
 
-    return (
-        <div className="CommunityBoard">
-            <Header />
-            <RecommendationBanner
-                onButtonClick={handleRecommendationButtonClick}
-                isOnCommunityBoard={true}
-            />
-            <div className="CommunityBoard-container">
-                <div className="CommunityBoard-section-first">
-                    <div className="CommunityBoard-title">게시판</div>
-                        <div className="CommunityBoard-Plus">
-                            <div className="CommunityBoard-ButtonText">택시 · 카페 · 식당 등, 함께할 친구를 찾아보세요!</div>
-                            <button className="CommunityBoard-Button" onClick={() => setIsModalOpen(true)}>
-                                <img
-                                    src={"/icons/plus.png"}
-                                    alt="추가"
-                                    className="Plus-icon"
-                                />
-                            </button>
-                        </div>
-                </div>
-                <div className="CommunityBoard-posts">
-                    {posts.map((post) => (
-                        <div 
-                            key={post.id} 
-                            className="CommunityBoard-post-item"
-                            onClick={() => handlePostClick(post)}
-                        >
-                            <div className="post-content">
-                                <div className="post-title">{post.title}</div>
-                                <div className="post-meta">
-                                    <span className="post-time">{getTimeAgo(post.createdAt)}</span>
-                                    <span className="post-comments">
-                                        <img src="/icons/message.png" alt="댓글" className="comment-icon" />
-                                        {(post.commentCount ?? (post.comments?.length || 0))}개
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                    {posts.length === 0 && (
-                        <div className="no-posts">아직 작성된 게시글이 없습니다.</div>
-                    )}
-                </div>
+  return (
+    <div className="CommunityBoard">
+      <Header />
+      <RecommendationBanner
+        onButtonClick={handleRecommendationButtonClick}
+        isOnCommunityBoard={true}
+      />
+      <div className="CommunityBoard-container">
+        <div className="CommunityBoard-section-first">
+          <div className="CommunityBoard-title">게시판</div>
+          <div className="CommunityBoard-Plus">
+            <div className="CommunityBoard-ButtonText">
+              택시 · 카페 · 식당 등, 함께할 친구를 찾아보세요!
             </div>
-            {isModalOpen && (
-                <div className="modal-overlay" onClick={handleCloseModal}>
-                    <div onClick={(e) => e.stopPropagation()}>
-                        <NewPost 
-                            onClose={handleCloseModal}
-                            onSubmit={handleAddPost} 
-                            editPost={editingPost}
-                        />
-                    </div>
-                </div>
-            )} 
-
-            {isDetailOpen && selectedPost && (
-                <div className="modal-overlay" onClick={handleCloseDetail}>
-                    <div onClick={(e) => e.stopPropagation()}>
-                        <PostDetail 
-                            post={selectedPost}
-                            onClose={handleCloseDetail}
-                            onDelete={handleDeletePost}
-                            onEdit={handleEditPost}
-                            onCommentAdd={handleCommentAdd}
-                        />
-                    </div>
-                </div>
-            )}
+            <button className="CommunityBoard-Button" onClick={() => setIsModalOpen(true)}>
+              <img src={"/icons/plus.png"} alt="추가" className="Plus-icon" />
+            </button>
+          </div>
         </div>
-    );
+
+        <div className="CommunityBoard-posts">
+          {posts.filter(Boolean).map((post) => (
+            <div
+              key={post.id ?? `post-${Math.random().toString(36).slice(2,8)}`}
+              className="CommunityBoard-post-item"
+              onClick={() => handlePostClick(post)}
+            >
+              <div className="post-content">
+                <div className="post-title">{post.title}</div>
+                <div className="post-meta">
+                  <span className="post-time">{getTimeAgo(post.createdAt)}</span>
+                  <span className="post-comments">
+                    <img src="/icons/message.png" alt="댓글" className="comment-icon" />
+                    {(post.commentCount ?? (post.comments?.length || 0))}개
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+          {posts.length === 0 && <div className="no-posts">아직 작성된 게시글이 없습니다.</div>}
+        </div>
+      </div>
+
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <NewPost
+              onClose={handleCloseModal}
+              onSubmit={handleAddPost}
+              editPost={editingPost}
+            />
+          </div>
+        </div>
+      )}
+
+      {isDetailOpen && selectedPost && (
+        <div className="modal-overlay" onClick={handleCloseDetail}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <PostDetail
+              post={selectedPost}
+              onClose={handleCloseDetail}
+              onDelete={handleDeletePost}
+              onEdit={handleEditPost}
+              onCommentAdd={handleCommentAdd}
+              canEdit={isMine(selectedPost)}
+              canDelete={isMine(selectedPost)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default CommunityBoard;
